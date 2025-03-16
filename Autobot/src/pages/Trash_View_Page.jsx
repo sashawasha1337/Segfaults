@@ -45,6 +45,7 @@ function Trash_View_Page() {
           Robot Detection Display
         </Typography>
         <DisplayCard
+          title="Detected Object"
           image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuGFmJvGmySA0ZIEY5j6Jg0zGOwqOaEBFhaw&s"
           metadata={sampleMetadata}
           labels={metadataLabels}

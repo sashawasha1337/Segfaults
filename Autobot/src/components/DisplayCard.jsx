@@ -7,7 +7,7 @@ import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
     The metadata is stored as key-value pairs in an object.
 */
 
-const DisplayCard = ({ image, metadata, labels }) => {
+const DisplayCard = ({title, image, metadata, labels }) => {
   return (
     <Card>
       {image && (
@@ -20,7 +20,7 @@ const DisplayCard = ({ image, metadata, labels }) => {
       <CardContent>
 
         <Typography variant="h6" component="div">
-          Detected Object
+          {title}
         </Typography>
 
         <Box sx={{ mt: 1 }}>
