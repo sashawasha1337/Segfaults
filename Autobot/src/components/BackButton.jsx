@@ -4,12 +4,12 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 
 
-const BackButton = () => {
+const BackButton = ({backURL="/"}) => {//defaults to "/" page if no url specified
     const navigate = useNavigate();
     
     return (
         <IconButton
-        onClick={() => navigate("/")}
+        onClick={() => navigate(backURL)}//passes backURL to navigate function
         sx={{
             position: "absolute",
             top: 50,

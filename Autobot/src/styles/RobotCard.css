@@ -1,0 +1,40 @@
+.robot-card-container{
+    color: black;
+    width: 300px;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    display: flex;
+    margin:0.5rem;
+    height:fit-content;
+}
+
+.robot-card-img {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    border-radius: 1rem 1rem 0 0;  
+}
+
+.robot-card-title {
+    margin-top: 10px;
+    text-align: left;
+    font-size: 2em;
+}
+
+.robot-card-description {
+    text-align: left;
+}
+
+.robot-card-btn{
+    width: 100%;
+    text-align: center;
+    background-color: #2563eb;
+    color: white;
+    padding: 0.3rem;
+    border-radius: 5px;
+}
+
+
