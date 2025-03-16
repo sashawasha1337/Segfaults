@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 const EventTable = ({events}) => {
     const navigate=useNavigate();
     const handleViewDetails = (eventId) => {
+        //commented out navigation to specific events 
         //navigate(`/EventDetails/${eventId}`);
         navigate(`/Trash_view_page`);
     }
@@ -33,7 +34,5 @@ const EventTable = ({events}) => {
     
 
 }
-
-
 
 export default EventTable;
