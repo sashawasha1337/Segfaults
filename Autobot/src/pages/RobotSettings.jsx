@@ -106,7 +106,7 @@ function RobotSettings() {
 
       <Box
         sx={{
-          marginTop: "auto",
+          mt: 25,
           mb: 4,
           textAlign: "center",
         }}
