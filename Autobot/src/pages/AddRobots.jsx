@@ -8,24 +8,13 @@ import Switch from '@mui/material/Switch';
 import { FormControlLabel } from "@mui/material";
 import Button from '@mui/material/Button';
 import Grid2 from "@mui/material/Grid";
+import BackButton from "../components/BackButton";
 
 function AddRobots() {
-  const navigate = useNavigate();
 
   return (
     <>
-      <IconButton
-        onClick={() => navigate("/")}
-        sx={{
-          position: "absolute",
-          top: 50,
-          right: 75,
-          color: "black",
-          padding: "40",
-        }}
-      >
-        <ArrowBackIcon fontSize="large"/>
-      </IconButton>
+      <BackButton />
 
       <h1 style ={{color: "black"}}>
         Add a Robot
