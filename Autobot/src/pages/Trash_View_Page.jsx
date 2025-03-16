@@ -38,7 +38,7 @@ function Trash_View_Page() {
         textAlign: "center",
       }}
     >
-      <BackButton />
+      <BackButton backURL="/ActivityLog"/>
 
       <Container maxWidth="sm">
         <Typography variant="h4" align="center" sx={{ mb: 2 }}>
