@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 const EventTable = ({events}) => {
     const navigate=useNavigate();
     const handleViewDetails = (eventId) => {
-        navigate(`/EventDetails/${eventId}`);
+        //navigate(`/EventDetails/${eventId}`);
+        navigate(`/Trash_view_page`);
     }
     return (
         <table>
