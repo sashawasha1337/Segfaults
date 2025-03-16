@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom';
 import AddRobots from "./pages/AddRobots";  
 import Trash_View_Page from './pages/Trash_View_Page';  
 import ActivityLog from "./pages/ActivityLog";
+import LoginPage from "./pages/LoginPage";
 import './App.css'
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
       <Route path="/AddRobots" element={<AddRobots />} />
       <Route path="/Trash_View_Page" element={<Trash_View_Page />} />
       <Route path="/ActivityLog" element={<ActivityLog />} />
+      <Route path="/LoginPage" element={<LoginPage />} />
     </Routes>
   </>
 );
