@@ -8,6 +8,7 @@ import Trash_View_Page from './pages/Trash_View_Page';
 import ActivityLog from "./pages/ActivityLog";
 import LoginPage from "./pages/LoginPage";
 import NewAccount from "./pages/NewAccount/NewAccount.jsx";
+import HomePage from './pages/HomePage';
 import './App.css'
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
       <Route path="/AddRobots" element={<AddRobots />} />
       <Route path="/Trash_View_Page" element={<Trash_View_Page />} />
       <Route path="/ActivityLog" element={<ActivityLog />} />
+      <Route path="/HomePage" element={<HomePage />} />
       <Route path="/LoginPage" element={<LoginPage />} />
       <Route path="/NewAccount" element={<NewAccount />} />
     </Routes>
