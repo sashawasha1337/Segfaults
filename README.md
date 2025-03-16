@@ -1,1 +1,0 @@
-This is the react scaffold built with vite. I didn't change anything so the main page is just the default one that has links to info about React and Vite. All I added was an empty folder in src tilted pages.
