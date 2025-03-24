@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Container, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DisplayCard from "../components/DisplayCard";
 import BackButton from "../components/BackButton";
+import { db } from "../firebaseConfig"; // Import Firestore
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 
 function Trash_View_Page() {
+
+  const [imageUrl, setImageUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -27,6 +32,28 @@ function Trash_View_Page() {
     Robot_ID: "RBT-001",
   };
 
+  useEffect(() => {
+    const fetchImage = async () => {
+      setLoading(true);
+      try {
+        const imagesRef = collection(db, "robot_images");
+        const q = query(imagesRef, orderBy("timestamp", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          setImageUrl(querySnapshot.docs[0].data().url);
+        } else {
+          console.warn("No images found in Firestore.");
+        }
+      } catch (error) {
+        console.error("Error fetching image:", error);
+      }
+      setLoading(false);
+    };
+
+    fetchImage();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -46,7 +73,7 @@ function Trash_View_Page() {
         </Typography>
         <DisplayCard
           title="Detected Object"
-          image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuGFmJvGmySA0ZIEY5j6Jg0zGOwqOaEBFhaw&s"
+          image={imageUrl || "https://picsum.photos/300"} // Show placeholder if no image found
           metadata={sampleMetadata}
           labels={metadataLabels}
         />
