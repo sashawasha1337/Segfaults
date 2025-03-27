@@ -11,6 +11,14 @@ function Trash_View_Page() {
 
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [metadata, setMetadata] = useState({
+  Confidence: "",
+  Category: "",
+  Location: "",
+  Coordinates: "",
+  Timestamp: "",
+  Robot_ID: "",
+});
 
   const navigate = useNavigate();
 
@@ -31,7 +39,7 @@ function Trash_View_Page() {
     Timestamp: "2025-03-14 10:32:00",
     Robot_ID: "RBT-001",
   };
-
+  // fetch image from database
   useEffect(() => {
     const fetchImage = async () => {
       setLoading(true);
@@ -54,6 +62,40 @@ function Trash_View_Page() {
     fetchImage();
   }, []);
 
+  //fetch metadata from database
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      setLoading(true);
+      try{
+        const metadataRef = collection(db, "GPS_data");
+        const q = query(metadataRef, orderBy("Timestamp", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if(!querySnapshot.empty){
+          const data = querySnapshot.docs[0].data();
+          //maybe we can store everything as strings?
+          setMetadata({
+            Confidence: data.Confidence,
+            Category: data.Category,
+            Location: data.Location,
+            Coordinates: data.Coordinates 
+            ? `${data.Coordinates.latitude}, ${data.Coordinates.longitude}` 
+            : "No coordinates found", //convert firestore geopoint to redable string
+            Timestamp: data.Timestamp.toDate().toLocaleString(), //convert firestore timestamp to readable string
+            Robot_ID: data.Robot_ID
+
+          });
+        }else{
+          console.warn("No metadata found in Firestore.");
+        }
+      }catch(error){
+        console.error("Error fetching metadata:", error); 
+      }
+      setLoading(false);
+    }
+    fetchMetadata();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -74,7 +116,7 @@ function Trash_View_Page() {
         <DisplayCard
           title="Detected Object"
           image={imageUrl || "https://picsum.photos/300"} // Show placeholder if no image found
-          metadata={sampleMetadata}
+          metadata={metadata}
           labels={metadataLabels}
         />
       </Container>
