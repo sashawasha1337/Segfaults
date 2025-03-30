@@ -1,5 +1,5 @@
 import React from 'react';
-import "../styles/homepage.css";
+import "../styles/HomePage.css";
 import {RobotCard} from "../components/RobotCard";
 import AddButton from '../components/AddButton';
 import SettingsButton from '../components/SettingsButton';
