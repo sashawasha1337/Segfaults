@@ -1,5 +1,5 @@
 import React from 'react'
-import "../styles/robotcard.css";
+import "../styles/RobotCard.css";
 
 export const RobotCard = ({ imgSrc, imgAlt, title, description, buttonText, link }) => {
     console.log('RobotCard component is rendering');
