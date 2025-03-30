@@ -1,14 +1,14 @@
 import React from "react";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
-import BackButton from "../components/BackButton";
 import { useNavigate } from "react-router-dom";
 
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import BackButton from "../components/BackButton";
+
 {/*
-  The forgot username page allows users to get sent an email that contains
-  the username associated with the email in the case that the user's
-  username was forgotten.
+  The reset password page allows users to reset their password in the case
+  that the current password associated with their account was forgotten.
 */}
-function ForgotUsernamePage() {
+function ResetPasswordPage() {
   const navigate = useNavigate();
 
   const [hasError, setHasError] = React.useState(false);
@@ -31,11 +31,11 @@ function ForgotUsernamePage() {
       }}
     >
 
-      <BackButton backURL="/"/>
+      <BackButton path="/" />
 
       {/* Text header */}
       <Typography variant="h5" sx={{ fontWeight: "bold"}}>
-          Enter your email to find your username
+          Enter your email to reset password
       </Typography>
 
       <Container // container for inner components
@@ -76,7 +76,7 @@ function ForgotUsernamePage() {
             backgroundColor: "purple",
           }}
         >
-          Find username
+          Reset password
         </Button>
 
       </Container>
@@ -84,4 +84,4 @@ function ForgotUsernamePage() {
   );
 };
 
-export default ForgotUsernamePage;
+export default ResetPasswordPage;

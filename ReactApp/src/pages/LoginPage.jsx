@@ -1,8 +1,9 @@
 import React from "react";
-import { Alert, Box, Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import GoogleIcon from "@mui/icons-material/Google";
 import { useNavigate } from "react-router-dom";
+
+import { Alert, Box, Button, TextField } from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
+import PasswordTextField from "../components/PasswordTextField";
 
 {/*
   The Login page allows users to enter their username and password to gain access to the web application.
@@ -15,34 +16,21 @@ function LoginPage() {
 
   const [invalidCredentials, setInvalidCredentials] = React.useState(false);
 
-  let count = 0 // delete this after credential verification logic is implemented
+  let count = 0; // delete this after credential verification logic is implemented
 
   const handleClickLogin = () => {
     // logic to handle credential verification should go here
     switch (count++) { // code is currently set up to test the error message for invalid credential input
       case 0:
         // case where credentials are invalid, invalidCredentials should be set to true
-        setInvalidCredentials(true)
-        break
+        setInvalidCredentials(true);
+        break;
       case 1:
         // case where credentials are valid, invalidCredentials should be set to false and then navigate to homepage
-        setInvalidCredentials(false)
-        navigate("/HomePage")
-        break
+        setInvalidCredentials(false);
+        navigate("/HomePage");
+        break;
     }
-  };
-
-  // react hook and some supporting functions to handle showPassword toggling for password text field
-  const [showPassword, setShowPassword] = React.useState(false);
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (event) => {
-    event.preventDefault();
   };
 
   return (
@@ -53,7 +41,7 @@ function LoginPage() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        position: "relative",
+        position: "relative"
       }}
       noValidate
       autoComplete="off"
@@ -65,30 +53,7 @@ function LoginPage() {
         variant="filled"
       />
 
-      {/* Password text field */}
-      <FormControl sx={{ mt: 3, width: "40ch" }} variant="filled">
-        <InputLabel htmlFor="password-text-field">Password</InputLabel>
-        <FilledInput
-          id="password-text-field"
-          type={showPassword ? 'text' : 'password'} // toggles how characters are displayed
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label={
-                  showPassword ? 'hide password' : 'display password'
-                }
-                onClick={handleClickShowPassword} // toggles showPassword on click
-                onMouseDown={handleMouseDownPassword}
-                onMouseUp={handleMouseUpPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />} {/* toggles show/hide password icon */}
-              </IconButton>
-            </InputAdornment>
-          }
-          label="Password"
-        />
-      </FormControl>
+      <PasswordTextField mt={3} width="40ch" />
        
       {/*
         Invalid credentials error message
@@ -120,7 +85,7 @@ function LoginPage() {
           textTransform: "none", // allows button text to display lowercase letters
           padding: 0,
           minWidth: "auto",
-          fontSize: "0.9rem",
+          fontSize: "0.9rem"
         }}
       >
         <span>Forgot Username?</span>
@@ -128,23 +93,23 @@ function LoginPage() {
 
       {/* Log in buttonn */}
       <Button variant="contained"
-          onClick={() => {handleClickLogin()}} // handles credential verification and navigation to homepage
-          sx={{
-            mt: 7,
-            textTransform: "none",
-            borderRadius: "50px", // rounds the corners of the button
-            width: "125px",
-            height: "50px",
-            fontSize: "1.0rem",
-            backgroundColor: "purple",
-          }}
+        onClick={() => {handleClickLogin()}} // handles credential verification and navigation to homepage
+        sx={{
+          mt: 7,
+          textTransform: "none",
+          borderRadius: "50px", // rounds the corners of the button
+          width: "125px",
+          height: "50px",
+          fontSize: "1.0rem",
+          backgroundColor: "purple"
+        }}
       >
         Log in
       </Button>
 
       {/* Sign up button */}
       <Button variant="contained"
-        onClick={() => navigate("/NewAccount")}
+        onClick={() => navigate("/SignUpPage")}
         sx={{
           mt: 5,
           textTransform: "none",
@@ -152,7 +117,7 @@ function LoginPage() {
           width: "125px",
           height: "50px",
           fontSize: "1.0rem",
-          backgroundColor: "purple",
+          backgroundColor: "purple"
         }}
       >
         Sign up
@@ -166,7 +131,7 @@ function LoginPage() {
           textTransform: "none",
           width: "305px",
           height: "50px",
-          fontSize: "1.0rem",
+          fontSize: "1.0rem"
         }}
       >
         Sign in with Google
@@ -183,13 +148,13 @@ function LoginPage() {
           textTransform: "none",
           padding: 0,
           minWidth: "auto",
-          fontSize: "0.8rem",
+          fontSize: "0.8rem"
         }}
       >
         <span>Reset Password</span>
       </Button>
     </Box>
   );
-}
+};
 
 export default LoginPage;
