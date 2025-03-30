@@ -19,10 +19,12 @@ import TextField from '@mui/material/TextField';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Button from '@mui/material/Button';
+import { useNavigate } from "react-router-dom";
 
 
 
 function NewAccount() {
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
@@ -32,6 +34,7 @@ function NewAccount() {
 
     function handleSignin() {
         console.log("Signing in with:", email, password);
+        navigate("/Homepage")
       };
       
     function handlePassword() {
