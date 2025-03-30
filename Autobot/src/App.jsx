@@ -11,6 +11,7 @@ import NewAccount from "./pages/NewAccount/NewAccount.jsx";
 import HomePage from './pages/HomePage';
 import RobotSettings from './pages/RobotSettings';
 import ControlPage from './pages/ControlPage';
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import './App.css'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <Route path="/NewAccount" element={<NewAccount />} />
       <Route path="/RobotSettings" element={<RobotSettings />} />
       <Route path="/ControlPage" element={<ControlPage />} />
+      <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
     </Routes>
   </>
 );
