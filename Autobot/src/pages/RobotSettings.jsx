@@ -20,7 +20,7 @@ function RobotSettings() {
       }}
     >
       <IconButton
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/ActivityLog")}
         sx={{
           position: "absolute",
           top: 0,
@@ -35,6 +35,7 @@ function RobotSettings() {
       <Button
         // Delete Robot Button
         variant="contained"
+        onClick={() => navigate("/HomePage")}
         sx={{
           backgroundColor: "#EC221F",
           border: "1px solid #C00F0C",

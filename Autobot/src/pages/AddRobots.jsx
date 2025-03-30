@@ -11,10 +11,11 @@ import Grid2 from "@mui/material/Grid";
 import BackButton from "../components/BackButton";
 
 function AddRobots() {
+  const navigate = useNavigate();
 
   return (
     <>
-      <BackButton />
+      <BackButton backURL="/HomePage" />
 
       <h1 style ={{color: "black"}}>
         Add a Robot
@@ -69,7 +70,9 @@ function AddRobots() {
         </Box>
 
 
-        <Button variant="contained" sx={{
+        <Button variant="contained"
+        onClick={() => navigate("/HomePage")}
+        sx={{
           mt: 6, 
           width: "195px", 
           height: "60px", 

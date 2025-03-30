@@ -26,7 +26,7 @@ function ActivityLog() {
       <SettingsButton path="/RobotSettings" />
 
       <IconButton
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/HomePage")}
         sx={{
           position: "absolute",
           top: 50,

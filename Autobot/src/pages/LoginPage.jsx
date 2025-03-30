@@ -27,7 +27,7 @@ function LoginPage() {
       case 1:
         // case where credentials are valid, invalidCredentials should be set to false and then navigate to homepage
         setInvalidCredentials(false)
-        navigate("/") // path to homepage needs to be added
+        navigate("/HomePage")
         break
     }
   };
@@ -110,7 +110,7 @@ function LoginPage() {
 
       {/* Forgot username button */}
       <Button variant="text" disableRipple
-        onClick={() => navigate("/")} // path to forgot username page needs to be added
+        onClick={() => navigate("/ForgotUsernamePage")}
         sx={{
           mt: invalidCredentials ? 0 : 1.5, // adjusts margin to accommodate the invalid credentials error message
           mr: 27,
@@ -144,7 +144,7 @@ function LoginPage() {
 
       {/* Sign up button */}
       <Button variant="contained"
-        onClick={() => navigate("/")} // path to create new account page needs to be added
+        onClick={() => navigate("/NewAccount")}
         sx={{
           mt: 5,
           textTransform: "none",
@@ -174,7 +174,7 @@ function LoginPage() {
 
       {/* Reset Password button */}
       <Button variant="text" disableRipple
-        onClick={() => navigate("/")} // path to reset password page needs to be added
+        onClick={() => navigate("/ResetPasswordPage")}
         sx={{
           mt: 2,
           "&:hover": {
