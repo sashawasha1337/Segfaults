@@ -1,21 +1,16 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; 
-import IconButton from "@mui/material/IconButton";
 import { useNavigate } from "react-router-dom";
-import Switch from '@mui/material/Switch';
-import { FormControlLabel } from "@mui/material";
-import Button from '@mui/material/Button';
-import Grid2 from "@mui/material/Grid";
+
+import { Box, Button, Grid2, Switch, TextField } from "@mui/material";
 import BackButton from "../components/BackButton";
 
-function AddRobots() {
+
+function AddRobotPage() {
   const navigate = useNavigate();
 
   return (
     <>
-      <BackButton backURL="/HomePage" />
+      <BackButton path="/HomePage" />
 
       <h1 style ={{color: "black"}}>
         Add a Robot
@@ -87,4 +82,4 @@ function AddRobots() {
   );
 }
 
-export default AddRobots;
+export default AddRobotPage;
