@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Container, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
+import { Typography, Container, Box } from "@mui/material";
 import DisplayCard from "../components/DisplayCard";
 import BackButton from "../components/BackButton";
+
 import { db } from "../firebaseConfig"; // Import Firestore
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 
-function Trash_View_Page() {
+function TrashViewPage() {
+  const navigate = useNavigate();
 
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [metadata, setMetadata] = useState({
-  Confidence: "",
-  Category: "",
-  Location: "",
-  Coordinates: "",
-  Timestamp: "",
-  Robot_ID: "",
-});
-
-  const navigate = useNavigate();
+    Confidence: "",
+    Category: "",
+    Location: "",
+    Coordinates: "",
+    Timestamp: "",
+    Robot_ID: "",
+  });
 
   const metadataLabels = {
     Confidence: "Confidence",
@@ -39,6 +40,7 @@ function Trash_View_Page() {
     Timestamp: "2025-03-14 10:32:00",
     Robot_ID: "RBT-001",
   };
+  
   // fetch image from database
   useEffect(() => {
     const fetchImage = async () => {
@@ -107,7 +109,7 @@ function Trash_View_Page() {
         textAlign: "center",
       }}
     >
-      <BackButton backURL="/ActivityLog"/>
+      <BackButton path="/ActivityLogPage"/>
 
       <Container maxWidth="sm">
         <Typography variant="h4" align="center" sx={{ mb: 2 }}>
@@ -122,6 +124,6 @@ function Trash_View_Page() {
       </Container>
     </Box>
   );
-}
+};
 
-export default Trash_View_Page;
+export default TrashViewPage;

@@ -4,10 +4,11 @@ import BackButton from "../components/BackButton";
 import { useNavigate } from "react-router-dom";
 
 {/*
-  The reset password page allows users to reset their password in the case
-  that the current password associated with their account was forgotten.
+  The forgot username page allows users to get sent an email that contains
+  the username associated with the email in the case that the user's
+  username was forgotten.
 */}
-function ResetPasswordPage() {
+function ForgotUsernamePage() {
   const navigate = useNavigate();
 
   const [hasError, setHasError] = React.useState(false);
@@ -30,11 +31,11 @@ function ResetPasswordPage() {
       }}
     >
 
-      <BackButton backURL="/"/>
+      <BackButton path="/"/>
 
       {/* Text header */}
       <Typography variant="h5" sx={{ fontWeight: "bold"}}>
-          Enter your email to reset password
+          Enter your email to find your username
       </Typography>
 
       <Container // container for inner components
@@ -75,7 +76,7 @@ function ResetPasswordPage() {
             backgroundColor: "purple",
           }}
         >
-          Reset password
+          Find username
         </Button>
 
       </Container>
@@ -83,4 +84,4 @@ function ResetPasswordPage() {
   );
 };
 
-export default ResetPasswordPage;
+export default ForgotUsernamePage;
