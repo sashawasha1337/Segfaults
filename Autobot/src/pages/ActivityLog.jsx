@@ -1,5 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"; 
 import IconButton from "@mui/material/IconButton";
@@ -7,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Switch from '@mui/material/Switch';
 import { FormControlLabel } from "@mui/material";
 import EventTable from "../components/EventTable";
+import SettingsButton from '../components/SettingsButton';
 
 function ActivityLog() {
   const navigate = useNavigate();
@@ -21,6 +23,8 @@ function ActivityLog() {
 
   return (
     <>
+      <SettingsButton path="/RobotSettings" />
+
       <IconButton
         onClick={() => navigate("/")}
         sx={{
@@ -33,6 +37,28 @@ function ActivityLog() {
       >
         <ArrowBackIcon fontSize="large"/>
       </IconButton>
+
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+        width="100vw"
+        position="fixed"
+        left={-75}
+      >
+        <Button variant="contained"
+          onClick={() => navigate("/ControlPage")}
+          sx={{
+            textTransform: "none",
+            borderRadius: "10px",
+            width: "125px",
+            height: "50px",
+            fontSize: "1.0rem",
+            backgroundColor: "black",
+          }}
+        >
+          FPV/Control
+        </Button>
+      </Box>
 
     <Box sx={{marginTop: '100px', padding: '10px'}}>
         <h1>Activity Log</h1>
