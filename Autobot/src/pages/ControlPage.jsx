@@ -1,6 +1,7 @@
 import {Button, Card, CardMedia, Grid ,Typography} from "@mui/material";
 import * as React from "react";
 import { ArrowUpward,ArrowDownward,ArrowBack,ArrowForward } from "@mui/icons-material";
+import BackButton from "../components/BackButton";
 const adjustRobotDirection = (direction) => { 
     //This function will be used to send the direction to the robot
 }
@@ -14,6 +15,9 @@ const ControlPage =()   => {
             <div style={{position:"fixed", top: "0", left: "50%",transform: "translateX(-50%)"}}>
                 <Typography variant="h3" style={{textAlign: "center"}}>Robot Control</Typography>
             </div>
+
+            <BackButton backURL="/ActivityLog" />
+            
            <Card style={{ width: "100%", margin: "20px", border: "1px solid black",  }}>
                 <CardMedia style={{height: "150",width: "250", objectFit: "cover" }}
                     component="img"
