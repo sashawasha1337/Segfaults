@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebaseConfig.js";
 
 import { Alert, Box, Button, TextField,Dialog, DialogActions,DialogTitle,DialogContent } from "@mui/material";
 
@@ -30,6 +32,11 @@ const UserSettingsPage = () => {
     const handleConfirmedLogout = () => {
 
         // logic to handle removing user tracking for logout should go here
+        signOut(auth).then(() => {
+            navigate("/");
+        }).catch((error) =>{
+            alert("logout Fail");    
+        });
         setOpenDialog(false);
         navigate("/"); 
     }

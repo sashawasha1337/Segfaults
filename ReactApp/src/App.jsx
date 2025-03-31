@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import RobotSettingPage from './pages/RobotSettingPage.jsx';
+import MapViewPage from './pages/MapViewPage';
 import SignUpPage from "./pages/SignUpPage.jsx";
 import TrashViewPage from './pages/TrashViewPage.jsx';
 import UserSettingsPage from './pages/UserSettingsPage.jsx';
@@ -24,6 +25,7 @@ function App() {
       <Route path="/HomePage" element={<HomePage />} />
       <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
       <Route path="/RobotSettingPage" element={<RobotSettingPage />} />
+      <Route path="/MapViewPage" element={<MapViewPage />} />
       <Route path="/SignUpPage" element={<SignUpPage />} />
       <Route path="/TrashViewPage" element={<TrashViewPage />} />
       <Route path="/UserSettingsPage/:username" element={<UserSettingsPage />} />
