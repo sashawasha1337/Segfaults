@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import { auth } from "../firebaseConfig.js";
 import { Alert, Box, Button, TextField } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import PasswordTextField from "../components/PasswordTextField";
@@ -15,11 +15,25 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const [invalidCredentials, setInvalidCredentials] = React.useState(false);
+  
 
   let count = 0; // delete this after credential verification logic is implemented
 
   const handleClickLogin = () => {
     // logic to handle credential verification should go here
+
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
+
+
     switch (count++) { // code is currently set up to test the error message for invalid credential input
       case 0:
         // case where credentials are invalid, invalidCredentials should be set to true
@@ -49,7 +63,7 @@ function LoginPage() {
     
       {/* Username text field */}
       <TextField
-        label="Username"
+        label="Email"
         variant="filled"
       />
 
@@ -88,7 +102,7 @@ function LoginPage() {
           fontSize: "0.9rem"
         }}
       >
-        <span>Forgot Username?</span>
+        <span>Forgot Password?</span>
       </Button>
 
       {/* Log in buttonn */}
