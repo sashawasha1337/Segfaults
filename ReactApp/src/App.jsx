@@ -17,9 +17,10 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/LoginPage" element={<LoginPage />} />
       <Route path="/ActivityLogPage" element={<ActivityLogPage />} />
       <Route path="/AddRobotPage" element={<AddRobotPage />} />
-      <Route path="/ControlPage" element={<ControlPage />} />
+      <Route path="/ControlPage/:robotID" element={<ControlPage />} />
       <Route path="/ForgotUsernamePage" element={<ForgotUsernamePage />} />
       <Route path="/HomePage" element={<HomePage />} />
       <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
