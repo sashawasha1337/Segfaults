@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState }from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig.js";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { Alert, Box, Button, TextField } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import PasswordTextField from "../components/PasswordTextField";
@@ -15,17 +16,34 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const [invalidCredentials, setInvalidCredentials] = React.useState(false);
-  
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [password, setPassword] = useState('');
 
   let count = 0; // delete this after credential verification logic is implemented
 
+  const handleForgotPassword = () => {
+    sendPasswordResetEmail(auth, email)
+    .then(() => {
+      // Password reset email sent!
+      // ..
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ..
+    });
+    alert("Reset Password Link Sent");
+  }
+
   const handleClickLogin = () => {
     // logic to handle credential verification should go here
-
     signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
       const user = userCredential.user;
+      navigate("/HomePage");
       // ...
     })
     .catch((error) => {
@@ -33,18 +51,6 @@ function LoginPage() {
       const errorMessage = error.message;
     });
 
-
-    switch (count++) { // code is currently set up to test the error message for invalid credential input
-      case 0:
-        // case where credentials are invalid, invalidCredentials should be set to true
-        setInvalidCredentials(true);
-        break;
-      case 1:
-        // case where credentials are valid, invalidCredentials should be set to false and then navigate to homepage
-        setInvalidCredentials(false);
-        navigate("/HomePage");
-        break;
-    }
   };
 
   return (
@@ -65,9 +71,12 @@ function LoginPage() {
       <TextField
         label="Email"
         variant="filled"
+        onChange={e => setEmail(e.target.value)}
       />
 
-      <PasswordTextField mt={3} width="40ch" />
+      <PasswordTextField mt={3} width="40ch" 
+        onChange={e => setPassword(e.target.value)}
+      />
        
       {/*
         Invalid credentials error message
@@ -89,7 +98,7 @@ function LoginPage() {
 
       {/* Forgot username button */}
       <Button variant="text" disableRipple
-        onClick={() => navigate("/ForgotUsernamePage")}
+        onClick={handleForgotPassword}
         sx={{
           mt: invalidCredentials ? 0 : 1.5, // adjusts margin to accommodate the invalid credentials error message
           mr: 27,
@@ -165,7 +174,6 @@ function LoginPage() {
           fontSize: "0.8rem"
         }}
       >
-        <span>Reset Password</span>
       </Button>
     </Box>
   );
