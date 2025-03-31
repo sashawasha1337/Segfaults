@@ -1,16 +1,61 @@
-import * as React from "react";
 
+import React, { useState, useRef, useEffect } from "react";
 import { Button, Card, CardMedia, Grid, Typography } from "@mui/material";
 import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-material";
 import BackButton from "../components/BackButton";
 import SettingsButton from '../components/SettingsButton';
-
-
-const adjustRobotDirection = (direction) => { 
-  //This function will be used to send the direction to the robot
-}
+import { db } from "../firebaseConfig"; // Import Firestore
+import { collection, query, getDocs, where } from "firebase/firestore";
+import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
+import { RobotConnection }  from "../hooks/RobotConnection"; // Import custom hook for WebRTC connection
 
 const ControlPage = () => {
+
+
+  const { robotID } = useParams(); // Get the robot ID from the URL parameters
+  const [robotIP, setRobotIP] = useState(""); // State to store the robot's IP address
+  const  videoRef = useRef(null); // Ref to access the video element
+ 
+  // Function to fetch the robot's IP address from Firestore using its ID
+  const fetchRobotIP = async () => {
+      try {
+          const robotsRef = collection(db, "robots");
+          const q = query(robotsRef, where("robotID", "==", robotID));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+              const robotData = querySnapshot.docs[0].data();
+              setRobotIP(robotData.ipAddress); // Set the robot's IP address in state
+          } else {
+              console.warn("No robot found with the given ID.");
+          }
+      }
+      catch (error) {
+          console.error("Error fetching robot IP address:", error);
+      }
+  };
+
+
+  useEffect(() => {
+      fetchRobotIP();
+  }, [fetchRobotIP]);
+
+
+  const { 
+      isConnected,
+      connectionStatus,
+      error: connectionError,
+      sendCommand
+  } = RobotConnection(robotIP, videoRef); // Custom hook to manage WebRTC connection
+
+  const adjustRobotDirection = async (command) => {
+      const sent = await sendCommand(command); // Send the command to the robot
+      if (!sent) {
+          console.error("Failed to send command:", command);
+      }
+  };
+
+
+  // JSX code for the page
   return (
     <div style ={{
         padding: "20px",
@@ -28,17 +73,18 @@ const ControlPage = () => {
       </div>
       
       <Card style={{ width: "100%", margin: "20px", border: "1px solid black" }}>
-        <CardMedia style={{height: "150",width: "250", objectFit: "cover" }}
-          component="img"
-          image="https://via.placeholder.com/150"
-          alt="video feed"
-
-          //instead of an image here this can be adjusted to be an mp4. 
-          //the type of video feed would have to be "progressive download"
-          //for live streaming we would need a tool like hls to convert
-          //ex usage :image="https://via.placeholder.com/150" would be  src="https://your-video-source-url.mp4"
-          // and component would be "video" not "img"  
+        <video
+          ref ={videoRef}
+          autoPlay
+          playsInline
+          style={{
+            width: "100%",
+            height: "auto",
+            borderRadius: "10px",
+            border: "1px solid black"
+          }}
         />
+        
       </Card>
 
       <Grid container direction="column" justifyContent="space-between" alignItems="center" >
