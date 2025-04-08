@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+
+import asyncio
 import threading
 import json
-import asyncio
-import requests
-
-# WebRTC libraries
-from flask import Flask
-from flask_socketio import SocketIO
+from flask import Flask, request
 from flask_cors import CORS
-from aiortc import RTCPeerConnection, RTCSessionDescription
-from aiortc.mediastreams import VideoStreamTrack
-from av import VideoFrame
+from flask_socketio import SocketIO
+from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack, get_capabilities
+from aiortc.contrib.media import MediaStreamTrack, VideoFrame
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import Twist
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy
+from rclpy.qos import QoSHistoryPolicy
+
+# Flask and Socket.IO setup
 
 app = Flask(__name__)
 CORS(app)
@@ -122,8 +123,16 @@ async def process_offer(sid, offer_data):
     pc = RTCPeerConnection()
     peer_connections[sid] = pc
     
-    # Add video track
-    pc.addTrack(ROSVideoTrack(ros_node))
+    # Set codec preference to H.264 if supported
+    capabilities = get_capabilities("video")
+    h264_codecs = [c for c in capabilities if c.mimeType == "video/H264"]
+    if h264_codecs:
+        transceiver = pc.addTransceiver("video")
+        transceiver.setCodecPreferences(h264_codecs)
+        transceiver.sender.replaceTrack(ROSVideoTrack(ros_node))
+    else:
+        # fallback
+        pc.addTrack(ROSVideoTrack(ros_node))
     
     # Handle data channel for commands
     @pc.on("datachannel")
