@@ -1,12 +1,44 @@
-import * as React from "react";
+import React,{ useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Box, Button, Grid2, Switch, TextField } from "@mui/material";
 import BackButton from "../components/BackButton";
 
+import {collection, addDoc, getDocs} from "firebase/firestore";
+import { db } from "../firebaseConfig";
+
 
 function AddRobotPage() {
   const navigate = useNavigate();
+  const [robotName, setRobotName] = useState("");
+  const [robotIp, setRobotIp] = useState("");
+
+  const handleAddRobot = async () => {
+    try{
+      const robotsRef = collection(db, "robots");
+      const snapshot = await getDocs(robotsRef);
+      
+      let maxId = 0;
+      snapshot.forEach((doc) => {
+        const robot = doc.data();
+        const robotId = parseInt(robot.robotID);
+        if(!isNaN(robotId) && robotId > maxId){
+          maxId = robotId;
+        }
+      });
+      await addDoc(robotsRef, {
+        ipAddress: robotIp,
+        location: "dock",
+        name: robotName,
+        robotID: (maxId + 1).toString(),
+        status: "idle",
+        users: "exampleUser",
+      });
+      navigate("/HomePage");
+    }catch(error){
+      console.error("Error adding robot: ", error);
+    }
+  }
 
   return (
     <>
@@ -33,6 +65,8 @@ function AddRobotPage() {
           label="Name"
           placeholder="Name"
           variant="filled"
+          value={robotName}
+          onChange={(e) => setRobotName(e.target.value)}
         />
 
         <TextField
@@ -40,6 +74,8 @@ function AddRobotPage() {
           label="IP Address"
           placeholder="IP Address"
           variant="filled"
+          value={robotIp}
+          onChange={(e) => setRobotIp(e.target.value)}
         />
 
         
@@ -66,7 +102,7 @@ function AddRobotPage() {
 
 
         <Button variant="contained"
-        onClick={() => navigate("/HomePage")}
+        onClick = {handleAddRobot}
         sx={{
           mt: 6, 
           width: "195px", 
