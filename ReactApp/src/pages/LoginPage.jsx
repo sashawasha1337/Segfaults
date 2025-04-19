@@ -15,11 +15,15 @@ import PasswordTextField from "../components/PasswordTextField";
 function LoginPage() {
   const navigate = useNavigate();
 
-  const [invalidCredentials, setInvalidCredentials] = React.useState(false);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [invalidCredentials, setInvalidCredentials] = React.useState(false);
+  
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [password, setPassword] = useState('');
+  const [errorCode, setErrorCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   let count = 0; // delete this after credential verification logic is implemented
 
@@ -30,28 +34,35 @@ function LoginPage() {
       // ..
     })
     .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      setErrorCode(error.code);
+      setErrorMessage(error.message);
       // ..
     });
     alert("Reset Password Link Sent");
   }
 
-  const handleClickLogin = () => {
-    // logic to handle credential verification should go here
-    signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in 
+  async function handleClickLogin() {
+    setEmailError('');
+    setPasswordError('');
+    setInvalidCredentials(false);
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+    }
+  
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       navigate("/HomePage");
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-    });
-
-  };
+    } catch (error) {
+      //console.log(error);
+      //setErrorCode(error.code);
+      //setErrorMessage(error.message);
+  
+      setInvalidCredentials(true); // Shows generic error
+    }
+  }
+  
 
   return (
     <Box // component container
@@ -73,8 +84,20 @@ function LoginPage() {
         variant="filled"
         onChange={e => setEmail(e.target.value)}
       />
+      <Alert icon={false} severity="error" // hides the error alert icon
+        sx={{
+          mt: 0.25,
+          mr: 7,
+          backgroundColor: "transparent",
+          color: "red",
+          padding: 0,
+          display: emailError ? "block" : "none" // display component when invalid credentials are entered
+        }}
+      >
+        {emailError}
+      </Alert>
 
-      <PasswordTextField mt={3} width="40ch" 
+      <PasswordTextField mt={3} width="40ch" value={password}
         onChange={e => setPassword(e.target.value)}
       />
        
@@ -93,7 +116,7 @@ function LoginPage() {
           display: invalidCredentials ? "block" : "none" // display component when invalid credentials are entered
         }}
       >
-        Invalid username and password combination.
+        Invalid email and password combination.
       </Alert>
 
       {/* Forgot username button */}
@@ -116,7 +139,7 @@ function LoginPage() {
 
       {/* Log in buttonn */}
       <Button variant="contained"
-        onClick={() => {handleClickLogin()}} // handles credential verification and navigation to homepage
+        onClick={handleClickLogin} // handles credential verification and navigation to homepage
         sx={{
           mt: 7,
           textTransform: "none",

@@ -10,7 +10,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
   toggle the password obfuscation. There are four optional props m, mt, width, and label which
   allows various attributes of PasswordTextField to be altered.
 */}
-const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password" }) => {
+const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password", ...props}) => {
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = React.useState(false);
@@ -47,6 +47,7 @@ const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password" }) => {
             </InputAdornment>
           }
           label="Password"
+          {...props}
         />
       </FormControl>
     );
