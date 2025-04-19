@@ -45,6 +45,10 @@ function LoginPage() {
     setEmailError('');
     setPasswordError('');
     setInvalidCredentials(false);
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+    }
   
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -80,6 +84,18 @@ function LoginPage() {
         variant="filled"
         onChange={e => setEmail(e.target.value)}
       />
+      <Alert icon={false} severity="error" // hides the error alert icon
+        sx={{
+          mt: 0.25,
+          mr: 7,
+          backgroundColor: "transparent",
+          color: "red",
+          padding: 0,
+          display: emailError ? "block" : "none" // display component when invalid credentials are entered
+        }}
+      >
+        {emailError}
+      </Alert>
 
       <PasswordTextField mt={3} width="40ch" value={password}
         onChange={e => setPassword(e.target.value)}
