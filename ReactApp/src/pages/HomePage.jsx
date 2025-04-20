@@ -55,14 +55,6 @@ function HomePage() {
         Activity Log
       </Button>
 
-      <RobotCard
-        imgSrc="https://images.squarespace-cdn.com/content/v1/5a3c1a29f9a61e2987882112/bee5c58a-5b2c-4302-bb18-433dd7bd5f2c/ROSmaster.jpeg"
-        imgAlt="Robot"
-        title="Robot 1"
-        description="Segfaults UGV"
-        buttonText="FPV/Control"
-        link="/ControlPage"
-      />
 
       {robots.map((robot, index) => (
         <RobotCard
@@ -72,7 +64,7 @@ function HomePage() {
           title={robot.name || `Robot ${index + 1}`}
           description={`IP: ${robot.ipAddress}`}
           buttonText="FPV/Control"
-          link="/ControlPage"
+          link={`/ControlPage/${robot.id}`}
         />  
         ))}
     </div>
