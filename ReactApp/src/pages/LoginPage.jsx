@@ -54,6 +54,7 @@ function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       navigate("/HomePage");
+      //console.log(auth.currentUser.email);
     } catch (error) {
       //console.log(error);
       //setErrorCode(error.code);
