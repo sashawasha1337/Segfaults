@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use } from "react";
 import { Button, Card, CardMedia, Grid, Typography } from "@mui/material";
 import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-material";
 import BackButton from "../components/BackButton";
@@ -7,7 +6,7 @@ import SettingsButton from '../components/SettingsButton';
 import { db } from "../firebaseConfig"; // Import Firestore
 import { collection, query, getDocs, where } from "firebase/firestore";
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
-import { RobotConnection }  from "../hooks/RobotConnection"; // Import custom hook for WebRTC connection
+import { useRobotConnection }  from "../hooks/useRobotConnection"; // Import custom hook for WebRTC connection
 
 const ControlPage = () => {
 
@@ -15,12 +14,13 @@ const ControlPage = () => {
   const { robotID } = useParams(); // Get the robot ID from the URL parameters
   const [robotIP, setRobotIP] = useState(""); // State to store the robot's IP address
   const  videoRef = useRef(null); // Ref to access the video element
+  const [connection, setConnection] = useState(null); // State to manage the connection
  
   // Function to fetch the robot's IP address from Firestore using its ID
   const fetchRobotIP = async () => {
       try {
           const robotsRef = collection(db, "robots");
-          const q = query(robotsRef, where("robotID", "==", robotID));
+          const q = query(robotsRef, where("id", "==", robotID));
           const querySnapshot = await getDocs(q);
           if (!querySnapshot.empty) {
               const robotData = querySnapshot.docs[0].data();
@@ -37,15 +37,10 @@ const ControlPage = () => {
 
   useEffect(() => {
       fetchRobotIP();
-  }, [fetchRobotIP]);
+  }, []);
 
-
-  const { 
-      isConnected,
-      connectionStatus,
-      error: connectionError,
-      sendCommand
-  } = RobotConnection(robotIP, videoRef); // Custom hook to manage WebRTC connection
+  // Call the hook at the top level. The hook can internally handle when robotIP changes.
+  const { isConnected, connectionStatus, error, sendCommand } = useRobotConnection(robotIP, videoRef);
 
   const adjustRobotDirection = async (command) => {
       const sent = await sendCommand(command); // Send the command to the robot
@@ -53,6 +48,10 @@ const ControlPage = () => {
           console.error("Failed to send command:", command);
       }
   };
+
+  useEffect(() => {
+      setConnection({ isConnected, connectionStatus, error }); // Update the connection state
+  }, [isConnected, connectionStatus, error]);
 
 
   // JSX code for the page
@@ -72,7 +71,7 @@ const ControlPage = () => {
         <Typography variant="h3" style={{textAlign: "center"}}>Robot Control</Typography>
       </div>
       
-      <Card style={{ width: "100%", margin: "20px", border: "1px solid black" }}>
+      <Card style={{ width: "100%", margin: "20px", border: "1px solid black" }}>``
         <video
           ref ={videoRef}
           autoPlay
