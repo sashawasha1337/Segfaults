@@ -1,4 +1,5 @@
 import {getAuth, onAuthStateChanged} from 'firebase/auth';
+import {auth} from './firebaseConfig.js'; 
 import React, {createContext, useContext, useEffect, useState} from 'react';
 
 const AuthContext = createContext();
@@ -7,7 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({children}) => {   
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const auth = getAuth();
+   
     
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -18,6 +19,7 @@ export const AuthProvider = ({children}) => {
     }, [auth]);
     
     return (
+        //uses react context library to create context sharable across all compone
         <AuthContext.Provider value={{currentUser}}>
         {!loading && children}
         </AuthContext.Provider>

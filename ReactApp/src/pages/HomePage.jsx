@@ -7,19 +7,25 @@ import {RobotCard} from "../components/RobotCard";
 import AddButton from '../components/AddButton';
 import SettingsButton from '../components/SettingsButton';
 import {db} from "../firebaseConfig";
-import {collection, getDocs} from "firebase/firestore";
+import {query,where, collection, getDocs} from "firebase/firestore";
+import { useAuth } from "../ContextForAuth.jsx"; 
 
 
 function HomePage() {
   const navigate = useNavigate();
 
   const [robots, setRobots] = useState([]);
-
+  const { currentUser } = useAuth(); 
   useEffect(() => {
     const fetchRobots = async() => {
       try{
+        if(!currentUser){
+          console.error("No current user found.");
+          return;
+        }
         const robotsRef = collection(db, "robots");
-        const robotsSnapshot = await getDocs(robotsRef);
+        console.log("Current user ID:", currentUser.uid); // Log the current user ID
+        const robotsSnapshot = await getDocs(query(robotsRef,where("users","array-contains",currentUser.uid)));
         const robotData = robotsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -30,7 +36,7 @@ function HomePage() {
       }
     };
     fetchRobots();
-  }, []);
+  }, [currentUser]);
 
 
   return (
