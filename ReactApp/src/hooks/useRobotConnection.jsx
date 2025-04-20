@@ -1,9 +1,9 @@
 // hooks/useRobotConnection.js
 import { useState, useEffect, useRef } from 'react';
-import Peer from 'simple-peer';
-import io from 'socket.io-client';
+import Peer from 'simple-peer/simplepeer.min.js';
+import { io } from 'socket.io-client';
 
-export function RobotConnection(robotIP, videoRef) {
+export function useRobotConnection(robotIP, videoRef) {
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -21,18 +21,29 @@ export function RobotConnection(robotIP, videoRef) {
     setConnectionStatus('connecting');
     
     // Connect to signaling server
-    const socket = io(`http://${robotIP}:5000`);
+    console.log(`Connecting to: http://${robotIP}:5000`);
+    const socket = io(`http://${robotIP}:5000`, {
+      reconnectionAttempts: 3, // Retry connection 3 times
+      timeout: 5000, // Timeout after 5 seconds
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
       setConnectionStatus('signaling');
       
       // Create peer connection
-      const peer = new Peer({ 
-        initiator: true,
-        trickle: false
-      });
-      peerRef.current = peer;
+      try {
+        const peer = new Peer({ 
+          initiator: true,
+          trickle: false
+        });
+        peerRef.current = peer;
+      } catch (err) {
+        console.error('Error creating Peer:', err);
+        setError('Failed to create WebRTC peer connection');
+        setConnectionStatus('connection failed');
+        return;
+    }
       
       // Handle WebRTC signaling
       peer.on('signal', data => {
@@ -53,11 +64,21 @@ export function RobotConnection(robotIP, videoRef) {
       
       peer.on('connect', () => {
         setConnectionStatus('connected');
-        dataChannelRef.current = peer;
         setIsConnected(true);
         setError(null);
+
+        const dataChannel = peer.createDataChannel('commands');
+        dataChannelRef.current = dataChannel;
       });
       
+      // ✅ ADD THIS: handle WebRTC disconnect
+      peer.on('close', () => {
+        console.warn("WebRTC peer connection closed");
+        setConnectionStatus('disconnected');
+        setIsConnected(false);
+      });
+
+
       peer.on('error', err => {
         console.error('Peer error:', err);
         setError('Connection error');
