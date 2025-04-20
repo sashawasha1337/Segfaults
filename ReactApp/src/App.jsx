@@ -13,6 +13,7 @@ import TrashViewPage from './pages/TrashViewPage.jsx';
 import UserSettingsPage from './pages/UserSettingsPage.jsx';
 import './App.css'
 
+
 function App() {
   return (
     <Routes>
@@ -28,7 +29,7 @@ function App() {
       <Route path="/MapViewPage" element={<MapViewPage />} />
       <Route path="/SignUpPage" element={<SignUpPage />} />
       <Route path="/TrashViewPage" element={<TrashViewPage />} />
-      <Route path="/UserSettingsPage/:username" element={<UserSettingsPage />} />
+      <Route path="/UserSettingsPage" element={<UserSettingsPage />} />
     </Routes>
   );
 }

@@ -4,24 +4,28 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig.js";
 
 import { Alert, Box, Button, TextField,Dialog, DialogActions,DialogTitle,DialogContent } from "@mui/material";
+import { useAuth } from "../ContextForAuth.jsx"; // Import the useAuth hook
+import { SystemSecurityUpdate } from "@mui/icons-material";
+
 
 const UserSettingsPage = () => {
     const navigate = useNavigate();
     const [oldPassword, setOldPassword] = React.useState("");   
     const [newPassword, setNewPassword] = React.useState("");
     const [repeatPassword, setRepeatPassword] = React.useState("");
-    const {username}=useParams();
+  
 
     const[openDialog, setOpenDialog] = React.useState(false);
 
 
-
+    const { currentUser } = useAuth(); 
    
-    React.useEffect(() => {
-        if(!username)
-            navigate("/"); 
-        //we can add secondary verification here to check if the username exists in the database
-    }, [username, navigate]);
+   
+    if(!currentUser) {
+         return <div>no current user</div>;
+    }  
+
+    const username = currentUser.email;
 
    
 
