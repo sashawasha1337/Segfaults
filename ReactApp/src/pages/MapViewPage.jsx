@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L, { latLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { collection, query, limit, doc, onSnapshot, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, limit, doc, onSnapshot, getDocs, orderBy, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { data } from "react-router-dom";
 
 const defaultCenter = [38.5608, -121.4240];
+const ROBOT_ID = "ugv1";
 
 const ugvIcon = L.icon({
   iconUrl: "https://cdn.pixabay.com/photo/2013/07/12/13/43/arrow-147174_1280.png",       
@@ -27,21 +27,19 @@ function MapView() {
   const [position, setPosition] = useState({ lat: defaultCenter[0], lng: defaultCenter[1] });
 
   useEffect(() => {
-    const docRef = doc(db, 'ugv_location', 'KXyXiopjNGAg8LV8WoNF');
+    const q = query(
+      collection(db, "gpsData"),
+      where("robotId", "==", ROBOT_ID),
+      orderBy("timestamp", "desc"),
+      limit(1)
+    );
 
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.location) {
-          setPosition({ lat: data.location.latitude, lng: data.location.longitude });
-        }
-      } else {
-        console.warn("UGV location document not found");
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0].data();
+        setPosition({ lat: doc.latitude, lng: doc.longitude });
       }
-    }, (error) => {
-      console.error("Error fetching UGV location:", error);
     });
-    
     return () => unsubscribe();
   }, []);
 
@@ -61,7 +59,7 @@ function MapView() {
           <AutoRecenterMap lat={position.lat} lng={position.lng} />
           <Marker position={[position.lat, position.lng]} icon={ugvIcon}>
             <Popup>
-              <div style={{ textAlign: "center" }}>UGV</div>
+              <div style={{ textAlign: "center" }}><strong>{ROBOT_ID}</strong></div>
             </Popup>
           </Marker>
           </>
