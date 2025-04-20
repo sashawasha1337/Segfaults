@@ -1,10 +1,10 @@
-import React, { useState }from "react";
+import React, { useState, useEffect }from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig.js";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { Alert, Box, Button, TextField } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
 import PasswordTextField from "../components/PasswordTextField";
+import { GoogleLogin } from "../components/GoogleLogin.jsx";
 
 {/*
   The Login page allows users to enter their username and password to gain access to the web application.
@@ -25,7 +25,8 @@ function LoginPage() {
   const [errorCode, setErrorCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  let count = 0; // delete this after credential verification logic is implemented
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
 
   const handleForgotPassword = () => {
     sendPasswordResetEmail(auth, email)
@@ -45,9 +46,9 @@ function LoginPage() {
     setEmailError('');
     setPasswordError('');
     setInvalidCredentials(false);
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
       setEmailError("Please enter a valid email address");
+      return;
     }
   
     try {
@@ -170,18 +171,7 @@ function LoginPage() {
       </Button>
 
       {/* Sign in with Google button */}
-      <Button variant="contained" startIcon={<GoogleIcon />}
-        onClick={() => navigate("/")} // path to Google sign in page needs to be added
-        sx={{
-          mt: 3,
-          textTransform: "none",
-          width: "305px",
-          height: "50px",
-          fontSize: "1.0rem"
-        }}
-      >
-        Sign in with Google
-      </Button>
+      <GoogleLogin></GoogleLogin>
 
       {/* Reset Password button */}
       <Button variant="text" disableRipple
