@@ -8,7 +8,7 @@
 </h1>
 <h1 align="center">
   <br>
-  <img src="robot.jpg" alt="Segfaults Logo" >
+  <img src="robot.jpg" alt="robot picture" >
   <br>
 </h1>
 
