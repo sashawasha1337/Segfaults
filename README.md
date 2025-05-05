@@ -33,13 +33,13 @@ This project combines robotics, computer vision, and cloud technologies to creat
 - **Data Management**: Store and retrieve robot data using Firestore.
 
 ### Robot Scripts
-- **Camera Integration**: Use OpenCV and ROS to capture and process images.
-- **Object Detection**: Implement YOLO-based AI for detecting trash in the robot's environment.
+- **Camera Integration**: Integrates the onboard camera with the robot's single-board computer to enable the capturing and processing of videos.
+- **Object Detection**: Utilizes the YOLO algorithm to scan a live feed video for litter in the robot's environment.
 - **Navigation**:
-  - GPS-based movement tracking using `gpsReaderScript.cjs`.
-  - Lidar-based obstacle avoidance with `avoid_obstacles.py`.
-- **Motor Control**: Control DC motors using ROS and GPIO in `MotorNode.py`.
-- **Cloud Connectivity**: Stream data to Firebase for real-time updates.
+  - Motor scripts are used to move the robot.
+  - Autonomous obstacle avoidance is implemented through data received from a Lidar.
+- **Movement Tracking**: Utilizes a GPS module to keep track of the robot's location.
+- **Cloud Connectivity**: Live video feed data is streamed to a website for real-time updates.
 
 ---
 
