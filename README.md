@@ -4,7 +4,7 @@
 
 ![image](Logo.png)
 
-Welcome to the **Segfaults Project**, a senior project developed at Sacramento State. This repository contains the codebase for a web application and robot scripts that together power an innovative trash-finding robot. The project demonstrates the integration of robotics, real-time data processing, and a user-friendly web interface to tackle waste management challenges.
+Welcome to the **Segfaults Project**, a senior project developed at California State University, Sacramento. This repository contains the codebase for a web application and robot scripts that together power an innovative trash-finding robot. The project demonstrates the integration of robotics, real-time data processing, and a user-friendly web interface to tackle waste management challenges.
 
 ---
 
