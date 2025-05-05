@@ -4,7 +4,7 @@
 
 <h1 align="center">
   <br>
-  <a href=Logo.png alt="Markdownify" width="200"></a>
+  <a src=Logo.png alt="Markdownify" width="200"></a>
   <br>
   Markdownify
   <br>
