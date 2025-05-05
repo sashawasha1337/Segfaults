@@ -54,7 +54,11 @@ Our Project features a web app which includes user management and presents data 
   - YOLO (for Image Detection)
   - Flask (for communication with robot and app)
 ---
-## 🖥️ How to Set Up and Run
+## 🖥️ Deployment
+
+## 🖥️ Testing 
+
+## 🖥️ Developer instructions
 
 
 
