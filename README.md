@@ -135,7 +135,29 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 ---
 
-## 🗓️ Timeline
+## 📅 Timeline
+| Date | Milestone | Sprint Story ID | Estimate |
+|----------------|-------------------------------------------------------------|------------------|----------|
+| Sep 8, 2025 | Autonomous navigation initialized | SCRUM-127 | TBD |
+| Sep 8, 2025 | Display robot data on robot select page | SCRUM-62 | TBD |
+| Sep 8, 2025 | Display data on object detection events | SCRUM-63 | TBD |
+| Sep 8, 2025 | Web domain and hosting initialized | SCRUM-20 | TBD |
+| Sep 8, 2025 | WebRTC server certificates for HTTPS | SCRUM-125 | TBD |
+| Sep 22, 2025 | Object detection system improvements | SCRUM-126 | TBD |
+| Sep 22, 2025 | Display object metadata | SCRUM-21 | TBD |
+| Sep 22, 2025 | Stop on object detection | SCRUM-7 | TBD |
+| Sep 22, 2025 | REST API for configuration | SCRUM-64 | TBD |
+| Oct 6, 2025 | Trash log feature | SCRUM-46 | TBD |
+| Oct 6, 2025 | WebSockets for video/commands | SCRUM-65 | TBD |
+| Oct 6, 2025 | Specific object recognition | SCRUM-9 | TBD |
+| Oct 6, 2025 | Store user data and events | SCRUM-27 | TBD |
+| Oct 6, 2025 | Store detected object data | SCRUM-10 | TBD |
+| Oct 6, 2025 | Filter object data | SCRUM-23 | TBD |
+| Oct 20, 2025 | Configure robot settings | SCRUM-51 | TBD |
+| Oct 20, 2025 | Emergency return system (battery/signal loss) | SCRUM-68 | TBD |
+| Oct 20, 2025 | Collision detection | SCRUM-70 | TBD |
+| Nov 3, 2025 | Send commands to robot | SCRUM-53 | TBD |
+| Nov 17, 2025 | Live map feed display | SCRUM-54 | TBD |
 
 ---
 
