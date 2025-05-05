@@ -142,6 +142,11 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 ---
 
+#### Data ERD 
+![image](segfaultsERD.png)
+
+---
+
 ## 📧 Contact
 
 For inquiries or feedback, reach out to the project team at **[your-email@example.com]**.
