@@ -63,37 +63,36 @@ This project combines robotics, computer vision, and cloud technologies to creat
   - Serialport (for GPS data)
 
 ---
-
 ## 🖥️ How to Set Up and Run
 
 ### Prerequisites
-- [Git](https://git-scm.com)
-- [Node.js](https://nodejs.org/) (for the web app)
-- Python 3.8+ (for robot scripts)
-- ROS2 (Robot Operating System)
+
+#### Web App 
+- [Tailscale](https://tailscale.com/)
+- [Firebase](https://firebase.google.com/)
+
+#### Robot
+- [Flask](https://flask.palletsprojects.com/en/stable/)
+- [ROS2](https://www.ros.org/) (Robot Operating System)
 
 ### Installation
 
-#### Web Application
+#### Authentication 
+1. Setup your Tailscale VPN
+   - Add Users
+   - Add Robots with SSH enabled
+  
+2. Setup Firebase Authenetication and Database
+   - Create Firebase account
+   - Configure Cloud Firestore
+   - Configure Firestore Authentication
+    
+#### Robot Scripts
 1. Clone the repository:
    ```bash
    git clone https://github.com/sashawasha1337/Segfaults.git
-   cd Segfaults/ReactApp
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   npm start
-   ```
-
-4. Open your browser and navigate to `http://localhost:3000`.
-
-#### Robot Scripts
 1. Navigate to the `RobotScripts` folder:
    ```bash
    cd Segfaults/RobotScripts
@@ -113,6 +112,26 @@ This project combines robotics, computer vision, and cloud technologies to creat
    ```bash
    ros2 run RobotScripts avoid_obstacles.py
    ```
+
+#### Web Application
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sashawasha1337/Segfaults.git
+   cd Segfaults/ReactApp
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server with Vite:
+   ```bash
+   npm run-dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000`.
+
 
 ---
 
