@@ -8,7 +8,7 @@ Welcome to the **Trash Finding Autonomous Robot Project**, developed by the segf
 
 ---
 
-## 🚀 Project Overview
+## 🤠	 Project Overview
 
 Our Project features a web app which includes user management and presents data from and allows access to Linux microcomputer based robots. These robots take advantage of AI image processing, lidar and GPS to recognize litter or potentially other objects of interest in order to enable a scan of a large area such as many buildings in a school campus. The robots will detect objects of interest in real time and store this as an event in a firebase backend, which can be accessed from the web app. 
 
@@ -54,11 +54,11 @@ Our Project features a web app which includes user management and presents data 
   - YOLO (for Image Detection)
   - Flask (for communication with robot and app)
 ---
-## 🖥️ Deployment
+## 🚀 Deployment
 
 ## 🖥️ Testing 
 
-## 🖥️ Developer instructions
+## 👽 Developer instructions
 
 
 
