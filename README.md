@@ -82,7 +82,7 @@ This project combines robotics, computer vision, and cloud technologies to creat
    - Add Users
    - Add Robots with SSH enabled
   
-2. Setup Firebase Authenetication and Database
+2. Setup Firebase Authentication and Database
    - Create Firebase account
    - Configure Cloud Firestore
    - Configure Firestore Authentication
