@@ -116,26 +116,6 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix:
-   ```bash
-   git checkout -b feature-name
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "Add feature-name"
-   ```
-4. Push your branch:
-   ```bash
-   git push origin feature-name
-   ```
-5. Submit a pull request.
-
----
-
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute this project as you see fit.
