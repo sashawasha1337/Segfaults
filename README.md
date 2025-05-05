@@ -1,5 +1,4 @@
 
-Based on your description, I'll draft an improved README for your project. Here's a possible structure:
 
 ---
 
