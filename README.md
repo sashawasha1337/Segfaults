@@ -45,7 +45,7 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 ### Web Application
 - **Frontend**:
-  - React
+  - React + Vite
   - Leaflet (for maps)
   - Firebase Authentication
 - **Backend**:
@@ -54,14 +54,12 @@ This project combines robotics, computer vision, and cloud technologies to creat
 ### Robot Scripts
 - **Languages**:
   - Python
-  - JavaScript
 - **Libraries & Frameworks**:
   - ROS2 (Robot Operating System)
+  - WebRTC
   - OpenCV
-  - YOLO (Ultralytics)
-  - Flask (for communication)
-  - Serialport (for GPS data)
-
+  - YOLO (for Image Detection)
+  - Flask (for communication with robot and app)
 ---
 ## 🖥️ How to Set Up and Run
 
