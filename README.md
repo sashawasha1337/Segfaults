@@ -79,13 +79,13 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 #### Authentication 
 1. Setup your Tailscale VPN
-   - Add Users
-   - Add Robots with SSH enabled
+   - Add Tailscale users (dependent on your plan)
+   - Add Robots with SSH enabled, and assign them a VPN IP. 
   
 2. Setup Firebase Authentication and Database
    - Create Firebase account
-   - Configure Cloud Firestore
-   - Configure Firestore Authentication
+   - Configure Cloud Firestore to store detected trash images and logs
+   - Configure Firestore Authentication to allow webapp access. 
     
 #### Robot Scripts
 1. Clone the repository:
