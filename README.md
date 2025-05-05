@@ -1,90 +1,124 @@
+--
 
+# Segfaults - Trash Finding Robot Application
 
----
-
-# Segfaults - Trash Finding Robot Web App
-
-Welcome to **Segfaults**, a senior project developed at Sacramento State. This repository contains the codebase for a web application designed to interface with and control a trash-finding robot. The project aims to leverage robotics and web technologies to address waste management challenges in an innovative way.
+Welcome to the **Segfaults Project**, a senior project developed at Sacramento State. This repository contains the codebase for a web application and robot scripts that together power an innovative trash-finding robot. The project demonstrates the integration of robotics, real-time data processing, and a user-friendly web interface to tackle waste management challenges.
 
 ---
 
 ## 🚀 Project Overview
 
-The **Segfaults Web App** serves as the user interface for a trash-finding robot. It allows users to:
+The **Segfaults** project features:
 
-- Monitor the robot's status.
-- Control its movements.
-- Visualize detected trash locations.
-- Manage and analyze data collected by the robot.
+1. **Trash-Finding Robot**: A robot equipped with advanced sensors and AI to detect, locate, and respond to trash in its environment.
+2. **Web Application**: A responsive and intuitive interface that enables users to:
+   - Monitor the robot's real-time status and location.
+   - Control its movements remotely.
+   - Visualize trash detection on a map.
+   - Manage and analyze collected data.
 
-This project combines advanced robotics and web development to create a seamless and interactive experience for users looking to improve waste management efficiency.
+This project combines robotics, computer vision, and cloud technologies to create a solution for efficient waste management.
 
 ---
 
 ## ✨ Key Features
 
-- **Real-Time Robot Monitoring**: Track the robot's status, location, and activity in real-time.
-- **Remote Control**: Navigate the robot using an intuitive web interface.
-- **Trash Detection Visualization**: Display detected trash locations on a map.
-- **Data Management**: Store and analyze data collected by the robot for future insights.
-- **Responsive Design**: A user-friendly interface that works across various devices.
+### Web App
+- **Real-Time Monitoring**: Track the robot's status, location, and trash detection events.
+- **Remote Control**: Navigate the robot via an intuitive React-based interface.
+- **Trash Visualization**: Display detected trash locations using Leaflet map integration.
+- **User Authentication**: Secure access through Firebase authentication.
+- **Data Management**: Store and retrieve robot data using Firestore.
+
+### Robot Scripts
+- **Camera Integration**: Use OpenCV and ROS to capture and process images.
+- **Object Detection**: Implement YOLO-based AI for detecting trash in the robot's environment.
+- **Navigation**:
+  - GPS-based movement tracking using `gpsReaderScript.cjs`.
+  - Lidar-based obstacle avoidance with `avoid_obstacles.py`.
+- **Motor Control**: Control DC motors using ROS and GPIO in `MotorNode.py`.
+- **Cloud Connectivity**: Stream data to Firebase for real-time updates.
 
 ---
 
 ## 🛠️ Technologies Used
 
-This project is built using the following technologies:
-
+### Web Application
 - **Frontend**:
-  - JavaScript
-  - CSS
-  - HTML
+  - React
+  - Leaflet (for maps)
+  - Firebase Authentication
 - **Backend**:
+  - Firebase Firestore (for data storage)
+
+### Robot Scripts
+- **Languages**:
   - Python
-- **Frameworks & Libraries**:
-  - (Include any specific frameworks like React, Flask, etc., if applicable.)
-- **Other Tools**:
-  - (Mention any additional tools or third-party services used.)
+  - JavaScript
+- **Libraries & Frameworks**:
+  - ROS2 (Robot Operating System)
+  - OpenCV
+  - YOLO (Ultralytics)
+  - Flask (for communication)
+  - Serialport (for GPS data)
 
 ---
 
 ## 🖥️ How to Set Up and Run
 
 ### Prerequisites
-
 - [Git](https://git-scm.com)
-- [Node.js](https://nodejs.org/) (for frontend dependencies)
-- Python (for backend functionality)
+- [Node.js](https://nodejs.org/) (for the web app)
+- Python 3.8+ (for robot scripts)
+- ROS2 (Robot Operating System)
 
 ### Installation
 
-1. Clone this repository:
+#### Web Application
+1. Clone the repository:
    ```bash
    git clone https://github.com/sashawasha1337/Segfaults.git
-   cd Segfaults
+   cd Segfaults/ReactApp
    ```
 
-2. Install frontend dependencies:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Set up the backend:
-   - (Add specific backend setup instructions here if necessary.)
-
-4. Run the application:
+3. Run the development server:
    ```bash
    npm start
    ```
 
-5. Open your browser and navigate to `http://localhost:3000` to access the app.
+4. Open your browser and navigate to `http://localhost:3000`.
+
+#### Robot Scripts
+1. Navigate to the `RobotScripts` folder:
+   ```bash
+   cd Segfaults/RobotScripts
+   ```
+
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. For ROS2 nodes, source the ROS2 environment:
+   ```bash
+   source /opt/ros/foxy/setup.bash
+   ```
+
+4. Run individual scripts as needed, e.g., for the LiDAR node:
+   ```bash
+   ros2 run RobotScripts avoid_obstacles.py
+   ```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you'd like to contribute, please follow these steps:
-
+We welcome contributions! Here's how you can help:
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix:
    ```bash
@@ -110,8 +144,8 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use, mod
 
 ## 📧 Contact
 
-For any inquiries or feedback, please reach out to the project team at **[your-email@example.com]**.
+For inquiries or feedback, reach out to the project team at **[your-email@example.com]**.
 
 ---
 
-Would you like to add any specific acknowledgments, links, or additional sections? Let me know if you want to enhance this further!
+Would you like any additional sections (e.g., acknowledgments, troubleshooting tips)? Let me know if you'd like further refinements!
