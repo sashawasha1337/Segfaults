@@ -1,10 +1,10 @@
 
 # Segfaults - Trash Finding Robot Application
 
-
+![logoimage](Logo.png)
 <h1 align="center">
   <br>
-  <a src=Logo.png alt="Markdownify" width="200"></a>
+  <a src="Logo.png" alt="Markdownify" width="200"></a>
   <br>
   Markdownify
   <br>
