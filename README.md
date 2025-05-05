@@ -4,22 +4,13 @@
 
 ![image](Logo.png)
 
-Welcome to the **Segfaults Project**, a senior project developed at California State University, Sacramento. This repository contains the codebase for a web application and robot scripts that together power an innovative trash-finding robot. The project demonstrates the integration of robotics, real-time data processing, and a user-friendly web interface to tackle waste management challenges.
+Welcome to the **Trash Finding Autonomous Robot Project**, developed by the segfaults senior project team at sac state. This repository contains the codebase for a web application and robot scripts that together can manage a fleet of trash-finding robots. 
 
 ---
 
 ## 🚀 Project Overview
 
-The **Segfaults** project features:
-
-1. **Trash-Finding Robot**: A robot equipped with advanced sensors and AI to detect, locate, and respond to trash in its environment.
-2. **Web Application**: A responsive and intuitive interface that enables users to:
-   - Monitor the robot's real-time status and location.
-   - Control its movements remotely.
-   - Visualize trash detection on a map.
-   - Manage and analyze collected data.
-
-This project combines robotics, computer vision, and cloud technologies to create a solution for efficient waste management.
+Our Project features a web app which includes user management and presents data from and allows access to Linux microcomputer based robots. These robots take advantage of AI image processing, lidar and GPS to recognize litter or potentially other objects of interest in order to enable a scan of a large area such as many buildings in a school campus. The robots will detect objects of interest in real time and store this as an event in a firebase backend, which can be accessed from the web app. 
 
 ---
 
