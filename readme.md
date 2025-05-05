@@ -1,10 +1,9 @@
 
 # Segfaults - Trash Finding Robot Application
 
-
 <h1 align="center">
   <br>
-  <a src="Logo.png" alt="Markdownify" width="200"></a>
+  <img src="image-url" alt="Alt Text" width="300" height="200">
   <br>
   Markdownify
   <br>
