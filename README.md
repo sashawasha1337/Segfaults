@@ -149,7 +149,7 @@ This project combines robotics, computer vision, and cloud technologies to creat
 
 ## 📧 Contact
 
-For inquiries or feedback, reach out to the project team at **[your-email@example.com]**.
+For inquiries or feedback, reach out to the project team at **[sashayasinericsaaed@csus.edu]**.
 
 ---
 
