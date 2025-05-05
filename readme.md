@@ -1,4 +1,8 @@
-
+<h1 align="center">
+  <br>
+  <img src="Logo.png" alt="Segfaults Logo" >
+  <br>
+</h1>
 # Segfaults - Trash Finding Robot Application
 
 ![logoImage](Logo.png)
