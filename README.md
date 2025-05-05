@@ -143,7 +143,7 @@ This project combines robotics, computer vision, and cloud technologies to creat
 ---
 
 #### Data ERD 
-![image](segfaultsERD.png)
+![image](SegfaultsERD.png)
 
 ---
 
