@@ -1,13 +1,7 @@
 
 # Segfaults - Trash Finding Robot Application
 
-<h1 align="center">
-  <br>
-  <img src="image-url" alt="Alt Text" width="300" height="200">
-  <br>
-  Markdownify
-  <br>
-</h1>
+![logoImage](Logo.png)
 ![robotimage](robot.jpg)
 
 Welcome to the **Trash Finding Autonomous Robot Project**, developed by the segfaults senior project team at sac state. This repository contains the codebase for a web application and robot scripts that together can manage a fleet of trash-finding robots. 
