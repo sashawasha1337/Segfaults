@@ -109,14 +109,13 @@ const ControlPage = () => {
           </Button>
         </Grid>
 
-        <Grid container spacing={2} justifyContent="space-between" alignItems="center">
-          <Grid item xs={6}>
+        <Grid container spacing={12} justifyContent="center" alignItems="center">
+          <Grid item>
             <Button onClick={() => adjustRobotDirection("left")}
               variant="contained"
               style={{
                 display: "flex",
-                justifyContent:"center",
-                alignItems: "center"
+
               }}
             >
               <ArrowBack style={{ fontSize: 50 }} />
@@ -128,8 +127,7 @@ const ControlPage = () => {
               variant="contained"
               style={{
                 display: "flex",
-                justifyContent:"center",
-                alignItems: "center"
+
               }}
             >
               <ArrowForward style={{ fontSize: 50 }} />
