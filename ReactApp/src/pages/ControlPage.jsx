@@ -69,19 +69,30 @@ const ControlPage = () => {
         <Typography variant="h3" style={{textAlign: "center"}}>Robot Control</Typography>
       </div>
       
-      <Card style={{ width: "100%", margin: "20px", border: "1px solid black" }}>``
-        <video
-          ref ={videoRef}
-          autoPlay
-          playsInline
-          style={{
-            width: "100%",
-            height: "auto",
-            borderRadius: "10px",
-            border: "1px solid black"
-          }}
-        />
-        
+      <Card 
+        style={{
+          width: "600px", 
+          height: "400px",
+          margin: "20px",
+          border: "1px solid black",
+          borderRadius: "10px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          overflow: "hidden",
+        }}>
+        { robotIP && videoRef.current ? (
+          <video
+            ref ={videoRef}
+            autoPlay
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover"
+            }}
+          />
+          ) : (
+            <Typography variant="h5" style={{textAlign: "center"}}>No Live Feed Detected...</Typography>
+          )}
       </Card>
 
       <Grid container direction="column" justifyContent="space-between" alignItems="center" >
