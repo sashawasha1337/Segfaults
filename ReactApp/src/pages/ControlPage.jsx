@@ -4,7 +4,7 @@ import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-
 import BackButton from "../components/BackButton";
 import SettingsButton from '../components/SettingsButton';
 import { db } from "../firebaseConfig"; // Import Firestore
-import { collection, query, getDocs, where } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore"; // Import Firestore methods
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 import { useRobotConnection }  from "../hooks/useRobotConnection"; // Import custom hook for WebRTC connection
 
@@ -18,21 +18,19 @@ const ControlPage = () => {
  
   // Function to fetch the robot's IP address from Firestore using its ID
   const fetchRobotIP = async () => {
-      try {
-          const robotsRef = collection(db, "robots");
-          const q = query(robotsRef, where("id", "==", robotID));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-              const robotData = querySnapshot.docs[0].data();
-              setRobotIP(robotData.ipAddress); // Set the robot's IP address in state
-          } else {
-              console.warn("No robot found with the given ID.");
-          }
-      }
-      catch (error) {
-          console.error("Error fetching robot IP address:", error);
-      }
-  };
+  try {
+    const robotDocRef = doc(db, "robots", robotID); // Reference the document directly
+    const robotDoc = await getDoc(robotDocRef); // Fetch the document
+    if (robotDoc.exists()) {
+      const robotData = robotDoc.data();
+      setRobotIP(robotData.ipAddress); // Set the robot's IP address in state
+    } else {
+      console.warn("No robot found with the given ID.");
+    }
+  } catch (error) {
+    console.error("Error fetching robot IP address:", error);
+  }
+};
 
 
   useEffect(() => {
@@ -104,16 +102,24 @@ const ControlPage = () => {
           <Grid item xs={6}>
             <Button onClick={() => adjustRobotDirection("left")}
               variant="contained"
-              style={{display: "flex"}}
+              style={{
+                display: "flex",
+                justifyContent:"center",
+                alignItems: "center"
+              }}
             >
               <ArrowBack style={{ fontSize: 50 }} />
             </Button>
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item>
             <Button onClick={() => adjustRobotDirection("right")}
               variant="contained"
-              style={{display: "flex"}}
+              style={{
+                display: "flex",
+                justifyContent:"center",
+                alignItems: "center"
+              }}
             >
               <ArrowForward style={{ fontSize: 50 }} />
             </Button>
