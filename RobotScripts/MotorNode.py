@@ -48,7 +48,7 @@ class MotorControlNode(Node):
 
                 # Compute motor speeds as the sum of drive and differential steering
                 left_speed = accelerator - steering
-                right_speed = linear_velocity + steering
+                right_speed = accelerator + steering
 
                 # Clamp speeds to the range [-1.0, 1.0] for safety.
                 left_speed = max(min(left_speed, 1.0), -1.0)
@@ -86,7 +86,7 @@ class MotorControlNode(Node):
 
                 # Set the motor directions
                 lgpio.gpio_write(self.chip, LEFT_DIR, left_direction)
-                lgpio.gpio_write(self.chip, RIGHT_DIR, left_direction)
+                lgpio.gpio_write(self.chip, RIGHT_DIR, right_direction)
 
                 # Set the PWM duty cycle
                 lgpio.tx_pwm(self.chip, LEFT_PWM, PWM_FREQ, left_duty)
