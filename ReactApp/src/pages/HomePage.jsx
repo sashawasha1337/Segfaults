@@ -61,8 +61,12 @@ function HomePage() {
         Activity Log
       </Button>
 
-
-      {robots.map((robot, index) => (
+      {robots.length === 0 ? (
+      <p style={{ marginTop: "150px", textAlign: "center" }}>
+        No robots found. Click the + button to add one!
+        </p>
+      ) : (
+      robots.map((robot, index) => (
         <RobotCard
           key={robot.id}
           imgSrc="https://images.squarespace-cdn.com/content/v1/5a3c1a29f9a61e2987882112/bee5c58a-5b2c-4302-bb18-433dd7bd5f2c/ROSmaster.jpeg"
@@ -71,10 +75,11 @@ function HomePage() {
           description={`IP: ${robot.ipAddress}`}
           buttonText="FPV/Control"
           link={`/ControlPage/${robot.id}`}
-        />  
-        ))}
-    </div>
-  );
+        />
+      ))
+    )}
+  </div>
+);
 };
 
 export default HomePage;
