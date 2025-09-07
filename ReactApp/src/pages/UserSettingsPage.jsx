@@ -25,8 +25,10 @@ const UserSettingsPage = () => {
          return <div>no current user</div>;
     }  
 
-    const username = currentUser.email;
-
+    const email = currentUser?.email || "";
+    const username = email.split("@")[0].split(".")[0]; 
+    const prettyName = username.charAt(0).toUpperCase() + username.slice(1);
+    const displayName = `${prettyName}'s settings`;
    
 
     const handleClickLogout = () => {
@@ -71,7 +73,7 @@ return(
         noValidate
         autoComplete="off"
     >
-    <h1>{username} Settings</h1>
+    <h1>{displayName}</h1>
 
     {/* Password update text fields */}
     <TextField

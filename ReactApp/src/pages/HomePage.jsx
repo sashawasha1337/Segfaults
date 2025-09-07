@@ -41,7 +41,7 @@ function HomePage() {
 
   return (
     <div className = "homepage">
-      <SettingsButton path="/" /> {/* path to user settings page needs to be added */}
+      <SettingsButton path="/UserSettingsPage" /> 
       <AddButton path="/AddRobotPage" />
       
       <Button variant="contained"
@@ -62,7 +62,7 @@ function HomePage() {
       </Button>
 
       {robots.length === 0 ? (
-      <p style={{ marginTop: "150px", textAlign: "center" }}>
+      <p style={{ marginTop: "200px", textAlign: "center" }}>
         No robots found. Click the + button to add one!
         </p>
       ) : (
