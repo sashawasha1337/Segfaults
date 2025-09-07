@@ -1,0 +1,7 @@
+aiortc~=1.8
+av~=12.3
+Flask~=3.0
+Flask-SocketIO~=5.3
+python-socketio~=5.11
+eventlet~=0.36
+opencv-python~=4.10
