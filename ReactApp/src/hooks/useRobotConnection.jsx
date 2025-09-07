@@ -9,7 +9,6 @@ export function useRobotConnection(robotIP, videoRef) {
   const [error, setError] = useState(null);
   const peerRef = useRef(null);
   const socketRef = useRef(null);
-  const dataChannelRef = useRef(null);
 
   // Initialize connection
   useEffect(() => {
@@ -21,74 +20,82 @@ export function useRobotConnection(robotIP, videoRef) {
     setConnectionStatus('connecting');
     
     // Connect to signaling server
-    console.log(`Connecting to: http://${robotIP}:5000`);
-    const socket = io(`http://${robotIP}:5000`, {
-      reconnectionAttempts: 3, // Retry connection 3 times
-      timeout: 5000, // Timeout after 5 seconds
+    console.log(`Connecting to: http://${robotIP}`);
+    const socket = io(`http://${robotIP}`, {
+      reconnectionAttempts: 3,
+      timeout: 5000,
+      transports: ['websocket', 'polling'],
     });
     socketRef.current = socket;
 
     socket.on('connect', () => {
       setConnectionStatus('signaling');
+      console.log('Connected to robot signaling server');
+    });
+    
+    // Handle incoming offer from robot
+    socket.on('offer', (offerData) => {
+      console.log('Received WebRTC offer from robot');
+      setConnectionStatus('processing offer');
       
-      // Create peer connection
       try {
+        // Create peer connection as answerer (not initiator)
         const peer = new Peer({ 
-          initiator: true,
+          initiator: false,  // Client is now the answerer
           trickle: false
         });
         peerRef.current = peer;
+        
+        // Handle WebRTC signaling - send answer back to robot
+        peer.on('signal', data => {
+          console.log('Sending answer to robot');
+          socket.emit('answer', JSON.stringify(data));
+        });
+        
+        peer.on('stream', stream => {
+          setConnectionStatus('streaming');
+          if (videoRef && videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(err => {
+              console.error('Error playing video stream:', err);
+            });
+          }
+          setIsConnected(true);
+        });
+        
+        peer.on('data', data => {
+          console.log('Received data from robot:', data.toString());
+        });
+        
+        peer.on('connect', () => {
+          console.log("WebRTC peer connection established");
+          setConnectionStatus('connected');
+          setIsConnected(true);
+          setError(null);
+        });
+        
+        peer.on('close', () => {
+          console.warn("WebRTC peer connection closed");
+          setConnectionStatus('disconnected');
+          setIsConnected(false);
+        });
+
+        peer.on('error', err => {
+          console.error('Peer error:', err);
+          setError('Connection error');
+          setConnectionStatus('connection failed');
+          setIsConnected(false);
+        });
+        
+        // Signal the offer to start the connection
+        peer.signal(JSON.parse(offerData));
+        
       } catch (err) {
         console.error('Error creating Peer:', err);
         setError('Failed to create WebRTC peer connection');
         setConnectionStatus('connection failed');
         return;
-    }
-      
-      // Handle WebRTC signaling
-      peer.on('signal', data => {
-        socket.emit('offer', JSON.stringify(data));
-      });
-      
-      peer.on('stream', stream => {
-        setConnectionStatus('streaming');
-        if (videoRef && videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setIsConnected(true);
-      });
-      
-      peer.on('data', data => {
-        console.log('Received data:', data.toString());
-      });
-      
-      peer.on('connect', () => {
-        setConnectionStatus('connected');
-        setIsConnected(true);
-        setError(null);
-
-        const dataChannel = peer.createDataChannel('commands');
-        dataChannelRef.current = dataChannel;
-      });
-      
-      // ✅ ADD THIS: handle WebRTC disconnect
-      peer.on('close', () => {
-        console.warn("WebRTC peer connection closed");
-        setConnectionStatus('disconnected');
-        setIsConnected(false);
-      });
-
-
-      peer.on('error', err => {
-        console.error('Peer error:', err);
-        setError('Connection error');
-        setIsConnected(false);
-      });
-      
-      // Handle answer from robot
-      socket.on('answer', data => {
-        peer.signal(JSON.parse(data));
-      });
+      }
     });
     
     socket.on('disconnect', () => {
@@ -97,6 +104,7 @@ export function useRobotConnection(robotIP, videoRef) {
     });
     
     socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err);
       setError('Failed to connect to robot');
       setConnectionStatus('connection failed');
     });
@@ -116,17 +124,21 @@ export function useRobotConnection(robotIP, videoRef) {
   const sendCommand = async (command) => {
     if (!robotIP) {
       setError('No robot connection available');
-      return;
+      return false;
     }
     
     try {
       // Try to send via WebRTC data channel if available
-      if (dataChannelRef.current && isConnected) {
-        dataChannelRef.current.send(command);
+      if (peerRef.current && isConnected) {
+        console.log("Sending command via WebRTC:", command);
+        peerRef.current.send(command);
         return true;
+      } else {
+        console.warn('WebRTC not connected, cannot send command');
+        return false;
       }
-      return false;
     } catch (error) {
+      console.error('Error sending command:', error);
       setError('Failed to send command');
       return false;
     }

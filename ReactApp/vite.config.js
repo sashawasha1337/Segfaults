@@ -13,6 +13,6 @@ export default defineConfig({
   server: {
     host: true,    // bind on 0.0.0.0 so LAN IP works
     port: 3000,
-    https: true    // plugin will hook this up
+    https: false    // plugin will hook this up
   }
 })
