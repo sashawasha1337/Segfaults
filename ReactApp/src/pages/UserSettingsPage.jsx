@@ -60,7 +60,7 @@ const handleUpdatePassword= () => {
 };
 
 return(
- 
+    
     <Box // component container
         component="form"
         sx={{ 
@@ -73,6 +73,7 @@ return(
         noValidate
         autoComplete="off"
     >
+    <BackButton path="/HomePage" />
     <h1>{displayName}</h1>
 
     {/* Password update text fields */}
@@ -98,7 +99,7 @@ return(
         required
         onChange={(e) => setRepeatPassword(e.target.value)}
     />
-
+    
     <Button onClick={handleUpdatePassword} variant="contained" sx={{ mt: 2 }}>
         Update Password
     </Button>
