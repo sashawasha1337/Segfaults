@@ -18,19 +18,19 @@ const ControlPage = () => {
  
   // Function to fetch the robot's IP address from Firestore using its ID
   const fetchRobotIP = async () => {
-  try {
-    const robotDocRef = doc(db, "robots", robotID); // Reference the document directly
-    const robotDoc = await getDoc(robotDocRef); // Fetch the document
-    if (robotDoc.exists()) {
-      const robotData = robotDoc.data();
-      setRobotIP(robotData.ipAddress); // Set the robot's IP address in state
-    } else {
-      console.warn("No robot found with the given ID.");
+    try {
+      const robotDocRef = doc(db, "robots", robotID); // Reference the document directly
+      const robotDoc = await getDoc(robotDocRef); // Fetch the document
+      if (robotDoc.exists()) {
+        const robotData = robotDoc.data();
+        setRobotIP(robotData.ipAddress); // Set the robot's IP address in state
+      } else {
+        console.warn("No robot found with the given ID.");
+      }
+    } catch (error) {
+      console.error("Error fetching robot IP address:", error);
     }
-  } catch (error) {
-    console.error("Error fetching robot IP address:", error);
-  }
-};
+  };
 
 
   useEffect(() => {
@@ -43,13 +43,17 @@ const ControlPage = () => {
   const adjustRobotDirection = async (command) => {
       const sent = await sendCommand(command); // Send the command to the robot
       if (!sent) {
-          console.error("Failed to send command:", command);
+          console.error("Failed to send movement command:", command);
+          console.error("Error details:", error);
+          console.error("Connection Details:", { isConnected, connectionStatus });
+
+          
       }
   };
 
-  useEffect(() => {
-      setConnection({ isConnected, connectionStatus, error }); // Update the connection state
-  }, [isConnected, connectionStatus, error]);
+  //useEffect(() => {
+  //    setConnection({ isConnected, connectionStatus, error }); // Update the connection state
+  //}, [isConnected, connectionStatus, error]);
 
 
   // JSX code for the page
@@ -79,9 +83,10 @@ const ControlPage = () => {
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           overflow: "hidden",
         }}>
-        { robotIP && videoRef.current ? (
+        { robotIP ? (
           <video
             ref ={videoRef}
+            muted
             autoPlay
             playsInline
             style={{
