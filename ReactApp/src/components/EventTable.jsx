@@ -10,15 +10,16 @@ const EventTable = ({events}) => {
   }
 
   return (
+    //TODO: this needs to look nicer, probably with MUI components
     <table>
       <thead>
         <tr>
           <th>Event ID</th>
           <th>Robot ID</th>
-          <th>Object Category</th>
-          <th>Event Location</th>
-          <th>Event Time</th>
-          <th>Event Details</th>
+          <th>Category</th>
+          <th>Location</th>
+          <th>Time</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody>
