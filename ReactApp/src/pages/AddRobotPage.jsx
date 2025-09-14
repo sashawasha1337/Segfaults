@@ -6,10 +6,12 @@ import BackButton from "../components/BackButton";
 
 import {collection, addDoc, getDocs} from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import {useAuth} from "../ContextForAuth.jsx";
 
 
 function AddRobotPage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();      
   const [robotName, setRobotName] = useState("");
   const [robotIp, setRobotIp] = useState("");
 

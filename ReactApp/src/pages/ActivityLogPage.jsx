@@ -1,30 +1,126 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Box } from "@mui/material";
+import { 
+  Box,
+  Container,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import BackButton from "../components/BackButton";
 import EventTable from "../components/EventTable";
-
+import { db } from "../firebaseConfig";
+import { useAuth } from "../ContextForAuth";
+import{
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs
+} from "firebase/firestore"
 
 function ActivityLogPage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  console.log("Current user object:", currentUser);
+  const [events, setEvents] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [err, setErr] = React.useState("");
 
-  const events =[
-    { eventId: 1, robotId: "RBT-01", category: "Litter", location: "Location 1", time: "2023-10-01 10:00"},
-    { eventId: 2, robotId: "RBT-02", category: "Litter", location: "Location 2", time: "2023-10-02 11:00"},
-    { eventId: 3, robotId: "RBT-03", category: "Litter", location: "Location 3", time: "2023-10-03 12:00"},
-    { eventId: 4, robotId: "RBT-04", category: "Litter", location: "Location 4", time: "2023-10-04 13:00" },
-    { eventId: 5, robotId: "RBT-05", category: "Litter", location: "Location 5", time: "2023-10-05 14:00" },
-  ]
+React.useEffect(() => {
+    const fetchEvents = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const q = query(
+          collection(db, "events"),
+          where("users", "array-contains", currentUser.uid),
+          orderBy("time", "desc"),
+          limit(200)
+        );
+        const snap = await getDocs(q);
 
-  return (
-    <>
-      <BackButton path="/HomePage" />
+        const rows = snap.docs.map((d) => {
+          const data = d.data();
+          const t = 
+            data.time?.toDate?.() instanceof Date
+              ? data.time.toDate()
+              :typeof data.time === "string"
+              ? new Date(data.time)
+              : null;
+          const formatted = 
+            t && !isNaN(t)
+              ? t.toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                }).replace(",", "")
+              : "";
+          return  {
+            eventId: d.id,
+            robotId: data.robotId ?? "Unknown",
+            category: data.category ?? "Unknown",
+            location: data.location ?? "Unknown",
+            time: formatted,
+          };
+        });
 
-      <Box sx={{marginTop: '100px', padding: '10px'}}>
-        <h1>Activity Log</h1>
-        <EventTable events={events} />
-      </Box>
+        setEvents(rows);
+              } catch (e) {
+        console.error("Error fetching events:", e);
+        setErr(e?.message || "Failed to load activity log.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [currentUser]);
+
+  return ( //TODO: make this look nicer with MUI components probably
+    <>  
+      <Container maxWidth="lg" sx={{ pt: 10, pb: 6 }}>
+        <BackButton path="/HomePage" />
+        <Stack spacing={3} alignItems="center">
+          <Typography variant="h3" fontWeight={800} textAlign="center">
+            Activity Log
+          </Typography>
+
+          <Paper
+            elevation={2}
+            sx={{
+              width: "100%",
+              px: 3,       // horizontal padding
+              py: 2,       // vertical padding
+              borderRadius: 3
+            }}
+          >
+            {loading ? (
+              <Typography variant="body1">Loading…</Typography>
+            ) : err ? (
+              <Typography sx={{ color: "crimson", whiteSpace: "pre-wrap" }}>
+                {err}
+              </Typography>
+            ) : events.length === 0 ? (
+              <Typography>No activity found.</Typography>
+            ) : (
+              <EventTable
+                events={events}
+                sx={{
+                  "& th, & td": { py: 1.5, px: 2 }, // extra cell padding
+                }}
+              />
+            )}
+          </Paper>
+        </Stack>
+      </Container>
     </>
   );
 }
