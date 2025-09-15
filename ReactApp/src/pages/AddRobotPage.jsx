@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { Box, Button, Grid2, Switch, TextField } from "@mui/material";
 import BackButton from "../components/BackButton";
 
-import {collection, addDoc, getDocs} from "firebase/firestore";
+import {collection, addDoc, getDocs, doc, updateDoc, arrayUnion, setDoc} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import {useAuth} from "../ContextForAuth.jsx";
+import { Merge } from "@mui/icons-material";
 
 
 function AddRobotPage() {
@@ -14,8 +15,39 @@ function AddRobotPage() {
   const { currentUser } = useAuth();      
   const [robotName, setRobotName] = useState("");
   const [robotIp, setRobotIp] = useState("");
+  const [email, setEmail] = useState("");
+  const [admin, setAdmin] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailList, setEmailList] = useState([]);
 
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+
+  // Tests the entered email
+  function handleAddEmail(){
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+    if (emailList.some(e => e.toLowerCase() === email.toLowerCase())) {
+      setEmailError("Already Added");
+      setEmail("");
+      return;
+    }
+    setEmailError("");
+    setEmailList([...emailList, email.toLowerCase()]);
+    setEmail("");
+  }
+
+  // Ability to remove a email
+  function removeEmail(value){
+    setEmailList(emailList.filter(e => e.toLowerCase() !== value.toLowerCase()));
+  }
+
+
+  // Handles adding robot to users profiles and robots collection
   const handleAddRobot = async () => {
+    
     try{
       const robotsRef = collection(db, "robots");
       const snapshot = await getDocs(robotsRef);
@@ -28,14 +60,36 @@ function AddRobotPage() {
           maxId = robotId;
         }
       });
-      await addDoc(robotsRef, {
+
+      // If current user not added to users list add them
+      if (!emailList.some(e => e.toLowerCase() === currentUser.email.toLowerCase())) {
+        emailList.unshift(currentUser.email.toLowerCase());
+      }
+
+      // Creates doc to add to robots collection with current user as admin
+      const docRef = await addDoc(robotsRef, {
         ipAddress: robotIp,
         location: "dock",
         name: robotName,
         robotID: (maxId + 1).toString(),
         status: "idle",
-        users: "exampleUser",
+        users: emailList,
+        admin: currentUser.email,
       });
+      
+      // Adds the robot uuid to profiles robots list 
+      for( const e of emailList) {
+        const profileDocRef = doc(db, "profiles", e);
+        
+        await setDoc(
+          doc(db, "profiles", e), 
+          {
+            robots: arrayUnion(docRef.id)
+          }, 
+          {merge: true}
+        );
+      }
+
       navigate("/HomePage");
     }catch(error){
       console.error("Error adding robot: ", error);
@@ -79,6 +133,36 @@ function AddRobotPage() {
           value={robotIp}
           onChange={(e) => setRobotIp(e.target.value)}
         />
+
+        <div>
+          <TextField
+            error={emailError}
+            label="Share to"
+            placeholder="Email"
+            variant="standard"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            helperText={emailError}
+          />
+          <Button variant="contained"
+          onClick = {handleAddEmail}
+          sx={{
+            mt: 6, 
+            backgroundColor: "blue",
+          }}
+            >
+            Add Email
+          </Button>
+        </div>
+        <div>
+          {emailList.map((emailPart => (
+            <div key={emailPart}>
+              {emailPart}
+              <Button onClick={ () => removeEmail(emailPart)}>Remove</Button>
+            </div>
+          )))}
+        </div>
+
 
         
         <Box //box and grid for switches

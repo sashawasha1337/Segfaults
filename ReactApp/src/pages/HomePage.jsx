@@ -7,7 +7,7 @@ import {RobotCard} from "../components/RobotCard";
 import AddButton from '../components/AddButton';
 import SettingsButton from '../components/SettingsButton';
 import {db} from "../firebaseConfig";
-import {query,where, collection, getDocs} from "firebase/firestore";
+import {query,where, collection, getDocs, doc, getDoc} from "firebase/firestore";
 import { useAuth } from "../ContextForAuth.jsx"; 
 
 
@@ -23,14 +23,33 @@ function HomePage() {
           console.error("No current user found.");
           return;
         }
-        const robotsRef = collection(db, "robots");
+
+        // getting the user profiles
+        const profilesRef = doc(db, "profiles", currentUser.email);
+        const profileSnap = await getDoc(profilesRef);
+
         console.log("Current user ID:", currentUser.uid); // Log the current user ID
-        const robotsSnapshot = await getDocs(query(robotsRef,where("users","array-contains",currentUser.uid)));
-        const robotData = robotsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setRobots(robotData);
+
+        const robotsData = [];
+        if(profileSnap.exists()){
+
+          //getting the list of robots that the user has access to
+          const profileData = profileSnap.data();
+          const robotIds = profileData.robots || [];
+
+          //getting the robots information from the uuid 
+          for (const ids of robotIds){
+            const robotsRef = doc(db, "robots", ids);
+            const robotSnap = await getDoc(robotsRef);
+            if(robotSnap.exists()){
+              robotsData.push({id: robotSnap.id, ...robotSnap.data()});
+            }
+          }
+
+
+        }
+        //setting the data of the robots for displaying
+        setRobots(robotsData);
       }catch (error) {
         console.error("Error fetching robots:", error);
       }
