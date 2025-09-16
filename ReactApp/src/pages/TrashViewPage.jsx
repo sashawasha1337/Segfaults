@@ -6,7 +6,7 @@ import DisplayCard from "../components/DisplayCard";
 import BackButton from "../components/BackButton";
 
 import { db } from "../firebaseConfig"; // Import Firestore
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
 
 
 function TrashViewPage() {
@@ -50,10 +50,42 @@ function TrashViewPage() {
         const q = query(imagesRef, orderBy("timestamp", "desc"), limit(1));
         const querySnapshot = await getDocs(q);
 
+        const metadataRef = collection(db, "trash_data");
+        const q2 = query(metadataRef, orderBy("Timestamp", "desc"), limit(1));
+        const querySnapshot2 = await getDocs(q2);
+
+        const gpsRef = collection(db, "gps_data");
+        const gpsQ = query(gpsRef, where("robotId", "==", "ugv1"), orderBy("timestamp", "desc"), limit(1));
+        const gpsSnapshot = await getDocs(gpsQ);
+
         if (!querySnapshot.empty) {
           setImageUrl(querySnapshot.docs[0].data().url);
         } else {
           console.warn("No images found in Firestore.");
+        }
+
+        let coordinatesTxt = "";
+        let timestampTxt = "";
+        if (!gpsSnapshot.empty && !querySnapshot2.empty) {
+          const d = gpsSnapshot.docs[0].data();
+          const data = querySnapshot2.docs[0].data();
+          const lat = d.latitude;
+          const lng = d.longitude;
+          if (lat != null && lng != null) {
+            coordinatesTxt = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          }
+          timestampTxt = d.timestamp.toDate().toLocaleString();
+
+          setMetadata({
+            Confidence: data.Confidence,
+            Category: data.Category,
+            Location: data.Location,
+            Coordinates: coordinatesTxt,
+            Timestamp: timestampTxt,
+            Robot_ID: data.Robot_ID
+        });
+        }else{
+          console.warn("No metadata found in Firestore.");
         }
       } catch (error) {
         console.error("Error fetching image:", error);
@@ -64,6 +96,7 @@ function TrashViewPage() {
     fetchImage();
   }, []);
 
+/*
   //fetch metadata from database
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -97,6 +130,7 @@ function TrashViewPage() {
     }
     fetchMetadata();
   }, []);
+*/
 
   return (
     <Box
