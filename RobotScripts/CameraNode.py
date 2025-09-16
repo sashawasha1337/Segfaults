@@ -14,7 +14,9 @@ class CameraPublisher(Node):
         self.declare_parameter("camera_index", 0)
         self.declare_parameter("width",        640)
         self.declare_parameter("height",       480)
-        self.declare_parameter("fps",          30.0)
+        self.declare_parameter("fps",          15.0)
+        self.declare_parameter('camera_backend', 'auto')  # 'auto' | 'gstreamer' | 'v4l2'
+
 
 
         idx    = self.get_parameter("camera_index").value
