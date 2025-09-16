@@ -1,5 +1,5 @@
 ##each robot will need json credentials,
-##the json file should be in the same directory as this scriptok 
+##the json file should be in the same directory as firebase publishing script
 
 
 from platform import node
@@ -11,6 +11,34 @@ from cv_bridge import CvBridge
 from message_filters import Subscriber, ApproximateTimeSynchronizer
 import json
 from std_msgs.msg import String
+
+def ros_time_to_seconds(ros_time):
+    return ros_time.sec + ros_time.nanosec * 1e-9
+
+def detection_to_dict(detection):
+    
+    result = {
+        "center": {
+            "x": detection.bbox.center.x,
+            "y": detection.bbox.center.y
+        },
+        "size": {
+            "x": detection.bbox.size.x,
+            "y": detection.bbox.size.y
+        },
+        "results": []
+    }
+    for res in detection.results:
+        result["results"].append({
+            "id": res.id,
+            "score": res.score,
+            "hypothesis": {
+                "class_id": res.hypothesis.class_id,
+                "class_name": res.hypothesis.class_name
+            }
+        })
+    return result
+
 
 class EventCompilerNode(Node):
     def __init__(self):
@@ -32,10 +60,10 @@ class EventCompilerNode(Node):
         # Convert ROS Image msg to OpenCV image
         frame = self.bridge.imgmsg_to_cv2(image_msg, desired_encoding="bgr8")
 
-        # Here you can process the frame and detection data as needed
+        # Here you can process the frame and detection data into a json which will be published as an event
 
         event={
-            "stamp": image_msg.header.stamp,
+            "time": ros_time_to_seconds(image_msg.header.stamp),
             "frame_id": image_msg.header.frame_id,
             "detections": len(det_msg.detections)
         }
