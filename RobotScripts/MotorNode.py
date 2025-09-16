@@ -3,7 +3,9 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import JointState
 import lgpio
+import time
 
 CHIP = 0
 
@@ -19,7 +21,7 @@ class MotorControlNode(Node):
                 super().__init__('motor_control_node')
                 self.get_logger().info("Motor Contorl Node with direct lgio control started.")
 
-                # Subscribe to /cmd_vel to reciece Twist messages
+                # Subscribe to /cmd_vel to recieve Twist messages
                 self.subscription = self.create_subscription(
                         Twist,
                         '/cmd_vel',
@@ -27,6 +29,19 @@ class MotorControlNode(Node):
                         10 # QoS depth
                 )
 
+                # Publish JointState messages for more accurate autonomous movement (position, velocity, effort)
+                joint_pub = self.create_publisher(JointState, '/joint_states', 10)
+
+                # Initialize JointState message
+                joint_msg = JointState()
+                joint_msg.header.stamp = self.get_clock().now().to_msg()
+                joint_msg.name = ['left_wheel_joint', 'right_wheel_joint'] # Hard coded labels. Check URDF joint names
+                joint_msg.position = [left_pos, right_pos] # Values obtained from motor encoders
+
+                # The following are optional to add to the message depending on whether velocity/torque sensors are available
+                # joint_msg.position = [left_vel, right_vel]
+                # joint_msg.effort = []
+                self.joint_pub.publish(joint_msg)
 
                 # Open GPIO chip handle
                 self.chip = lgpio.gpiochip_open(CHIP)
