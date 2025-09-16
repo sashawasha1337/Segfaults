@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@serialport/parser-readline": "^13.0.0",
-    "firebase": "^11.6.0",
-    "nmea-simple": "^3.3.0",
-    "serialport": "^13.0.0"
-  }
-}
