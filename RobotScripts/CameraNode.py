@@ -48,11 +48,35 @@ class CameraPublisher(Node):
         self.get_logger().info("Camera publisher started")
 
 
+
+
+
     def _publish_frame(self):
         ok, frame = self.cap.read()
         if not ok:
             self.get_logger().warning("Frame grab failed")
             return
+
+        self.get_logger().info(f"Raw frame shape: {frame.shape}, dtype: {frame.dtype}")
+
+        width  = self.get_parameter("width").value
+        height = self.get_parameter("height").value
+
+        # Detect flattened buffer and reshape
+        if frame.ndim == 2 and frame.shape[0] == 1:
+            # Flatten then reshape
+            flat = frame.flatten()
+            expected = width * height * 3
+            if flat.size == expected:
+                frame = flat.reshape((height, width, 3))
+                self.get_logger().info(f"Reshaped to: {frame.shape}")
+            else:
+                self.get_logger().error(f"Unexpected buffer size: {flat.size}, expected {expected}")
+                return
+
+        # Convert grayscale to BGR if needed
+        if len(frame.shape) == 2:
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
         msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
         self.pub.publish(msg)
