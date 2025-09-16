@@ -44,6 +44,7 @@ class NetworkNode(Node):
         try:
             # Store the latest frame
             self.latest_frame = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            self.get_logger().info(f'Frame received: {self.latest_frame.shape}')    
         except Exception as e:
             self.get_logger().error(f'Error processing camera frame: {str(e)}')
             
@@ -184,8 +185,10 @@ class ROSVideoTrack(VideoStreamTrack):
         # Get frame from ROS node
         if self.node.latest_frame is not None:
             frame = self.node.latest_frame
+            print(f"Sending frame: {frame.shape}")
         else:
             # Create a black frame if no image is available
+            print("No frame available, sending black frame")
             import numpy as np
             frame = np.zeros((480, 640, 3), np.uint8)
         # Convert to VideoFrame
