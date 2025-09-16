@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import { FilledInput, FormControl, IconButton, InputAdornment, InputLabel } from "@mui/material";
+import { OutlinedInput, FormControl, IconButton, InputAdornment, InputLabel } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 {/* 
@@ -10,7 +10,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
   toggle the password obfuscation. There are four optional props m, mt, width, and label which
   allows various attributes of PasswordTextField to be altered.
 */}
-const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password", ...props}) => {
+const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password", size= "medium", ...props}) => {
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = React.useState(false);
@@ -26,9 +26,9 @@ const PasswordTextField = ({ m=0, mt=0, width="30ch", label="Password", ...props
     };
 
     return (
-      <FormControl sx={{ m: m, mt: mt, width: width }} variant="filled">
+      <FormControl sx={{ m: m, mt: mt, width: width, "& input": {padding: "14px"} }} variant="outlined" size={size}>
         <InputLabel htmlFor="password-text-field">{label}</InputLabel>
-        <FilledInput
+        <OutlinedInput
           id="password-text-field"
           type={showPassword ? 'text' : 'password'} // toggles how characters are displayed
           endAdornment={
