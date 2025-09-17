@@ -41,6 +41,8 @@ class YoloNode(Node):
         det_array= Detection2DArray()
         det_array.header= msg.header
 
+        #creates a detection2D object for each object detection which creates a publish
+
         for box in results.boxes:
             det= Detection2D()
             bbox= BoundingBox2D()
