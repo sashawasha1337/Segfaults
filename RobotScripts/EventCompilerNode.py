@@ -65,7 +65,9 @@ class EventCompilerNode(Node):
         event={
             "time": ros_time_to_seconds(image_msg.header.stamp),
             "frame_id": image_msg.header.frame_id,
-            "detections": len(det_msg.detections)
+            "detections": len(det_msg.detections),
+            "location": "testLoc",
+            "robotID": "testRobot"
         }
         self.get_logger().info(f"EVENT: {event}  ")
         self.publisher_.publish(String(data=json.dumps(event)))

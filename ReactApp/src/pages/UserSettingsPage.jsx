@@ -61,10 +61,10 @@ const handleUpdatePassword= () => {
 };
 
 return(
-    
+    <><BackButton path="/HomePage" />
     <Box // component container
         component="form"
-        sx={{ 
+        sx={{
             "& .MuiTextField-root": { mt: 2, width: "40ch" },
             display: "flex",
             flexDirection: "column",
@@ -74,41 +74,37 @@ return(
         noValidate
         autoComplete="off"
     >
-    <BackButton path="/HomePage" />
-    <h1>{displayName}</h1>
+        <h1>{displayName}</h1>
 
-    {/* Password update text fields */}
-    <TextField
-        label="Old Password"
-        variant="filled"
-        type="password"
-        required
-        onChange={(e) => setOldPassword(e.target.value)}
-    />
-    <TextField
-        label="New Password"
-        variant="filled"
-        type="password"
-        required
-        onChange={(e) => setNewPassword(e.target.value)}
-    />
-      
-    <TextField
-        label="Repeat New Password"
-        variant="filled"
-        type="password"
-        required
-        onChange={(e) => setRepeatPassword(e.target.value)}
-    />
-    
-    <Button onClick={handleUpdatePassword} variant="contained" sx={{ mt: 2 }}>
-        Update Password
-    </Button>
+        {/* Password update text fields */}
+        <TextField
+            label="Old Password"
+            variant="filled"
+            type="password"
+            required
+            onChange={(e) => setOldPassword(e.target.value)} />
+        <TextField
+            label="New Password"
+            variant="filled"
+            type="password"
+            required
+            onChange={(e) => setNewPassword(e.target.value)} />
 
-    <Button onClick={handleClickLogout} variant="contained" sx={{ mt: 2, backgroundColor:"red" }}>
-        Logout
-    </Button>
-    <Dialog open={openDialog} onClose={handleCancelLogout}>
+        <TextField
+            label="Repeat New Password"
+            variant="filled"
+            type="password"
+            required
+            onChange={(e) => setRepeatPassword(e.target.value)} />
+
+        <Button onClick={handleUpdatePassword} variant="contained" sx={{ mt: 2 }}>
+            Update Password
+        </Button>
+
+        <Button onClick={handleClickLogout} variant="contained" sx={{ mt: 2, backgroundColor: "red" }}>
+            Logout
+        </Button>
+        <Dialog open={openDialog} onClose={handleCancelLogout}>
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogContent>
                 <p>You will be returned to the login screen</p>
@@ -121,11 +117,11 @@ return(
                     Cancel
                 </Button>
             </DialogActions>
-        
 
-    </Dialog>
 
-    </Box>
+        </Dialog>
+
+    </Box></>
   );
   
 
