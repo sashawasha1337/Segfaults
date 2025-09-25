@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, use } from "react";
-import { Button, Card, CardMedia, Grid, Typography } from "@mui/material";
+import { Box,  Button, Card, CardMedia, Grid, Typography } from "@mui/material";
 import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-material";
 import BackButton from "../components/BackButton";
 import SettingsButton from '../components/SettingsButton';
@@ -15,6 +15,9 @@ const ControlPage = () => {
   const [robotIP, setRobotIP] = useState(""); // State to store the robot's IP address
   const  videoRef = useRef(null); // Ref to access the video element
   const [connection, setConnection] = useState(null); // State to manage the connection
+
+  const [batteryVoltage, setBatteryVoltage] = useState(null); // State to store battery voltage
+  const [wifiStrength, setWifiStrength] = useState(null); // State to store WiFi strength
  
   // Function to fetch the robot's IP address from Firestore using its ID
   const fetchRobotIP = async () => {
@@ -38,7 +41,12 @@ const ControlPage = () => {
   }, []);
 
   // Call the hook at the top level. The hook can internally handle when robotIP changes.
-  const { isConnected, connectionStatus, error, sendCommand } = useRobotConnection(robotIP, videoRef);
+  const { isConnected, connectionStatus, error, sendCommand } = useRobotConnection(
+    robotIP, 
+    videoRef,
+    setBatteryVoltage,
+    setWifiStrength
+  );
 
   const adjustRobotDirection = async (command) => {
       const sent = await sendCommand(command); // Send the command to the robot
@@ -51,9 +59,7 @@ const ControlPage = () => {
       }
   };
 
-  //useEffect(() => {
-  //    setConnection({ isConnected, connectionStatus, error }); // Update the connection state
-  //}, [isConnected, connectionStatus, error]);
+
 
 
   // JSX code for the page
@@ -99,6 +105,21 @@ const ControlPage = () => {
             <Typography variant="h5" style={{textAlign: "center"}}>No Live Feed Detected...</Typography>
           )}
       </Card>
+
+      <Box 
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          borderRadius: "10px",
+          marginBottom: "20px",
+          padding: "10px",
+          width: "300px",
+        }}
+      >
+        <Typography variant="body1">Connection Status: {isConnected ? "Connected" : "Disconnected"}</Typography>
+        <Typography variant="body1">Battery Voltage: {batteryVoltage ? `${batteryVoltage} V` : "N/A"}</Typography>
+        <Typography variant="body1">Wifi Strength: {wifiStrength ? `${wifiStrength} dB` : "N/A"}</Typography>
+      </Box>
 
       <Grid container direction="column" justifyContent="space-between" alignItems="center" >
         <Grid item >
