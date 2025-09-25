@@ -40,12 +40,12 @@ class SinglePeerSession:
         
         @data_channel.on("open")
         def on_open():
-            print("Data channel opened")
+            self.logger.info("Data channel is open")
             
         @data_channel.on("message")
         def on_message(message):
             if isinstance(message, str):
-                print(f"Received command: {message}")
+                self.logger.info(f"Received command: {message}")
                 try:
                     self.node.execute_command(message)
                 except Exception as e:
