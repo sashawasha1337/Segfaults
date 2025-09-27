@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Peer from 'simple-peer/simplepeer.min.js';
 import { io } from 'socket.io-client';
 
-export function useRobotConnection(robotIP, videoRef) {
+export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpdate) {
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -64,7 +64,22 @@ export function useRobotConnection(robotIP, videoRef) {
         });
         
         peer.on('data', data => {
-          console.log('Received data from robot:', data.toString());
+          message = data.toString();
+          console.log('Received data from robot:', message);
+
+          try{
+            const parsed = JSON.parse(message);
+            if (parsed?.type === 'status') {
+              if (parsed.batteryVoltage !== undefined && onBatteryUpdate) {
+                onBatteryUpdate(parsed.batteryVoltage);
+              }
+              if (parsed.wifiStrength !== undefined && onWifiUpdate) {
+                onWifiUpdate(parsed.wifiStrength);
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing message from robot:', error);
+          }
         });
         
         peer.on('connect', () => {
