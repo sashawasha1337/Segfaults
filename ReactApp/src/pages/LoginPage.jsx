@@ -76,7 +76,9 @@ function LoginPage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#f4ecd8"
+        backgroundColor: "#f4ecd8",
+        height: "100dvh",
+        width: "100vw"
       }}
     >
       <Box // login card
@@ -85,12 +87,15 @@ function LoginPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
           backgroundColor: "rgba(255, 255, 255, 0.8)",
           borderRadius: 2,
-          p: 4,
+          p: { xs: 2, sm: 4 },
           boxShadow: 3,
-          width: "clamp(320px, 90vw, 420px)" // responsive width between 320px and 420px
+          maxHeight: "100%",
+          overflowY: 'auto',
+          width: "fit", // responsive width between 320px and 420px
+          minHeight: "min(90dvh, 600px)", // never taller than viewport
+          justifyContent: "center",
         }}
         noValidate
         autoComplete="off"
@@ -104,7 +109,7 @@ function LoginPage() {
         <img 
           src={Logo} 
           alt="Logo" 
-          style={{ width: "250px", marginBottom: "20px" }} 
+          style={{ width: "75%", marginBottom: "8%" }} 
         />
         {/* Username text field */}
         <TextField
@@ -125,7 +130,7 @@ function LoginPage() {
           {emailError}
         </Alert>
   
-        <PasswordTextField mt={0} width="40ch" value={password}
+        <PasswordTextField mt={1} width="40ch" value={password}
           onChange={e => setPassword(e.target.value)}
         />
          
