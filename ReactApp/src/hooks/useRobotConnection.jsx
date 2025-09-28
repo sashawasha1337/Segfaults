@@ -45,6 +45,73 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
           trickle: false
         });
         peerRef.current = peer;
+
+        // Listen for additional data channels
+        peer._pc.ondatachannel = (event) => {
+          const channel = event.channel;
+          console.log(`Data channel received: ${channel.label}`);
+
+          if (channel.label === "status") {
+            channel.onopen = () => {
+              console.log("Status data channel is open (browser)");
+            };
+          
+            channel.onmessage = (ev) => {
+              console.log("STATUS EVENT TRIGGERED");
+              console.log("Raw status message from robot:", ev.data, typeof ev.data);
+            
+              try {
+                let text;
+                if (typeof ev.data === "string") {
+                  text = ev.data;
+                } else if (ev.data instanceof ArrayBuffer) {
+                  text = new TextDecoder().decode(ev.data);
+                } else if (ev.data && typeof ev.data.text === "function") {
+                  ev.data.text().then((t) => {
+                    console.log("Blob status text:", t);
+                    parseStatus(t);
+                  });
+                  return;
+                } else {
+                  console.warn("Unknown status payload type:", ev.data);
+                  return;
+                }
+              
+                parseStatus(text);
+              } catch (err) {
+                console.error("Error handling status message:", err);
+              }
+            };
+          
+            const parseStatus = (text) => {
+              console.log("Parsing status:", text);
+              try {
+                const msg = JSON.parse(text);
+                console.log("Parsed status object:", msg);
+                if (msg?.type === "status") {
+                  onBatteryUpdate?.(msg.batteryVoltage);
+                  onWifiUpdate?.(msg.wifiStrength);
+                }
+              } catch (e) {
+                console.error("Failed to parse JSON:", e, text);
+              }
+            };
+          }
+
+
+          if (channel.label === "commands") {
+            peerRef.current.commandChannel = channel; // Store reference for sending commands
+            channel.onopen = () => {
+              console.log("Commands data channel is open");
+            }
+            channel.onclose = () => {
+              console.log("Commands data channel is closed");
+            }
+            channel.onerror = (err) => {
+              console.error("Commands data channel error:", err);
+            }
+          }
+        };
         
         // Handle WebRTC signaling - send answer back to robot
         peer.on('signal', data => {
@@ -63,31 +130,20 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
           setIsConnected(true);
         });
         
-        peer.on('data', data => {
-          message = data.toString();
-          console.log('Received data from robot:', message);
-
-          try{
-            const parsed = JSON.parse(message);
-            if (parsed?.type === 'status') {
-              if (parsed.batteryVoltage !== undefined && onBatteryUpdate) {
-                onBatteryUpdate(parsed.batteryVoltage);
-              }
-              if (parsed.wifiStrength !== undefined && onWifiUpdate) {
-                onWifiUpdate(parsed.wifiStrength);
-              }
-            }
-          } catch (error) {
-            console.error('Error parsing message from robot:', error);
-          }
-        });
-        
         peer.on('connect', () => {
           console.log("WebRTC peer connection established");
           setConnectionStatus('connected');
           setIsConnected(true);
           setError(null);
+        
+          // Debug peer connection state
+          console.log('Peer._pc:', peer._pc);
+          if(peer && peer._pc.ondatachannel) {
+            console.log('Ondatachannel handler exists');
+          }
+        
         });
+
         
         peer.on('close', () => {
           console.warn("WebRTC peer connection closed");
@@ -144,9 +200,9 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
     
     try {
       // Try to send via WebRTC data channel if available
-      if (peerRef.current && isConnected) {
+      if (peerRef.current?.commandChannel && peerRef.current?.commandChannel?.readyState === "open") {
         console.log("Sending command via WebRTC:", command);
-        peerRef.current.send(command);
+        peerRef.current.commandChannel.send(command);
         return true;
       } else {
         console.warn('WebRTC not connected, cannot send command');
