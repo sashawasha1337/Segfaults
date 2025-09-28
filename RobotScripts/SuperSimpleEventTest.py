@@ -4,7 +4,7 @@ Only writes: robot_id, location, time, category, users.
 
 Run example:
   export ROBOT_ID=RBT-01
-  export ROBOT_UID=3wxSSldz5mhCJrOJiAGvzsnMGpn2 (this is Joey's user)
+  export ROBOT_UID=3wxSSldz5mhCJrOJiAGvzsnMGpn2                 (this is Joey's user)
   export EVENT_LOCATION="Test Park"
   export EVENT_CATEGORY="Litter"
   # ONE_SHOT=1 (default) sends a single event then exits; set to 0 to keep sending on every message
