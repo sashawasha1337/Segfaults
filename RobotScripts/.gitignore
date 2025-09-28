@@ -31,3 +31,8 @@ RobotScripts/keys/*.json
 .env.test.local
 .env.production.local
 .env.local
+
+# Firebase
+image-test-permissions.json
+robot-service-account.json
+goku.jpg
