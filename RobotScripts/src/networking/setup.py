@@ -21,8 +21,6 @@ setup(
     entry_points={
         'console_scripts': [
             'networking_node_script = networking.NetworkNode:main',
-            'event_compiler = networking.EventCompilerNode:main',
-            'firebase_node = networking.FirebaseNode:main',
-        ],
+            'event_compiler = networking.EventCompilerNode:main',        ],
     },
 )

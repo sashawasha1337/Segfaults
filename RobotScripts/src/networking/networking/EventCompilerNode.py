@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-firebase##each robot will need json credentials,
-=======
-##each robot will need json credentials,
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea
+
 ##the json file should be in the same directory as firebase publishing script
 
 import os
@@ -18,11 +14,9 @@ from std_msgs.msg import String
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-<<<<<<< HEAD
-FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.firebasestorage.app")
-=======
 
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea
+
+
 SERVICE_ACCOUNT_FILE = "robot-service-account.json"   
 ROBOT_ID = os.environ.get("ROBOT_ID") or os.uname().nodename
 COLLECTION_PATH = "events"    
@@ -127,10 +121,3 @@ if __name__ == '__main__':
     main()
 
 
-<<<<<<< HEAD
-##sashas notes:
-##https://firebase.google.com/docs/storage/admin/start?utm_source=chatgpt.com#node.js
-
-##shows that I should use appspot.com for storage bucket
-=======
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea

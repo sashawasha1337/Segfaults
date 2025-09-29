@@ -24,5 +24,6 @@ setup(
             'gps_node = navigation.gpsNode:main',
             'obstacle_avoidance = navigation.obstacle_avoidance:main',
             'geofence_node = navigation.geofenceControllerNode:main',
+        ],
     },
 )
