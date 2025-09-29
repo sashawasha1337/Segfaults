@@ -15,7 +15,6 @@ class SinglePeerSession:
         self.socketio = socketio
         self.peer_connection = None
         self.data_channel = None
-        self.status_channel = None
         self.logger = node.get_logger()
 
 
@@ -34,40 +33,36 @@ class SinglePeerSession:
 
         pc = RTCPeerConnection()
         self.peer_connection = pc
-        self.peer_connection.addTrack(ROSVideoTrack(self.node))
-    
 
-        # Commands channel
-        self.data_channel = pc.createDataChannel("commands")
-        self.logger.info(f"Data channel created: {self.data_channel.label}")
+        self.data_channel = pc.createDataChannel("robot")
+        self.logger.info(f"Data channel created for {self.sid}")
 
-        
         @self.data_channel.on("open")
         def on_open():
-            self.logger.info("Data channel is open")
-            self.logger.info(f"Data channel state: {self.data_channel.readyState}")
-            
+            self.logger.info(f"Data channel opened for {self.sid}")
+
         @self.data_channel.on("message")
         def on_message(message):
-            if isinstance(message, str):
-                self.logger.info(f"Received command: {message}")
-                try:
-                    self.node.execute_command(message)
-                except Exception as e:
-                    self.logger.error(f"Error executing command: {e}")
-
-        # Status channel
-        self.status_channel = pc.createDataChannel("status")
-        self.logger.info(f"Status channel created: {self.status_channel.label}")
-        self.logger.info(f"Status channel object id: {id(self.status_channel)}")
-
-
-        @self.status_channel.on("open")
-        def on_status_open():
-            self.logger.info("Status data channel is open")
-            self.logger.info(f"Status channel state: {self.status_channel.readyState}")
-
+            try:
+                if isinstance(message, bytes):
+                    message = message.decode("utf-8")
+                obj = json.loads(message)
+                if obj.get("type") == "command":
+                    cmd = obj.get("command")
+                    self.logger.info(f"Received command: {cmd}")
+                    self.node.execute_command(cmd)
+                    # Send acknowledgment back
+                    ack = json.dumps({"type": "command_ack", "command": cmd})
+                    if self.data_channel.readyState == "open":
+                        self.data_channel.send(ack)
+                else:
+                    self.logger.info(f"Unknown inbound message: {obj}")
+            except Exception as e:
+                self.logger.error(f"Error handling inbound message: {e}")
         
+        
+        pc.addTrack(ROSVideoTrack(self.node))
+
         offer = await self.peer_connection.createOffer()
         await self.peer_connection.setLocalDescription(offer)
 

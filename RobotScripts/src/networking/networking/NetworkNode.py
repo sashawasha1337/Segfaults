@@ -47,7 +47,9 @@ class NetworkNode(Node):
         self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10) # Commands published for robot movement commands
 
         self.status_pusher = StatusPusher(self, lambda: self.peer_session)
-        self.status_timer = self.create_timer(STATUS_INTERVAL, self.status_pusher.push_status)
+        self.status_timer = self.create_timer(STATUS_INTERVAL, self.handle_status_push)
+        # Initial Status
+        self.handle_status_push()
 
         self.battery_voltage = None
         self.battery_subscription = self.create_subscription(
@@ -82,6 +84,12 @@ class NetworkNode(Node):
         elif command == "right":
             twist.angular.z = -0.5
         self.cmd_vel_publisher.publish(twist)
+
+    def handle_status_push(self):
+        if self.peer_session and webrtc_loop:
+            async def send_status():
+                self.status_pusher.push_status()
+            self._submit_webrtc_task(send_status(), "push status")
 
     def handle_connect(self):
         self.get_logger().info(f'Client connected: {request.sid}')
