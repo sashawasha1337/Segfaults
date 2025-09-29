@@ -15,6 +15,7 @@ class SinglePeerSession:
         self.socketio = socketio
         self.peer_connection = None
         self.data_channel = None
+        self.status_channel = None
         self.logger = node.get_logger()
 
 
@@ -35,14 +36,18 @@ class SinglePeerSession:
         self.peer_connection = pc
         self.peer_connection.addTrack(ROSVideoTrack(self.node))
     
-        data_channel = self.peer_connection.createDataChannel("commands")
-        self.data_channel = data_channel
+
+        # Commands channel
+        self.data_channel = pc.createDataChannel("commands")
+        self.logger.info(f"Data channel created: {self.data_channel.label}")
+
         
-        @data_channel.on("open")
+        @self.data_channel.on("open")
         def on_open():
             self.logger.info("Data channel is open")
+            self.logger.info(f"Data channel state: {self.data_channel.readyState}")
             
-        @data_channel.on("message")
+        @self.data_channel.on("message")
         def on_message(message):
             if isinstance(message, str):
                 self.logger.info(f"Received command: {message}")
@@ -51,6 +56,18 @@ class SinglePeerSession:
                 except Exception as e:
                     self.logger.error(f"Error executing command: {e}")
 
+        # Status channel
+        self.status_channel = pc.createDataChannel("status")
+        self.logger.info(f"Status channel created: {self.status_channel.label}")
+        self.logger.info(f"Status channel object id: {id(self.status_channel)}")
+
+
+        @self.status_channel.on("open")
+        def on_status_open():
+            self.logger.info("Status data channel is open")
+            self.logger.info(f"Status channel state: {self.status_channel.readyState}")
+
+        
         offer = await self.peer_connection.createOffer()
         await self.peer_connection.setLocalDescription(offer)
 

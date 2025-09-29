@@ -36,3 +36,12 @@ RobotScripts/keys/*.json
 image-test-permissions.json
 robot-service-account.json
 goku.jpg
+
+#ROS2 Package and Python Cache Files
+build/
+install/
+log/
+*.pyc
+__pycache__/
+*.swp
+

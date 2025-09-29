@@ -5,9 +5,9 @@ Helper class to manage polling and pushing status updates (battery voltage, WiFi
 import json, re, subprocess
 
 class StatusPusher:
-    def __init__(self, node, data_channel_getter):
+    def __init__(self, node, status_channel_getter):
         self.node = node
-        self.data_channel_getter = data_channel_getter
+        self.status_channel_getter = status_channel_getter
 
     def battery_callback(self, msg):
         self.node.battery_voltage = msg.voltage
@@ -32,7 +32,16 @@ class StatusPusher:
             'batteryVoltage': self.node.battery_voltage,
             'wifiStrength': wifi_strength,
         }
-        dc = self.data_channel_getter()
-        if dc and dc.data_channel and dc.data_channel.readyState == "open":
-            dc.data_channel.send(json.dumps(payload))
+        peer_session = self.status_channel_getter()
+        sc = getattr(peer_session, 'status_channel', None)
+        self.node.get_logger().info(f"Status channel object id: {id(sc) if sc else 'None'}")
+
+        if sc and sc.readyState == "open":
+            self.node.get_logger().info(f'Sending status on channel {sc.label}, state={sc.readyState}')
+            payload_json = json.dumps(payload)
+            sc.send(payload_json)
+            self.node.get_logger().info(f'Status payload: {payload_json}')
+            self.node.get_logger().info(f'Status buffer amount: {sc.bufferedAmount}')
             self.node.get_logger().info('Status sent over data channel')
+        else:
+            self.node.get_logger().warning('Data channel not open, cannot send status')
