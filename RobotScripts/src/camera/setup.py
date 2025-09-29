@@ -19,8 +19,11 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
-            'camera_node_script = camera.CameraNode:main',
-        ],
-    },
+    'console_scripts': [
+        'camera_node = camera.CameraNode:main',
+        'yolo_node = camera.YoloNode:main',
+        'rplidar_avoidance = camera.rplidar_avoidance:main',
+    ],
+},
+
 )

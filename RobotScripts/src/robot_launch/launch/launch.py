@@ -5,13 +5,63 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='camera',
-            executable='camera_node_script',
+            executable='camera_node',
             prefix='libcamerify',
+            output='screen',
+        ),
+        Node(
+            package='camera',
+            executable='yolo_node',
+            output='screen',
+        ),
+        Node(
+            package='camera',
+            executable='rplidar_avoidance',
+            output='screen',
+        ),
+        Node(
+            package='navigation',
+            executable='navigation_node',
+            output='screen',
+        ),
+        Node(
+            package='navigation',
+            executable='gps_node',
+            output='screen',
+        ),
+        Node(
+            package='navigation',
+            executable='geofence_node',
+            output='screen',
+        ),
+        Node(
+            package='navigation',
+            executable='obstacle_avoidance',
+            output='screen',
+        ),
+        Node(
+            package='motor_control',
+            executable='motor_node',
+            output='screen',
+            ),
+        Node(   
+            package='motor_control',
+            executable='battery_node',
             output='screen',
         ),
         Node(
             package='networking',
             executable='networking_node_script',
+            output='screen'
+        ),
+        Node(
+            package='networking',
+            executable='event_compiler',
+            output='screen'
+        ),
+        Node(
+            package='networking',
+            executable='firebase_node',
             output='screen'
         ),
     ])

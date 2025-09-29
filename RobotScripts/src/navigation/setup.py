@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
-package_name = 'networking'
+package_name = 'navigation'
 
 setup(
     name=package_name,
-    version='0.0.1',
+    version='0.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -14,15 +14,15 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='patrick',
-    maintainer_email='patrick@todo.todo',
+    maintainer_email='patrick.doolittle@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'networking_node_script = networking.NetworkNode:main',
-            'event_compiler = networking.EventCompilerNode:main',
-            'firebase_node = networking.FirebaseNode:main',
-        ],
+            'navigation_node = navigation.NavigationNode:main',
+            'gps_node = navigation.gpsNode:main',
+            'obstacle_avoidance = navigation.obstacle_avoidance:main',
+            'geofence_node = navigation.geofenceControllerNode:main',
     },
 )
