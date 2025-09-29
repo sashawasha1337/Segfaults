@@ -8,7 +8,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 import urllib.parse
 
-
+##change private key for firebase here
 SERVICE_ACCOUNT_FILE="image-test-permissions.json"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
