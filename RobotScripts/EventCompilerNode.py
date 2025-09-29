@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-firebase##each robot will need json credentials,
-=======
 ##each robot will need json credentials,
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea
+
 ##the json file should be in the same directory as firebase publishing script
 
 import os
