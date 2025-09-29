@@ -127,10 +127,9 @@ if __name__ == '__main__':
     main()
 
 
-<<<<<<< HEAD
+
 ##sashas notes:
 ##https://firebase.google.com/docs/storage/admin/start?utm_source=chatgpt.com#node.js
 
 ##shows that I should use appspot.com for storage bucket
-=======
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea
+
