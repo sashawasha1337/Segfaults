@@ -59,9 +59,4 @@ def generate_launch_description():
             executable='event_compiler',
             output='screen'
         ),
-        Node(
-            package='networking',
-            executable='firebase_node',
-            output='screen'
-        ),
     ])
