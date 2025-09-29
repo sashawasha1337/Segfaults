@@ -15,11 +15,11 @@ from std_msgs.msg import String
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-<<<<<<< HEAD
-FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.firebasestorage.app")
-=======
 
->>>>>>> 8783b2f9be069d6f373287fe03a4ebd4e0f11eea
+FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.firebasestorage.app")
+
+
+
 SERVICE_ACCOUNT_FILE = "robot-service-account.json"   
 ROBOT_ID = os.environ.get("ROBOT_ID") or os.uname().nodename
 COLLECTION_PATH = "events"    
