@@ -118,7 +118,7 @@ const ControlPage = () => {
       >
         <Typography variant="body1">Connection Status: {isConnected ? "Connected" : "Disconnected"}</Typography>
         <Typography variant="body1">Battery Voltage: {batteryVoltage ?? "N/A"}</Typography>
-        <Typography variant="body1">Wifi Strength: {wifiStrength ?? "N/A"}</Typography>
+        <Typography variant="body1">Wifi Strength: {wifiStrength != null ? `${wifiStrength} dB` : "N/A"}</Typography>
       </Box>
 
       <Grid container direction="column" justifyContent="space-between" alignItems="center" >
