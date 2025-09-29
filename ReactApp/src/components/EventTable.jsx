@@ -1,24 +1,45 @@
-import React from 'react';
+import React, { Children } from 'react';
 import { useNavigate } from "react-router-dom";
 
-const EventTable = ({events}) => {
+//const [sortField, setSortField] = React.useState<"timeMs" | "eventId" | "robotId" | "category" | "location">("timeMS");
+//const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">("desc");
+
+
+
+const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
   const navigate=useNavigate();
   const handleViewDetails = (eventId) => {
     //commented out navigation to specific events 
     //navigate(`/EventDetails/${eventId}`);
     navigate('/TrashViewPage');
   }
+  // this defines labels which manage arrows indicating sorting direction and field 
+  const SortingButton=({field, label})=>{
+    const activeField=field===sortField;
+    const direction=activeField?sortDirection:"asc";
+    const arrow = activeField ? (direction==="asc"?"↑":"↓") : "";
+    return(
+      <th
+        onClick={()=> onRequestSort(field)}
+        aria-sort={activeField? direction : "none"}
+        title={`Sort by ${label}`}
+        style={{cursor:"pointer"}}
+      >
+        {label} {arrow}
+      </th>
+    );
+  };
 
   return (
     //TODO: this needs to look nicer, probably with MUI components
     <table>
       <thead>
         <tr>
-          <th>Event ID</th>
-          <th>Robot ID</th>
-          <th>Category</th>
-          <th>Location</th>
-          <th>Time</th>
+          <SortingButton field="eventId" label="Event ID" />
+          <SortingButton field="robotId" label="Robot ID" />
+          <SortingButton field="category" label="Category" />
+          <SortingButton field="location" label="Location" />
+          <SortingButton field="timeMS" label="Time" />
           <th>Details</th>
         </tr>
       </thead>
