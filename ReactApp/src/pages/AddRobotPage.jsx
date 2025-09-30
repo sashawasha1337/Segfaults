@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Button, Grid2, Switch, TextField } from "@mui/material";
 import BackButton from "../components/BackButton";
 
-import {collection, addDoc, getDocs, doc, updateDoc, arrayUnion, setDoc} from "firebase/firestore";
+import {collection, addDoc, getDocs, doc, updateDoc, arrayUnion, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import {useAuth} from "../ContextForAuth.jsx";
 import { Merge } from "@mui/icons-material";
@@ -19,6 +19,7 @@ function AddRobotPage() {
   const [admin, setAdmin] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailList, setEmailList] = useState([]);
+  const norm = (s) => (s || "").trim().toLowerCase();
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
@@ -47,54 +48,37 @@ function AddRobotPage() {
 
   // Handles adding robot to users profiles and robots collection
   const handleAddRobot = async () => {
-    
-    try{
-      const robotsRef = collection(db, "robots");
-      const snapshot = await getDocs(robotsRef);
-      
-      let maxId = 0;
-      snapshot.forEach((doc) => {
-        const robot = doc.data();
-        const robotId = parseInt(robot.robotID);
-        if(!isNaN(robotId) && robotId > maxId){
-          maxId = robotId;
-        }
-      });
+  try {
+    if (!currentUser) throw new Error("Not signed in");
 
-      // If current user not added to users list add them
-      if (!emailList.some(e => e.toLowerCase() === currentUser.email.toLowerCase())) {
-        emailList.unshift(currentUser.email.toLowerCase());
-      }
+    // normalize + ensure creator is in users
+    const emails = Array.from(new Set([norm(currentUser.email), ...emailList.map(norm)]));
 
-      // Creates doc to add to robots collection with current user as admin
-      const docRef = await addDoc(robotsRef, {
-        ipAddress: robotIp,
-        location: "dock",
-        name: robotName,
-        robotID: (maxId + 1).toString(),
-        status: "idle",
-        users: emailList,
-        admin: currentUser.email,
-      });
-      
-      // Adds the robot uuid to profiles robots list 
-      for( const e of emailList) {
-        const profileDocRef = doc(db, "profiles", e);
-        
-        await setDoc(
-          doc(db, "profiles", e), 
-          {
-            robots: arrayUnion(docRef.id)
-          }, 
-          {merge: true}
-        );
-      }
+    const robotsRef = collection(db, "robots");
+    const docRef = await addDoc(robotsRef, {
+      ipAddress: robotIp,
+      location: "dock",
+      name: robotName,
+      status: "idle",
+      users: emails,
+      admin: norm(currentUser.email),
+      createdAt: serverTimestamp(),
+    });
 
-      navigate("/HomePage");
-    }catch(error){
-      console.error("Error adding robot: ", error);
+    // add robot docId to each profile
+    for (const e of emails) {
+      await setDoc(
+        doc(db, "profiles", e),
+        { robots: arrayUnion(docRef.id) },
+        { merge: true }
+      );
     }
+
+    navigate("/HomePage");
+  } catch (error) {
+    console.error("Error adding robot: ", error);
   }
+};
 
   return (
     <>
@@ -136,7 +120,7 @@ function AddRobotPage() {
 
         <div>
           <TextField
-            error={emailError}
+            error={!!emailError}
             label="Share to"
             placeholder="Email"
             variant="standard"

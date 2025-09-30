@@ -6,12 +6,10 @@ import pynmea2
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-ROBOT_ID = "ugv1"
 SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_KEY_PATH", "/home/ugv/.keys/firebase-adminsdk.json")
-
-SERIAL_PORT = '/dev/tty.usbserial-10' # Raspberry Pi or Jetson Nano use = '/dev/ttyUSB0'
+SERIAL_PORT = '/dev/ttyUSB0'          # Raspberry Pi or Jetson Nano use = '/dev/ttyUSB0'
 BAUD_RATE = 9600                      # bits per second
-DELTA_DEG = 0.000005                  # meters
+DELTA_DEG = 0.000005                  # ~ 0.5 meters
 LOCATION_CHECK_INTERVAL = 2.5         # seconds
 
 if not firebase_admin._apps:
@@ -26,7 +24,7 @@ def has_moved(last_lat, last_lng, lat, lng):
         return True
     return (abs(lat - last_lat) > DELTA_DEG or (abs(lng - last_lng) > DELTA_DEG))
 
-def save_detection(image_url, category, confidence, lat, lng, location, robot_id="ugv1"):
+def save_detection(image_url, category, confidence, lat, lng, location, robot_id):
     db = firestore.client()
     image_data_collection = db.collection("trash_data")
 
@@ -37,12 +35,12 @@ def save_detection(image_url, category, confidence, lat, lng, location, robot_id
         "latitude": lat,
         "longitude": lng,
         "location": location,
-        "robot_id": robot_id,
+        "robotID": robot_id,
         "timestamp": firestore.SERVER_TIMESTAMP,
     })
 
 def run():
-    print(f"\nListening for GPS data on serial port {SERIAL_PORT} as {ROBOT_ID} ...")
+    print(f"\nListening for GPS data on serial port {SERIAL_PORT} ...")
     last_lat = None
     last_lng = None
     next_check_interval = 0.0
@@ -74,15 +72,14 @@ def run():
                         print(f"\nGPS fix received at: lat={latitude}, lng={longitude}")
 
                         data_point = {
-                            "robotId": ROBOT_ID,
                             "latitude": latitude,
                             "longitude": longitude,
                             "timestamp": firestore.SERVER_TIMESTAMP,
                         }
                         gps_collection.add(data_point)
-                        print(f"Uploaded GPS data for {ROBOT_ID} to Firebase: {data_point}")
+                        print(f"Uploaded GPS data to Firebase: {data_point}")
                     else:
-                        print(f"{ROBOT_ID} has not moved")
+                        print(f"UGV has not moved")
                     next_check_interval = now + LOCATION_CHECK_INTERVAL
             except KeyboardInterrupt:
                 print("\nStopping...")

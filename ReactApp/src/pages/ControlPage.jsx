@@ -72,7 +72,7 @@ const ControlPage = () => {
         alignItems: "center"
       }}
     >
-      <SettingsButton path="/RobotSettingPage" />
+      <SettingsButton path={`/RobotSettingPage/${robotID}`} />
       <BackButton path="/HomePage" />
 
       <div style={{position:"fixed", top: "0", left: "50%",transform: "translateX(-50%)"}}>

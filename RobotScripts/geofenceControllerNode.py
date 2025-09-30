@@ -8,7 +8,6 @@ from geometry_msgs.msg import Twist
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-ROBOT_ID = "ugv1"
 SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_KEY_PATH", "/home/ugv/.keys/firebase-adminsdk.json")
 
 GEO_CHECK_PERIOD = 2.0            # seconds
@@ -42,7 +41,6 @@ class GeofenceController(Node):
     def fetch_latest_gps(self):
         q = (
             self.db.collection("gps_data")
-            .where("robotId", "==", ROBOT_ID)
             .order_by("timestamp", direction=firestore.Query.DESCENDING)
             .limit(1)
         )
@@ -52,7 +50,7 @@ class GeofenceController(Node):
         return docs[0].to_dict()
 
     def fetch_geofence(self):
-        ref = self.db.collection("geofence").document(ROBOT_ID)
+        ref = self.db.collection("geofence").document("global")
         snap = ref.get()
         if not snap.exists:
             return None
