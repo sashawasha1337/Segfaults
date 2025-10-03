@@ -7,7 +7,6 @@ import { collection, query, doc, setDoc, limit, onSnapshot, orderBy, where } fro
 import { db } from "../firebaseConfig";
 
 const defaultCenter = [38.56080, -121.42400];
-const ROBOT_ID = "ugv1";
 
 const ugvIcon = L.icon({
   iconUrl: "https://cdn.pixabay.com/photo/2013/07/12/13/43/arrow-147174_1280.png",       
@@ -41,7 +40,6 @@ function MapView() {
   useEffect(() => {
     const q = query(
       collection(db, "gps_data"),
-      where("robotId", "==", ROBOT_ID),
       orderBy("timestamp", "desc"),
       limit(1)
     );
@@ -56,9 +54,8 @@ function MapView() {
   }, []);
 
   async function writeGeofence(isEnabled, center, radius) {
-    const ref = doc(db, "geofence", ROBOT_ID);
+    const ref = doc(db, "geofence", "global");
     await setDoc(ref, {
-      robotId: ROBOT_ID,
       enabled: Boolean(isEnabled),
       center: {latitude: center.lat, longitude: center.lng},
       radius: radius,
@@ -114,7 +111,7 @@ function MapView() {
           <AutoRecenterMap lat={position.lat} lng={position.lng} />
           <Marker position={[position.lat, position.lng]} icon={ugvIcon}>
             <Popup>
-              <div style={{ textAlign: "center" }}><strong>{ROBOT_ID}</strong></div>
+              <div style={{ textAlign: "center" }}><strong>UGV</strong></div>
             </Popup>
           </Marker>
           {isRadiusOn && lockedCenter && (

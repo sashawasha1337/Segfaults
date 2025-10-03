@@ -11,6 +11,7 @@ import MapViewPage from './pages/MapViewPage';
 import SignUpPage from "./pages/SignUpPage.jsx";
 import TrashViewPage from './pages/TrashViewPage.jsx';
 import UserSettingsPage from './pages/UserSettingsPage.jsx';
+import RobotDashboardPage from './pages/RobotDashboardPage.jsx';
 import './App.css'
 
 
@@ -25,11 +26,12 @@ function App() {
       <Route path="/ForgotUsernamePage" element={<ForgotUsernamePage />} />
       <Route path="/HomePage" element={<HomePage />} />
       <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
-      <Route path="/RobotSettingPage" element={<RobotSettingPage />} />
+      <Route path="/RobotSettingPage/:robotID" element={<RobotSettingPage />} />
       <Route path="/MapViewPage" element={<MapViewPage />} />
       <Route path="/SignUpPage" element={<SignUpPage />} />
       <Route path="/TrashViewPage" element={<TrashViewPage />} />
       <Route path="/UserSettingsPage" element={<UserSettingsPage />} />
+      <Route path="/RobotDashboardPage/:robotID" element={<RobotDashboardPage />} /> 
     </Routes>
   );
 }

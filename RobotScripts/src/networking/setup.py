@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'networking_node_script = networking.NetworkNode:main'
-        ],
+            'networking_node_script = networking.NetworkNode:main',
+            'event_compiler = networking.EventCompilerNode:main',        ],
     },
 )

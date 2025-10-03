@@ -76,15 +76,15 @@ function HomePage() {
   const [robots, setRobots] = useState([]);
   const { currentUser } = useAuth(); 
   useEffect(() => {
-    const fetchRobots = async() => {
-      try{
-        if(!currentUser){
+    if(!currentUser){
           console.error("No current user found.");
           return;
         }
+    const fetchRobots = async() => {
+      try{
 
         // getting the user profiles
-        const profilesRef = doc(db, "profiles", currentUser.email);
+        const profilesRef = doc(db, "profiles", norm(currentUser.email));
         const profileSnap = await getDoc(profilesRef);
 
         console.log("Current user ID:", currentUser.uid); // Log the current user ID
@@ -152,10 +152,11 @@ function HomePage() {
           title={robot.name || `Robot ${index + 1}`}
           description={`IP: ${robot.ipAddress}`}
           buttonText="FPV/Control"
-          link={`/ControlPage/${robot.id}`} /><Button
+          //link={`/ControlPage/${robot.id}`} /><Button
+          link={`/RobotDashboardPage/${robot.id}`} /><Button
             variant="outlined"
             size="small"
-            sx {...{ mt: 1, textTransform: "none" }}
+            sx={{ mt: 1, textTransform: "none" }}
             onClick={() => handleDeleteRobot(robot.id)}
           >
             Delete Robot

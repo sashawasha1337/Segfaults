@@ -72,7 +72,7 @@ const ControlPage = () => {
         alignItems: "center"
       }}
     >
-      <SettingsButton path="/RobotSettingPage" />
+      <SettingsButton path={`/RobotSettingPage/${robotID}`} />
       <BackButton path="/HomePage" />
 
       <div style={{position:"fixed", top: "0", left: "50%",transform: "translateX(-50%)"}}>
@@ -118,7 +118,7 @@ const ControlPage = () => {
       >
         <Typography variant="body1">Connection Status: {isConnected ? "Connected" : "Disconnected"}</Typography>
         <Typography variant="body1">Battery Voltage: {batteryVoltage ?? "N/A"}</Typography>
-        <Typography variant="body1">Wifi Strength: {wifiStrength ?? "N/A"}</Typography>
+        <Typography variant="body1">Wifi Strength: {wifiStrength != null ? `${wifiStrength} dB` : "N/A"}</Typography>
       </Box>
 
       <Grid container direction="column" justifyContent="space-between" alignItems="center" >

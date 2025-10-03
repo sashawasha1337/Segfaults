@@ -32,6 +32,11 @@ RobotScripts/keys/*.json
 .env.production.local
 .env.local
 
+# Firebase
+image-test-permissions.json
+robot-service-account.json
+goku.jpg
+
 #ROS2 Package and Python Cache Files
 build/
 install/

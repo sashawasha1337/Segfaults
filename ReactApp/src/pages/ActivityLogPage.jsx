@@ -29,6 +29,15 @@ function ActivityLogPage() {
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState("");
 
+  const [sortField, setSortField] = React.useState("timeMS");
+  const [sortDirection, setSortDirection] = React.useState("desc");
+
+  const handleRequestSort = (field) => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    setSortField(field);
+  };
+  
+
 React.useEffect(() => {
     const fetchEvents = async () => {
       if (!currentUser) {
@@ -69,6 +78,8 @@ React.useEffect(() => {
             category: data.category ?? "Unknown",
             location: data.location ?? "Unknown",
             time: formatted,
+            //timeMS to make sure sorting by time works correctly in event table
+            timeMS: t instanceof Date ? t.getTime() : null,
           };
         });
 
@@ -83,6 +94,28 @@ React.useEffect(() => {
 
     fetchEvents();
   }, [currentUser]);
+
+  //here is the actual function where data is sorted based on set order
+  const sortedEvents = React.useMemo(() => {
+    const dir= sortDirection === "asc" ? 1 : -1;
+    const get = (e) => {
+      if (sortField === "timeMS") return e.timeMS ?? 0;
+      if (sortField === "eventId") return e.eventId ?? "";
+      if (sortField === "robotId") return e.robotId ?? "";
+      if (sortField === "category") return e.category ?? "";
+      if (sortField === "location") return e.location ?? "";
+      return "";
+    }
+    //pass this return into sorted events
+    return [...events].sort((a, b) => {
+      //these interior returns tell the sort functin how to order the events
+      const aValue = get(a);
+      const bValue = get(b);
+      if (aValue < bValue) return -1 * dir;
+      if (aValue > bValue) return 1 * dir;
+      return 0;
+    });
+  }, [events, sortField, sortDirection]);
 
   return ( //TODO: make this look nicer with MUI components probably
     <>  
@@ -112,7 +145,10 @@ React.useEffect(() => {
               <Typography>No activity found.</Typography>
             ) : (
               <EventTable
-                events={events}
+                events={sortedEvents}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onRequestSort={handleRequestSort}
                 sx={{
                   "& th, & td": { py: 1.5, px: 2 }, // extra cell padding
                 }}

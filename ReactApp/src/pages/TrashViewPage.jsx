@@ -55,7 +55,7 @@ function TrashViewPage() {
         const querySnapshot2 = await getDocs(q2);
 
         const gpsRef = collection(db, "gps_data");
-        const gpsQ = query(gpsRef, where("robotId", "==", "ugv1"), orderBy("timestamp", "desc"), limit(1));
+        const gpsQ = query(gpsRef, orderBy("timestamp", "desc"), limit(1));
         const gpsSnapshot = await getDocs(gpsQ);
 
         if (!querySnapshot.empty) {
