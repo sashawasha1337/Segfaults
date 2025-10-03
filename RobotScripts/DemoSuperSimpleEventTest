@@ -3,11 +3,14 @@ Minimal ROS2 -> Firestore writer for top-level 'events' collection.
 Only writes: robot_id, location, time, category, users. 
 This is for windows and will be used to demo to our lab advisor.
 
-  $env:ROBOT_ID="RBT-01"
-  $env:ROBOT_UID="3wxSSldz5mhCJrOJiAGvzsnMGpn2"   # Joey's user UID (or any UID)
-  $env:EVENT_LOCATION="Test Park"
-  $env:EVENT_CATEGORY="Litter"
-  $env:ONE_SHOT="1"   # default; sends once then exits
+  cd C:\pixi_ws
+  pixi shell
+  call C:\pixi_ws\ros2-windows\local_setup.bat
+  set ROBOT_ID=RBT-01
+  set ROBOT_UID=3wxSSldz5mhCJrOJiAGvzsnMGpn2
+  set EVENT_LOCATION=Test Park
+  set EVENT_CATEGORY=Litter
+  set ONE_SHOT=1
   python SuperSimpleEventTest.py
 """
 
