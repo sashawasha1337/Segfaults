@@ -1,13 +1,16 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-
+import IconButton from "@mui/material/IconButton";
 import { 
   Box,
+  Button,
   Container,
   Paper,
   Stack,
   Typography,
+  Tooltip,
 } from "@mui/material";
+import RefreshIcon from '@mui/icons-material/Refresh';
 import BackButton from "../components/BackButton";
 import EventTable from "../components/EventTable";
 import { db } from "../firebaseConfig";
@@ -24,36 +27,31 @@ import{
 function ActivityLogPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  console.log("Current user object:", currentUser);
   const [events, setEvents] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState("");
-
   const [sortField, setSortField] = React.useState("timeMS");
   const [sortDirection, setSortDirection] = React.useState("desc");
+  const [lastRefresh, setLastRefresh] = React.useState(new Date()); 
 
-  const handleRequestSort = (field) => {
-    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    setSortField(field);
-  };
-  
+  console.log("Current user object:", currentUser);
+  // Add fetchEvents function outside useEffect so it can be reused
+  const fetchEvents = async () => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+    try {
+      setLoading(true);
+      const q = query(
+        collection(db, "events"),
+        where("users", "array-contains", currentUser.uid),
+        orderBy("time", "desc"),
+        limit(200)
+      );
+      const snap = await getDocs(q);
 
-React.useEffect(() => {
-    const fetchEvents = async () => {
-      if (!currentUser) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const q = query(
-          collection(db, "events"),
-          where("users", "array-contains", currentUser.uid),
-          orderBy("time", "desc"),
-          limit(200)
-        );
-        const snap = await getDocs(q);
-
-        const rows = snap.docs.map((d) => {
+      const rows = snap.docs.map((d) => {
           const data = d.data();
           const t = 
             data.time?.toDate?.() instanceof Date
@@ -84,6 +82,7 @@ React.useEffect(() => {
         });
 
         setEvents(rows);
+        setLastRefresh(new Date());
               } catch (e) {
         console.error("Error fetching events:", e);
         setErr(e?.message || "Failed to load activity log.");
@@ -92,8 +91,22 @@ React.useEffect(() => {
       }
     };
 
+  React.useEffect(() => {
     fetchEvents();
+
+    // Set up auto-refresh every 30 seconds
+    const intervalId = setInterval(() => {
+      fetchEvents();
+    }, 30000); // 30000 ms = 30 seconds
+
+    return () => clearInterval(intervalId);
   }, [currentUser]);
+
+  const handleRequestSort = (field) => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    setSortField(field);
+  };
+  
 
   //here is the actual function where data is sorted based on set order
   const sortedEvents = React.useMemo(() => {
@@ -125,6 +138,21 @@ React.useEffect(() => {
           <Typography variant="h3" fontWeight={800} textAlign="center">
             Activity Log
           </Typography>
+
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Tooltip title="Last updated at">
+              <Typography variant="body2" color="text.secondary">
+                Last refresh: {lastRefresh.toLocaleTimeString()}
+              </Typography>
+            </Tooltip>
+            <IconButton 
+              onClick={fetchEvents}
+              disabled={loading}
+              color="primary"
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Box>
 
           <Paper
             elevation={2}
