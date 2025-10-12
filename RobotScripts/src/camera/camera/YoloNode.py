@@ -3,69 +3,108 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
-from ultralytics import YOLO;
-#imports for publishing detected objects
-from vision_msgs.msg import Detection2DArray, Detection2D, ObjectHypothesisWithPose, BoundingBox2D;
+from ultralytics import YOLO
+from vision_msgs.msg import Detection2DArray, Detection2D, ObjectHypothesisWithPose, BoundingBox2D
 
-class YoloNode(Node):
+class YoloTrackNode(Node):
     def __init__(self):
-        super().__init__('yolo_node')
-        self.publisher_ = self.create_publisher(Detection2DArray, 'detections', 10)
-        # Initialize YOLO model
-        self.model = YOLO("yolo11s.pt")
+        super().__init__('yolo_track_node')
+        self.get_logger().info("Starting YOLO11 Tracking Node initialization.")
 
-        # Subscribe to camera feed
-        self.subscription = self.create_subscription(
-            Image,
-            "/camera/image_raw",
-            self.image_callback,
-            10
-        )
+        # Parameters for setup
+        self.declare_parameter('image_topic', '/camera/image_raw')
+        self.declare_parameter('out_image_topic', '/tracking/image') # Where detections are published
+        self.declare_parameter('weights', './Model/best.pt')
+        self.declare_parameter('tracker', 'botsort.yaml') # Ultralytics tracking
+        self.declare_parameter('conf', 0.3)
+
+        # Read parameters
+        self.image_topic = self.get_parameter('image_topic').value
+        self.out_image_topic = self.get_parameter('out_image_topic').value
+        self.weights = self.get_parameter('weights').value
+        self.tracker = self.get_parameter('tracker').value
+        self.conf = self.get_parameter('conf').value
+
+        # Seting up Model
         self.bridge = CvBridge()
-        self.get_logger().info("YOLO node initialized")
+        self.model = YOLO(self.weights)
+        self.known_ids = set()  # store IDs of objects already seen
 
-    def image_callback(self, msg):
-        # Convert ROS Image msg to OpenCV image
-        frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+        # ROS interfaces
+        self.sub = self.create_subscription(Image, self.image_topic, self.image_cb, 10) # Camera feed subscription
+        self.get_logger().info(f"Subscribed to image topic: {self.image_topic}")
+        self.pub_img = self.create_publisher(Image, self.out_image_topic, 10) # Annotated images published here
+        self.get_logger().info(f"Publishing annotated images to: {self.out_image_topic}")
+        self.pub_tracks = self.create_publisher(Detection2DArray, 'detections', 10) # Publishes new detection to here
+        self.get_logger().info(f"YOLO11 tracking node initialized with {self.weights}, tracker={self.tracker}")
 
-        # Run model on frame
-        results = self.model(frame)[0]
+    def image_cb(self, msg: Image):
+        # Convert ROS2 Image → OpenCV
+        frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
-        # Display bounding box on frame
-        annotated_frame = results.plot()
+        # Run YOLO tracking
+        results = self.model.track(
+            source=frame,
+            conf=self.conf,
+            persist=True,
+            tracker=self.tracker,
+            verbose=False
+        )
 
-        # Test video (delete later)
-        cv2.imshow("YOLO Object Detection", annotated_frame)
-        cv2.waitKey(1)
-        
-        det_array= Detection2DArray()
-        det_array.header= msg.header
+        # Annotated frame
+        annotated = results[0].plot()
 
-        #creates a detection2D object for each object detection which creates a publish
+        # Prepare Detection2DArray
+        det_array = Detection2DArray()
+        det_array.header = msg.header
 
-        for box in results.boxes:
-            det= Detection2D()
-            bbox= BoundingBox2D()
-            bbox.center.x= (box.xyxy[0][0].item()+ box.xyxy[0][2].item())/2
-            bbox.center.y= (box.xyxy[0][1].item()+ box.xyxy[0][3].item())/2
-            bbox.size_x= box.xyxy[0][2].item()- box.xyxy[0][0].item()
-            bbox.size_y= box.xyxy[0][3].item()- box.xyxy[0][1].item()
-            det.bbox= bbox
+        boxes = results[0].boxes
+        if boxes.id is not None:
+            for box, tid, cls, conf in zip(boxes.xyxy, boxes.id, boxes.cls, boxes.conf):
+                tid = int(tid.item())
 
-            hypo= ObjectHypothesisWithPose()
-            hypo.hypothesis.class_id= str(int(box.cls[0].item()))
-            hypo.hypothesis.score= float(box.conf[0].item())
-            det.results.append(hypo)
+                # Only publish new detections
+                if tid not in self.known_ids:
+                    self.known_ids.add(tid)
 
-            det_array.detections.append(det)
+                    # Bounding box
+                    x1, y1, x2, y2 = [float(v) for v in box.tolist()]
+                    bbox = BoundingBox2D()
+                    bbox.center.x = (x1 + x2) / 2
+                    bbox.center.y = (y1 + y2) / 2
+                    bbox.size_x = x2 - x1
+                    bbox.size_y = y2 - y1
+
+                    # Detection object
+                    det = Detection2D()
+                    det.bbox = bbox
+
+                    # Class hypothesis
+                    hypo = ObjectHypothesisWithPose()
+                    hypo.hypothesis.class_id = str(int(cls.item()))
+                    hypo.hypothesis.score = float(conf.item())
+                    det.results.append(hypo)
+
+                    det_array.detections.append(det)
+
+        # Publish annotated image
+        img_msg = self.bridge.cv2_to_imgmsg(annotated, encoding='bgr8')
+        img_msg.header = msg.header
+        self.pub_img.publish(img_msg)
+
+        # Publish new detections if any
         if det_array.detections:
-            self.publisher_.publish(det_array)
-            self.get_logger().info(f"Published {len(det_array.detections)} detections")
+            self.pub_tracks.publish(det_array)
 
-def main():
-    rclpy.init()
-    node = YoloNode()
+    def destroy_node(self):
+        self.get_logger().info("Shutting down YOLO11 Tracking Node.")
+        super().destroy_node()
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = YoloTrackNode()
     try:
+        node.get_logger().info("YOLO11 Tracking Node starting.")
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
