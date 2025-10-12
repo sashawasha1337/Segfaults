@@ -1,7 +1,7 @@
 from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 
 
 def generate_launch_description():
@@ -13,25 +13,19 @@ def generate_launch_description():
         choices = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']
     )
 
-    verbosity = LaunchConfiguration('verbosity')
-
     system_arg = DeclareLaunchArgument(
         'system',
         default_value='nano',
         description = 'Robot system type (nano, pi, dev)',
         choices = ['nano', 'pi', 'dev']
     )
+
+    verbosity = LaunchConfiguration('verbosity')
     system = LaunchConfiguration('system')
 
-    if system == 'nano':
-        # Nano specific nodes or parameters can be set here
-        camera_prefix = ''
-    elif system == 'pi':
-        # Pi specific nodes or parameters can be set here
-        camera_prefix = 'libcamerify'
-    else:
-        # Dev specific nodes or parameters can be set here
-        camera_prefix = ''
+
+    # Configure camera prefix for raspberry pi 5
+    camera_prefix = PythonExpression([system, " == 'pi' ? 'libcamerify' : ''"])
 
 
     return LaunchDescription([
