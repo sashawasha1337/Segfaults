@@ -10,6 +10,8 @@ class CameraPublisher(Node):
     def __init__(self):
         super().__init__("camera_publisher")
 
+        self.get_logger().info("Starting camera node initialization.")
+
 
         self.declare_parameter("camera_index", 0)
         self.declare_parameter("width",        640)
@@ -24,15 +26,36 @@ class CameraPublisher(Node):
         height = self.get_parameter("height").value
         self.fps = self.get_parameter("fps").value
 
-        # OpenCV capture
-        self.cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  width)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.cap.set(cv2.CAP_PROP_FPS,          self.fps)
+        try:
+            # OpenCV capture
+            self.cap = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  width)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            self.cap.set(cv2.CAP_PROP_FPS,          self.fps)
+        
+        except Exception as e:
+            self.get_logger().error(f"Exception opening camera index {idx}: {str(e)}")
+            raise ConnectionError("Camera open failed")
+
+        backend = self.get_parameter('camera_backend').value
+        if backend != 'auto':
+            self.get_logger().info(f"Camera backend detected: {backend}")
+        else:
+            self.get_logger().info(f"Camera backend: Auto-detected (using {cv2.CAP_V4L2})")
+
+        try:
+            # Log actual camera properties
+            actual_width  = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+            actual_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            actual_fps    = self.cap.get(cv2.CAP_PROP_FPS)
+
+            self.get_logger().info(f"Actual camera properties: {actual_width}x{actual_height} @ {actual_fps} FPS")
+        except Exception as e:
+            self.get_logger().warning(f"Could not retrieve camera properties: {str(e)}")
 
         if not self.cap.isOpened():
             self.get_logger().error(f"Cannot open camera index {idx}")
-            raise RuntimeError("Camera open failed")
+            raise ConnectionError("Camera open failed")
 
         # ROS pub ‑ use best‑effort QoS for high‑rate sensor data
         qos = QoSProfile(
@@ -45,8 +68,8 @@ class CameraPublisher(Node):
 
         # Publish at the requested frame rate
         self.timer = self.create_timer(1.0 / self.fps, self._publish_frame)
-        self.get_logger().info("Camera publisher started")
-
+        self.get_logger().info("Camera publisher started.")
+        self.get_logger().info("Camera node initialized.")
 
 
 
@@ -54,10 +77,10 @@ class CameraPublisher(Node):
     def _publish_frame(self):
         ok, frame = self.cap.read()
         if not ok:
-            self.get_logger().warning("Frame grab failed")
+            self.get_logger().warning("Frame grab failed, retrying...", throttle_duration_sec=5.0)
             return
 
-        self.get_logger().info(f"Raw frame shape: {frame.shape}, dtype: {frame.dtype}")
+        self.get_logger().debug(f"Raw frame shape: {frame.shape}, dtype: {frame.dtype}", throttle_duration_sec=5.0)
 
         width  = self.get_parameter("width").value
         height = self.get_parameter("height").value
@@ -69,7 +92,7 @@ class CameraPublisher(Node):
             expected = width * height * 3
             if flat.size == expected:
                 frame = flat.reshape((height, width, 3))
-                self.get_logger().info(f"Reshaped to: {frame.shape}")
+                #self.get_logger().info(f"Reshaped to: {frame.shape}")
             else:
                 self.get_logger().error(f"Unexpected buffer size: {flat.size}, expected {expected}")
                 return
@@ -78,13 +101,20 @@ class CameraPublisher(Node):
         if len(frame.shape) == 2:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-        msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
-        self.pub.publish(msg)
+        try:
+            msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            self.pub.publish(msg)
+            # Once-only debug log
+            self.get_logger().info("Published first camera frame", once=True)
+            self.get_logger().debug(f"Published frame shape: {frame.shape}, dtype: {frame.dtype}", throttle_duration_sec=5.0)
+        except Exception as e:
+            self.get_logger().error(f"Failed to publish camera frame: {str(e)}")
 
     def destroy_node(self):
         if self.cap.isOpened():
             self.cap.release()
         super().destroy_node()
+        self.get_logger().info("Camera node shutting down.")
 
 
 
@@ -93,6 +123,7 @@ def main():
     node = None
     try:
         node = CameraPublisher()
+        self.get_logger().info("Camera node starting.")
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass

@@ -9,6 +9,7 @@ from vision_msgs.msg import Detection2DArray, Detection2D, ObjectHypothesisWithP
 class YoloTrackNode(Node):
     def __init__(self):
         super().__init__('yolo_track_node')
+        self.get_logger().info("Starting YOLO11 Tracking Node initialization.")
 
         # Parameters for setup
         self.declare_parameter('image_topic', '/camera/image_raw')
@@ -31,10 +32,11 @@ class YoloTrackNode(Node):
 
         # ROS interfaces
         self.sub = self.create_subscription(Image, self.image_topic, self.image_cb, 10) # Camera feed subscription
+        self.get_logger().info(f"Subscribed to image topic: {self.image_topic}")
         self.pub_img = self.create_publisher(Image, self.out_image_topic, 10) # Annotated images published here
+        self.get_logger().info(f"Publishing annotated images to: {self.out_image_topic}")
         self.pub_tracks = self.create_publisher(Detection2DArray, 'detections', 10) # Publishes new detection to here
-
-        self.get_logger().info(f"YOLO11 tracking node running with {self.weights}, tracker={self.tracker}")
+        self.get_logger().info(f"YOLO11 tracking node initialized with {self.weights}, tracker={self.tracker}")
 
     def image_cb(self, msg: Image):
         # Convert ROS2 Image → OpenCV
@@ -94,10 +96,15 @@ class YoloTrackNode(Node):
         if det_array.detections:
             self.pub_tracks.publish(det_array)
 
+    def destroy_node(self):
+        self.get_logger().info("Shutting down YOLO11 Tracking Node.")
+        super().destroy_node()
+
 def main(args=None):
     rclpy.init(args=args)
     node = YoloTrackNode()
     try:
+        node.get_logger().info("YOLO11 Tracking Node starting.")
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
