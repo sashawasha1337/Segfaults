@@ -11,7 +11,7 @@ class StatusPusher:
 
     def battery_callback(self, msg):
         self.node.battery_voltage = msg.voltage
-        self.node.get_logger().info(f'Battery voltage: {self.node.battery_voltage} V')
+        self.node.get_logger().debug(f'Battery voltage: {self.node.battery_voltage} V', throttle_duration_sec=10)
 
     def get_wifi_strength(self):
         try:
@@ -25,13 +25,13 @@ class StatusPusher:
     def push_status(self):
         peer_session = self.data_channel_getter()
         if not peer_session:
-            self.node.get_logger().warning('No active peer session, cannot send status')
+            self.node.get_logger().error('No active peer session, cannot send status')
             return
 
 
         wifi_strength = self.get_wifi_strength()
 
-        self.node.get_logger().info(f'Wifi Strength: {wifi_strength}')
+        self.node.get_logger().debug(f'Wifi Strength: {wifi_strength}', throttle_duration_sec=10)
 
         payload = {
             'type': 'status',
@@ -47,4 +47,4 @@ class StatusPusher:
             dc.send(payload_json)
             self.node.get_logger().info(f'Status sent: {payload_json}')
         else:
-            self.node.get_logger().warning('Data channel not open, cannot send status')
+            self.node.get_logger().error('Data channel not open, cannot send status')
