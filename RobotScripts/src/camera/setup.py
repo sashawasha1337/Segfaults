@@ -23,7 +23,7 @@ setup(
         'camera_node = camera.CameraNode:main',
         'yolo_node = camera.YoloNode:main',
         'rplidar_avoidance = camera.rplidar_avoidance:main',
-        'simple_image_event_test = camera.SimpleImageEventTest:main',
+        'event_compiler_node = camera.EventCompilerNode:main',
     ],
 },
 

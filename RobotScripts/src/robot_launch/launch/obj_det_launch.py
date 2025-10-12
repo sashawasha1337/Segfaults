@@ -52,7 +52,7 @@ def generate_launch_description():
         ),
         Node(
             package='camera',
-            executable='simple_image_event_test',
+            executable='event_compiler_node',
             output='screen',
             respawn=True,
             respawn_delay=10,
