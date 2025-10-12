@@ -53,6 +53,7 @@ function ActivityLogPage() {
 
       const rows = snap.docs.map((d) => {
           const data = d.data();
+          const imageUrl = data.image_url ?? null;
           const t = 
             data.time?.toDate?.() instanceof Date
               ? data.time.toDate()
@@ -78,6 +79,7 @@ function ActivityLogPage() {
             time: formatted,
             //timeMS to make sure sorting by time works correctly in event table
             timeMS: t instanceof Date ? t.getTime() : null,
+            imageUrl,
           };
         });
 

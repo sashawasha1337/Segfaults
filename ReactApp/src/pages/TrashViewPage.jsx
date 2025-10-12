@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
 import { Typography, Container, Box } from "@mui/material";
 import DisplayCard from "../components/DisplayCard";
 import BackButton from "../components/BackButton";
-
-import { db } from "../firebaseConfig"; // Import Firestore
-import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
-
+import { db } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 function TrashViewPage() {
   const navigate = useNavigate();
+  const { state } = useLocation(); // contains eventId, imageUrl, robotId, etc.
 
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,107 +28,65 @@ function TrashViewPage() {
     Coordinates: "Coordinates",
     Timestamp: "Timestamp",
     Robot_ID: "Robot ID",
-  }
-
-  const sampleMetadata = {
-    Confidence: "92%",
-    Category: "Litter",
-    Location: "Library",
-    Coordinates: "38.56094° N, 77.31693° W",
-    Timestamp: "2025-03-14 10:32:00",
-    Robot_ID: "RBT-001",
   };
-  
-  // fetch image from database
+
   useEffect(() => {
-    const fetchImage = async () => {
+    let alive = true;
+    const run = async () => {
       setLoading(true);
       try {
-        const imagesRef = collection(db, "robot_images");
-        const q = query(imagesRef, orderBy("timestamp", "desc"), limit(1));
-        const querySnapshot = await getDocs(q);
+        let img = state?.imageUrl ?? null;
+        let rob = state?.robotId ?? "Unknown";
+        let cat = state?.category ?? "Unknown";
+        let loc = state?.location ?? "Unknown";
+        let timeTxt = "";
 
-        const metadataRef = collection(db, "trash_data");
-        const q2 = query(metadataRef, orderBy("Timestamp", "desc"), limit(1));
-        const querySnapshot2 = await getDocs(q2);
-
-        const gpsRef = collection(db, "gps_data");
-        const gpsQ = query(gpsRef, orderBy("timestamp", "desc"), limit(1));
-        const gpsSnapshot = await getDocs(gpsQ);
-
-        if (!querySnapshot.empty) {
-          setImageUrl(querySnapshot.docs[0].data().url);
-        } else {
-          console.warn("No images found in Firestore.");
-        }
-
-        let coordinatesTxt = "";
-        let timestampTxt = "";
-        if (!gpsSnapshot.empty && !querySnapshot2.empty) {
-          const d = gpsSnapshot.docs[0].data();
-          const data = querySnapshot2.docs[0].data();
-          const lat = d.latitude;
-          const lng = d.longitude;
-          if (lat != null && lng != null) {
-            coordinatesTxt = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        if (!img && state?.eventId) {
+          const ref = doc(db, "events", state.eventId);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            const data = snap.data();
+            img = data.image_url ?? null;
+            rob = data.robotId ?? rob;
+            cat = data.category ?? cat;
+            loc = data.location ?? loc;
+            const t =
+              data.time?.toDate?.() instanceof Date
+                ? data.time.toDate()
+                : typeof data.time === "string"
+                ? new Date(data.time)
+                : null;
+            if (t instanceof Date && !isNaN(t)) {
+              timeTxt = t.toLocaleString();
+            }
           }
-          timestampTxt = d.timestamp.toDate().toLocaleString();
-
-          setMetadata({
-            Confidence: data.Confidence,
-            Category: data.Category,
-            Location: data.Location,
-            Coordinates: coordinatesTxt,
-            Timestamp: timestampTxt,
-            Robot_ID: data.Robot_ID
-        });
-        }else{
-          console.warn("No metadata found in Firestore.");
+        } else if (state?.timeMS) {
+          const t = new Date(state.timeMS);
+          if (!isNaN(t)) timeTxt = t.toLocaleString();
         }
-      } catch (error) {
-        console.error("Error fetching image:", error);
-      }
-      setLoading(false);
-    };
 
-    fetchImage();
-  }, []);
-
-/*
-  //fetch metadata from database
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      setLoading(true);
-      try{
-        const metadataRef = collection(db, "GPS_data");
-        const q = query(metadataRef, orderBy("Timestamp", "desc"), limit(1));
-        const querySnapshot = await getDocs(q);
-
-        if(!querySnapshot.empty){
-          const data = querySnapshot.docs[0].data();
-          //maybe we can store everything as strings?
+        if (alive) {
+          setImageUrl(img);
           setMetadata({
-            Confidence: data.Confidence,
-            Category: data.Category,
-            Location: data.Location,
-            Coordinates: data.Coordinates 
-            ? `${data.Coordinates.latitude}, ${data.Coordinates.longitude}` 
-            : "No coordinates found", //convert firestore geopoint to redable string
-            Timestamp: data.Timestamp.toDate().toLocaleString(), //convert firestore timestamp to readable string
-            Robot_ID: data.Robot_ID
-
+            Confidence: "",
+            Category: cat,
+            Location: loc,
+            Coordinates: "",
+            Timestamp: timeTxt,
+            Robot_ID: rob,
           });
-        }else{
-          console.warn("No metadata found in Firestore.");
         }
-      }catch(error){
-        console.error("Error fetching metadata:", error); 
+      } catch (e) {
+        console.error("Error loading event:", e);
+      } finally {
+        alive && setLoading(false);
       }
-      setLoading(false);
-    }
-    fetchMetadata();
-  }, []);
-*/
+    };
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [db, state]);
 
   return (
     <Box
@@ -139,7 +95,7 @@ function TrashViewPage() {
         justifyContent: "center",
         alignItems: "center",
         width: "100%", // Ensures full width
-        height: "100%", // Centers vertically too
+        height: "100%",// Centers vertically too 
         textAlign: "center",
       }}
     >
@@ -158,6 +114,6 @@ function TrashViewPage() {
       </Container>
     </Box>
   );
-};
+}
 
 export default TrashViewPage;
