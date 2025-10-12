@@ -123,7 +123,7 @@ def main():
     node = None
     try:
         node = CameraPublisher()
-        self.get_logger().info("Camera node starting.")
+        node.get_logger().info("Camera node starting.")
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
