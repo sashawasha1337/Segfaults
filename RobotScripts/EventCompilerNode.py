@@ -3,6 +3,9 @@
 ##the json file should be in the same directory as firebase publishing script
 
 import os
+import cv2
+import uuid 
+import urllib.parse
 from platform import node
 import rclpy
 from rclpy.node import Node
@@ -13,10 +16,10 @@ from message_filters import Subscriber, ApproximateTimeSynchronizer
 import json
 from std_msgs.msg import String
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 
 
-FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.firebasestorage.app")
+FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET","segfaults-database.appspot.com")
 
 
 
@@ -54,7 +57,6 @@ def detection_to_dict(detection):
         })
     return result
 
-
 class EventCompilerNode(Node):
     def __init__(self):
         super().__init__('event_compiler_node')
@@ -64,10 +66,11 @@ class EventCompilerNode(Node):
         cred_path = os.path.join(script_dir, SERVICE_ACCOUNT_FILE)
         if not firebase_admin._apps:
             cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred)
+            firebase_admin.initialize_app(cred,{"storageBucket": FIREBASE_STORAGE_BUCKET})
         self.db = firestore.client()
         # end of firebase inmit
 
+        self.bucket = storage.bucket()
 
         self.subscription1 = Subscriber(self, Image, '/camera/image_raw')
         ##this subscribes to example gps topic, can change this to whatever it actually is 
@@ -86,6 +89,8 @@ class EventCompilerNode(Node):
     def synced_callback(self, image_msg:Image, det_msg:Detection2DArray):
         # Convert ROS Image msg to OpenCV image
         frame = self.bridge.imgmsg_to_cv2(image_msg, desired_encoding="bgr8")
+        ts_ms = int(ros_time_to_seconds(image_msg.header.stamp) * 1000)
+        image_storage_path, image_url = self.upload_image_to_firebase(frame,ts_ms)
 
         # Here you can process the frame and detection data into a json which will be published as an event
 
@@ -96,6 +101,8 @@ class EventCompilerNode(Node):
             "robot_id": ROBOT_ID,
             "users": [ROBOT_UID],
             "detections_full": [detection_to_dict(d) for d in det_msg.detections],
+            "image_storage_path": image_storage_path,
+            "image_url": image_url
             #"timestamp": firestore.SERVER_TIMESTAMP
         }
         self.get_logger().info(f"EVENT: {events}  ")
@@ -108,6 +115,17 @@ class EventCompilerNode(Node):
         except Exception as e:
             self.get_logger().error(f"Error writing to Firestore: {e}")
 
+    def upload_image_to_firebase(self, frame, ts_ms):
+        ok, buf = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        filename = f"{ROBOT_ID}_{ts_ms}_{uuid.uuid4().hex}.jpg"
+        path = f"events/{ROBOT_ID}/{filename}"
+        blob = self.bucket.blob(path)
+        token = uuid.uuid4().hex
+        blob.metadata = {"firebaseStorageDownloadTokens": token}
+        blob.upload_from_string(buf.tobytes(), content_type='image/jpeg')
+        fixedname = urllib.parse.quote(blob.name, safe="")
+        url = f"https://firebasestorage.googleapis.com/v0/b/{self.bucket.name}/o/{fixedname}?alt=media&token={token}"
+        return path,url
 
 def main(args=None):
     rclpy.init(args=args)
