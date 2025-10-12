@@ -75,7 +75,7 @@ class EventCompilerNode(Node):
         self.subscription1 = Subscriber(self, Image, '/camera/image_raw')
         ##this subscribes to example gps topic, can change this to whatever it actually is 
         ##self.subscription2 = Subscriber(self, NavSatFix, '/gps/fix')
-        self.subscription3 = Subscriber(self, Detection2DArray, 'detection_events')
+        self.subscription3 = Subscriber(self, Detection2DArray, 'detections')
 
         ##ensures that the time of the bounding box message and image are close
         self.ts = ApproximateTimeSynchronizer(
