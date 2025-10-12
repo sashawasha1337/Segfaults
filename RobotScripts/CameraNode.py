@@ -77,7 +77,7 @@ class CameraPublisher(Node):
     def _publish_frame(self):
         ok, frame = self.cap.read()
         if not ok:
-            self.get_logger().warning("Frame grab failed, retrying...")
+            self.get_logger().warning("Frame grab failed, retrying...", throttle_duration_sec=5.0)
             return
 
         self.get_logger().debug(f"Raw frame shape: {frame.shape}, dtype: {frame.dtype}", throttle_duration_sec=5.0)
