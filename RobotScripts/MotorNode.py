@@ -30,20 +30,25 @@ class MotorControlNode(Node):
                 )
                 self.get_logger().info("Created cmd_vel subscription.")
 
+
+                # JOINT MESSAGE NOT IMPLEMENTED YET - COMMENTED OUT FOR NOW
+
                 # Publish JointState messages for more accurate autonomous movement (position, velocity, effort)
-                joint_pub = self.create_publisher(JointState, '/joint_states', 10)
-                self.get_logger().info("Created joint_states publisher.")
+
+                #joint_pub = self.create_publisher(JointState, '/joint_states', 10)
+                #self.get_logger().info("Created joint_states publisher.")
 
                 # Initialize JointState message
-                joint_msg = JointState()
-                joint_msg.header.stamp = self.get_clock().now().to_msg()
-                joint_msg.name = ['left_wheel_joint', 'right_wheel_joint'] # Hard coded labels. Check URDF joint names
+
+                #joint_msg = JointState()
+                #joint_msg.header.stamp = self.get_clock().now().to_msg()
+                #joint_msg.name = ['left_wheel_joint', 'right_wheel_joint'] # Hard coded labels. Check URDF joint names
                 #joint_msg.position = [left_pos, right_pos] # Values obtained from motor encoders
 
                 # The following are optional to add to the message depending on whether velocity/torque sensors are available
                 # joint_msg.position = [left_vel, right_vel]
                 # joint_msg.effort = []
-                self.joint_pub.publish(joint_msg)
+                #self.joint_pub.publish(joint_msg)
 
                 try:
                         # Open GPIO chip handle
