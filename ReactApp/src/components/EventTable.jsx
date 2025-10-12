@@ -8,11 +8,18 @@ import { useNavigate } from "react-router-dom";
 
 const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
   const navigate=useNavigate();
-  const handleViewDetails = (eventId) => {
-    //commented out navigation to specific events 
-    //navigate(`/EventDetails/${eventId}`);
-    navigate('/TrashViewPage');
-  }
+  const handleViewDetails = (event) => {
+    navigate('/TrashViewPage', {
+      state: {
+        eventId: event.eventId,
+        imageUrl: event.imageUrl ?? null,
+        robotId: event.robotId ?? "Unknown",
+        category: event.category ?? "Unknown",
+        location: event.location ?? "Unknown",
+        timeMS: event.timeMS ?? null,
+        },
+      });
+    }
   // this defines labels which manage arrows indicating sorting direction and field 
   const SortingButton=({field, label})=>{
     const activeField=field===sortField;
@@ -53,7 +60,7 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
             <td>{event.time}</td>
             <td>
               <button
-                onClick={() => handleViewDetails(event.eventId)}
+                onClick={() => handleViewDetails(event)}
               >
                 View Details
               </button>
