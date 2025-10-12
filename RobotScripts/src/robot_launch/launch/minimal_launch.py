@@ -1,6 +1,5 @@
-from Segfaults.RobotScripts.src.robot_launch.launch.full_launch import LaunchDescription
 from launch_ros.actions import Node
-from Segfaults.RobotScripts.src.robot_launch.launch.full_launch import LaunchDescription
+from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
