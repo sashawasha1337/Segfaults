@@ -36,6 +36,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         verbosity_arg,
+        system_arg,
 
         Node(
             package='camera',
