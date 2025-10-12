@@ -13,13 +13,14 @@ set ROBOT_UID=3wxSSldz5mhCJrOJiAGvzsnMGpn2
 set EVENT_LOCATION=Test Park
 set EVENT_CATEGORY=Litter
 set ONE_SHOT=1
-set FIREBASE_STORAGE_BUCKET=segfaults-database.appspot.com
+set FIREBASE_STORAGE_BUCKET=segfaults-database.firebasestorage.app
 :: Optional: require an image before posting
-set WAIT_FOR_IMAGE=0
+set WAIT_FOR_IMAGE=1
 :: Optional: change image topic
 set IMAGE_TOPIC=/camera/image_raw/compressed
 
-python SuperSimpleEventTest.py
+python testFeeder.py
+python SimpleImageEventTest.py
 """
 
 import os
@@ -55,7 +56,7 @@ WAIT_FOR_IMAGE = os.environ.get("WAIT_FOR_IMAGE", "0") == "1"
 IMAGE_TOPIC = os.environ.get("IMAGE_TOPIC", "/camera/image_raw/compressed")
 
 # Firebase Storage bucket (must be *.appspot.com for Admin SDK signed URLs)
-FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.appspot.com")
+FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET", "segfaults-database.firebasestorage.app")
 # ---------------------------
 
 
@@ -75,7 +76,7 @@ class SuperSimpleEventNode(Node):
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred, {"storageBucket": FIREBASE_STORAGE_BUCKET})
         self.db = firestore.client()
-        self.bucket = storage.bucket()
+        self.bucket = storage.bucket(FIREBASE_STORAGE_BUCKET)   
         # ---------------------
 
         # Debug publisher (what we write to Firestore)
@@ -178,8 +179,11 @@ class SuperSimpleEventNode(Node):
             event_doc["frame_id"] = frame_id
 
         # Debug publish (optional)
+        debug_doc = dict(event_doc)
+        if "time" in debug_doc:
+            debug_doc["time"] = "SERVER_TIMESTAMP"
         try:
-            self.pub_debug.publish(String(data=json.dumps(event_doc)))
+            self.pub_debug.publish(String(data=json.dumps(debug_doc)))
         except Exception as e:
             self.get_logger().warn(f"Debug publish failed: {e}")
 
