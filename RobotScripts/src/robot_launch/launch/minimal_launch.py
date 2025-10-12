@@ -25,8 +25,10 @@ def generate_launch_description():
 
 
     # Configure camera prefix for raspberry pi 5
-    camera_prefix = PythonExpression([system, " == 'pi' ? 'libcamerify' : ''"])
-
+    #camera_prefix = PythonExpression([system, " == 'pi' ? 'libcamerify' : ''"])
+    camera_prefix = PythonExpression([
+    "'libcamerify' if '", system, "' == 'pi' else ''"
+])
 
     return LaunchDescription([
         verbosity_arg,
