@@ -16,6 +16,23 @@ def generate_launch_description():
 
     verbosity = LaunchConfiguration('verbosity')
 
+    system_arg = DeclareLaunchArgument(
+        'system',
+        default_value='nano',
+        description = 'Robot system type (nano, pi, dev)',
+        choices = ['nano', 'pi', 'dev']
+    )
+    system = LaunchConfiguration('system')
+ 
+    if system == 'nano':
+        # Nano specific nodes or parameters can be set here
+        camera_prefix = ''
+    elif system == 'pi':
+        # Pi specific nodes or parameters can be set here
+        camera_prefix = 'libcamerify'
+    else:
+        # Dev specific nodes or parameters can be set here
+        camera_prefix = ''
 
 
     return LaunchDescription([
@@ -24,7 +41,7 @@ def generate_launch_description():
         Node(
             package='camera',
             executable='camera_node',
-            prefix='libcamerify',
+            prefix=camera_prefix,
             output='screen',
             respawn=True,
             respawn_delay=2,
