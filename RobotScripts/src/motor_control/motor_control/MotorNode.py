@@ -1,5 +1,4 @@
 # Node to handle the control of bi-directional PWM DC motors using lgpio
-
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -30,26 +29,31 @@ class MotorControlNode(Node):
                 )
                 self.get_logger().info("Created cmd_vel subscription.")
 
+
+                # JOINT MESSAGE NOT IMPLEMENTED YET - COMMENTED OUT FOR NOW
+
                 # Publish JointState messages for more accurate autonomous movement (position, velocity, effort)
-                joint_pub = self.create_publisher(JointState, '/joint_states', 10)
-                self.get_logger().info("Created joint_states publisher.")
+
+                #joint_pub = self.create_publisher(JointState, '/joint_states', 10)
+                #self.get_logger().info("Created joint_states publisher.")
 
                 # Initialize JointState message
-                joint_msg = JointState()
-                joint_msg.header.stamp = self.get_clock().now().to_msg()
-                joint_msg.name = ['left_wheel_joint', 'right_wheel_joint'] # Hard coded labels. Check URDF joint names
+
+                #joint_msg = JointState()
+                #joint_msg.header.stamp = self.get_clock().now().to_msg()
+                #joint_msg.name = ['left_wheel_joint', 'right_wheel_joint'] # Hard coded labels. Check URDF joint names
                 #joint_msg.position = [left_pos, right_pos] # Values obtained from motor encoders
 
                 # The following are optional to add to the message depending on whether velocity/torque sensors are available
                 # joint_msg.position = [left_vel, right_vel]
                 # joint_msg.effort = []
-                self.joint_pub.publish(joint_msg)
+                #self.joint_pub.publish(joint_msg)
 
                 try:
                         # Open GPIO chip handle
                         self.chip = lgpio.gpiochip_open(CHIP)
-                        chip_info = lgpio.gpiochip_info(self.chip)
-                        self.get_logger().info(f"Opened GPIO chip info: {chip_info['name']}, {chip_info['label']}")
+                        chip_info = lgpio.gpio_get_chip_info(self.chip)
+                        self.get_logger().info(f"Opened GPIO chip: {chip_info}")
 
                         # Claim the direction pins as outputs
                         lgpio.gpio_claim_output(self.chip, LEFT_DIR)

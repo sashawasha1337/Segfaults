@@ -39,7 +39,7 @@ def generate_launch_description():
             prefix=camera_prefix,
             output='screen',
             respawn=True,
-            respawn_delay=2,
+            respawn_delay=10,
             arguments=['--ros-args', '--log-level', verbosity]
         ),
         Node(
@@ -47,7 +47,7 @@ def generate_launch_description():
             executable='motor_node',
             output='screen',
             respawn=True,
-            respawn_delay=2,
+            respawn_delay=10,
             arguments=['--ros-args', '--log-level', verbosity]
             ),
         Node(
