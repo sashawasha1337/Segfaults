@@ -19,7 +19,7 @@ class YoloTrackNode(Node):
         # Parameters
         self.declare_parameter('image_topic', '/camera/image_raw')
         self.declare_parameter('out_image_topic', '/tracking/image')
-        self.declare_parameter('weights', '/home/robot/ros2_ws/Model/best.pt')
+        self.declare_parameter('weights', '~/home/robot/ros2_ws/Model/best.pt')
         self.declare_parameter('tracker', 'botsort.yaml')
         self.declare_parameter('conf', 0.3)
 

@@ -10,7 +10,7 @@ from platform import node
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, NavSatFix
-from vision_msgs.msg import Detection2DArray
+from vision_msgs.msg import Detection2DArray#might not need
 from cv_bridge import CvBridge
 from message_filters import Subscriber, ApproximateTimeSynchronizer
 import json
@@ -53,7 +53,7 @@ class EventCompilerNode(Node):
         self.subscription1 = Subscriber(self, Image, '/camera/image_raw')
         ##this subscribes to example gps topic, can change this to whatever it actually is 
         ##self.subscription2 = Subscriber(self, NavSatFix, '/gps/fix')
-        self.subscription3 = Subscriber(self, Detection2DArray, 'detections')
+        self.subscription3 = Subscriber(self, String, 'detections')
 
         ##ensures that the time of the bounding box message and image are close
         self.ts = ApproximateTimeSynchronizer(
@@ -64,7 +64,7 @@ class EventCompilerNode(Node):
         self.publisher_ = self.create_publisher(String, 'compiled_events', 10)
         self.get_logger().info("Event Compiler node initialized")
 
-    def synced_callback(self, image_msg:Image, det_msg:Detection2DArray):
+    def synced_callback(self, image_msg:Image, det_msg:String):
         # Convert ROS Image msg to OpenCV image
         frame = self.bridge.imgmsg_to_cv2(image_msg, desired_encoding="bgr8")
         ts_ms = int(ros_time_to_seconds(image_msg.header.stamp) * 1000)
@@ -73,12 +73,12 @@ class EventCompilerNode(Node):
         # Here you can process the frame and detection data into a json which will be published as an event
 
         events={
-            "time": ros_time_to_seconds(image_msg.header.stamp),
-            "frame_id": image_msg.header.frame_id,
-            "detections": len(det_msg.detections),
+            "category": json.loads(det_msg.data).get("class",""),
+            "location":"",#gps data later
             "robot_id": ROBOT_ID,
+            "time": json.loads(det_msg.data).get("timestamp",""),
+            #we need to change this part we have no need for users/need to redesign
             "users": [ROBOT_UID],
-            "image_storage_path": image_storage_path,
             "image_url": image_url
             #"timestamp": firestore.SERVER_TIMESTAMP
         }
