@@ -18,7 +18,7 @@ from firebase_admin import credentials, firestore, storage
 import urllib.parse
 
 
-FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET","segfaults-database.appspot.com")
+FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET","segfaults-database.firebasestorage.app")
 
 
 
@@ -58,7 +58,7 @@ class YoloTrackNode(Node):
         self.db = firestore.client()
         # end of firebase inmit
 
-        self.bucket = storage.bucket()
+        self.bucket = storage.bucket(FIREBASE_STORAGE_BUCKET)
 
         # QoS profile
         qos = QoSProfile(
@@ -119,9 +119,10 @@ class YoloTrackNode(Node):
                 # Only publish new detections
                 if tid not in self.known_ids:
                     self.known_ids.add(tid)
-
+                    
+                    ts_ms = int(ros_time_to_seconds(msg.header.stamp) * 1000)
                     # Encode annotated image to base64
-                    _, image_url = self.upload_image_to_firebase(annotated, int(ros_time_to_seconds(msg.header.stamp) * 1000))
+                    _, image_url = self.upload_image_to_firebase(annotated, ts_ms)
                    
 
                     # Build JSON
@@ -129,7 +130,7 @@ class YoloTrackNode(Node):
                         "category": class_name,
                         "location": "",  # GPS data can be added later
                         "robotID": ROBOT_ID,
-                        "time": class_name,
+                        "time": datetime.utcfromtimestamp(ts_ms / 1000).isoformat() + "Z",
                         "users": [ROBOT_UID],
                         "image_url": image_url
                     }

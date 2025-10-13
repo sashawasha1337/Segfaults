@@ -103,6 +103,8 @@ class CameraPublisher(Node):
 
         try:
             msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            # Time stamps the images
+            msg.header.stamp = self.get_clock().now().to_msg()
             self.pub.publish(msg)
             # Once-only debug log
             self.get_logger().info("Published first camera frame", once=True)
