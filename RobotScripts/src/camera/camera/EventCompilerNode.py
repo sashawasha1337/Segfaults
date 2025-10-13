@@ -17,6 +17,7 @@ import json
 from std_msgs.msg import String
 import firebase_admin
 from firebase_admin import credentials, firestore, storage
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
 
 FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET","segfaults-database.appspot.com")
@@ -49,15 +50,18 @@ class EventCompilerNode(Node):
         # end of firebase inmit
 
         self.bucket = storage.bucket()
-
-        self.subscription1 = Subscriber(self, Image, '/camera/image_raw')
+        qos = QoSProfile(
+            reliability = ReliabilityPolicy.BEST_EFFORT,
+            history     = HistoryPolicy.KEEP_LAST,
+            depth       = 1,
+        )
+        self.subscription1 = Subscriber(self, Image, '/camera/image_raw', qos_profile=qos)
         ##this subscribes to example gps topic, can change this to whatever it actually is 
         ##self.subscription2 = Subscriber(self, NavSatFix, '/gps/fix')
-        self.subscription3 = Subscriber(self, String, 'detections')
+        self.subscription3 = Subscriber(self, String, 'detections', qos_profile=qos)
 
         ##ensures that the time of the bounding box message and image are close
-        self.ts = ApproximateTimeSynchronizer(
-            [self.subscription1, self.subscription3], queue_size=10, slop=0.1)
+        self.image_cache = collections.deque(maxlen=10)
         self.ts.registerCallback(self.synced_callback)
         self.bridge = CvBridge()
         ##publish compiled events to compiled_events topic
