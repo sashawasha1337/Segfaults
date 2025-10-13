@@ -36,6 +36,8 @@ RobotScripts/keys/*.json
 image-test-permissions.json
 robot-service-account.json
 goku.jpg
+src/camera/camera/robot-service-account.json
+
 
 #ROS2 Package and Python Cache Files
 build/
