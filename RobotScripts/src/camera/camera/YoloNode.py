@@ -15,6 +15,7 @@ from datetime import datetime
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore, storage
+import urllib.parse
 
 
 FIREBASE_STORAGE_BUCKET = os.environ.get("FIREBASE_STORAGE_BUCKET","segfaults-database.appspot.com")
@@ -68,40 +69,18 @@ class YoloTrackNode(Node):
 
         # ROS publishers/subscribers
         self.sub = self.create_subscription(Image, self.image_topic, self.image_cb, qos)
+        
+        self.pub_events = self.create_publisher(String, 'compiled_events', 10)
+        self.pub_img = self.create_publisher(Image, '/tracking/image', 10)
 
         self.get_logger().info(f"YOLO tracking node running with {self.weights}, tracker={self.tracker}")
     
     
-    def synced_callback(self, image_msg: Image, det_msg: String):
-        # Convert ROS Image msg to OpenCV image
-        frame = self.bridge.imgmsg_to_cv2(image_msg, desired_encoding="bgr8")
-        ts_ms = int(ros_time_to_seconds(image_msg.header.stamp) * 1000)
-        image_storage_path, image_url = self.upload_image_to_firebase(frame, ts_ms)
 
-        # Here you can process the frame and detection data into a json which will be published as an event
-
-        events = {
-            "category": json.loads(det_msg.data).get("class", ""),
-            "location": "",  # gps data later
-            "robot_id": ROBOT_ID,
-            "time": json.loads(det_msg.data).get("timestamp", ""),
-            # we need to change this part we have no need for users/need to redesign
-            "users": [ROBOT_UID],
-            "image_url": image_url
-            # "timestamp": firestore.SERVER_TIMESTAMP
-        }
-        self.get_logger().info(f"EVENT: {events}  ")
-        self.publisher_.publish(String(data=json.dumps(events)))
-
-        # write to firestore
-        try:
-            ref = self.db.collection(COLLECTION_PATH).add(events)
-            self.get_logger().info(f"Firestore write successful: {ref}")
-        except Exception as e:
-            self.get_logger().error(f"Error writing to Firestore: {e}")
-
-    def upload_image_to_firebase(self, frame, ts_ms):
-        ok, buf = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+    def upload_image_to_firebase(self, image, ts_ms):
+        ok, buf = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        if not ok:
+            raise RuntimeError("cv2.imencode failed")
         filename = f"{ROBOT_ID}_{ts_ms}_{uuid.uuid4().hex}.jpg"
         path = f"events/{ROBOT_ID}/{filename}"
         blob = self.bucket.blob(path)
@@ -127,6 +106,10 @@ class YoloTrackNode(Node):
         annotated = results[0].plot()
         boxes = results[0].boxes
 
+        img_msg = self.bridge.cv2_to_imgmsg(annotated, encoding="bgr8")
+        img_msg.header = msg.header
+        self.pub_img.publish(img_msg)
+        
         if boxes.id is not None:
             for box, tid, cls, conf in zip(boxes.xyxy, boxes.id, boxes.cls, boxes.conf):
                 tid = int(tid.item())
@@ -138,29 +121,32 @@ class YoloTrackNode(Node):
                     self.known_ids.add(tid)
 
                     # Encode annotated image to base64
-                    _, buffer = cv2.imencode('.jpg', annotated)
-                    img_base64 = base64.b64encode(buffer).decode('utf-8')
+                    _, image_url = self.upload_image_to_firebase(annotated, int(ros_time_to_seconds(msg.header.stamp) * 1000))
+                   
 
                     # Build JSON
-                    detection_data = {
-                        "timestamp": datetime.now().isoformat(),
-                        "class": class_name,
-                        "image_stamp": {
-                            "sec": int(msg.header.stamp.sec),
-                            "nanosec": int(msg.header.stamp.nanosec)
-                        }
+                    event = {
+                        "category": class_name,
+                        "location": "",  # GPS data can be added later
+                        "robotID": ROBOT_ID,
+                        "time": class_name,
+                        "users": [ROBOT_UID],
+                        "image_url": image_url
                     }
                     
 
-                    msg_out = String()
-                    msg_out.data = json.dumps(detection_data)
-                    msg_out.header = msg.header
-               
+                    # Publish event
+                    self.pub_events.publish(String(data=json.dumps(event)))
+                    try:
+                        ref = self.db.collection(COLLECTION_PATH).add(event)
+                        self.get_logger().info(f"Firestore write successful: {ref}")
+                    except Exception as e:
+                        self.get_logger().error(f"Error writing to Firestore: {e}")
+                   
 
                     self.get_logger().info(f"New detection published: {class_name} (ID:{tid})")
 
         # Publish annotated frame to /tracking/image
-        img_msg = self.bridge.cv2_to_imgmsg(annotated, encoding="bgr8")
         
 
         
