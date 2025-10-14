@@ -70,33 +70,26 @@ function HomePage() {
       alert("Failed to delete robot. See console for details.");
     }
   };
-  
-
 
   const [robots, setRobots] = useState([]);
   const { currentUser } = useAuth(); 
   useEffect(() => {
     if(!currentUser){
-          console.error("No current user found.");
-          return;
-        }
+      console.error("No current user found.");
+      return;
+    }
     const fetchRobots = async() => {
       try{
-
-        // getting the user profiles
         const profilesRef = doc(db, "profiles", norm(currentUser.email));
         const profileSnap = await getDoc(profilesRef);
 
-        console.log("Current user ID:", currentUser.uid); // Log the current user ID
+        console.log("Current user ID:", currentUser.uid);
 
         const robotsData = [];
         if(profileSnap.exists()){
-
-          //getting the list of robots that the user has access to
           const profileData = profileSnap.data();
           const robotIds = profileData.robots || [];
 
-          //getting the robots information from the uuid 
           for (const ids of robotIds){
             const robotsRef = doc(db, "robots", ids);
             const robotSnap = await getDoc(robotsRef);
@@ -104,10 +97,7 @@ function HomePage() {
               robotsData.push({id: robotSnap.id, ...robotSnap.data()});
             }
           }
-
-
         }
-        //setting the data of the robots for displaying
         setRobots(robotsData);
       }catch (error) {
         console.error("Error fetching robots:", error);
@@ -118,7 +108,7 @@ function HomePage() {
 
 
   return (
-    <div className = "homepage">
+    <div className="homepage">
       <SettingsButton path="/UserSettingsPage" /> 
       <AddButton path="/AddRobotPage" />
       
@@ -140,31 +130,25 @@ function HomePage() {
       </Button>
 
       {robots.length === 0 ? (
-      <p style={{ marginTop: "200px", textAlign: "center" }}>
-        No robots found. Click the + button to add one!
+        <p style={{ marginTop: "200px", textAlign: "center" }}>
+          No robots found. Click the + button to add one!
         </p>
       ) : (
-      robots.map((robot, index) => (
-        <><RobotCard
-          key={robot.id}
-          imgSrc="https://images.squarespace-cdn.com/content/v1/5a3c1a29f9a61e2987882112/bee5c58a-5b2c-4302-bb18-433dd7bd5f2c/ROSmaster.jpeg"
-          imgAlt={`Robot ${robot.id}`}
-          title={robot.name || `Robot ${index + 1}`}
-          description={`IP: ${robot.ipAddress}`}
-          buttonText="FPV/Control"
-          //link={`/ControlPage/${robot.id}`} /><Button
-          link={`/RobotDashboardPage/${robot.id}`} /><Button
-            variant="outlined"
-            size="small"
-            sx={{ mt: 1, textTransform: "none" }}
-            onClick={() => handleDeleteRobot(robot.id)}
-          >
-            Delete Robot
-          </Button></>
-      ))
-    )}
-  </div>
-);
-};
+        robots.map((robot, index) => (
+          <RobotCard
+            key={robot.id}
+            imgSrc="https://images.squarespace-cdn.com/content/v1/5a3c1a29f9a61e2987882112/bee5c58a-5b2c-4302-bb18-433dd7bd5f2c/ROSmaster.jpeg"
+            imgAlt={`Robot ${robot.id}`}
+            title={robot.name || `Robot ${index + 1}`}
+            description={`IP: ${robot.ipAddress}`}
+            buttonText="FPV/Control"
+            link={`/RobotDashboardPage/${robot.id}`}
+            onDelete={() => handleDeleteRobot(robot.id)}
+          />
+        ))
+      )}
+    </div>
+  );
+}
 
 export default HomePage;
