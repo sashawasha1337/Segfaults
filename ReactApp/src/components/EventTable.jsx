@@ -11,7 +11,7 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
   const handleViewDetails = (event) => {
     navigate('/TrashViewPage', {
       state: {
-        eventId: event.eventId,
+        //eventId: event.eventId,
         imageUrl: event.imageUrl ?? null,
         robotId: event.robotId ?? "Unknown",
         category: event.category ?? "Unknown",
@@ -42,7 +42,6 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
     <table>
       <thead>
         <tr>
-          <SortingButton field="eventId" label="Event ID" />
           <SortingButton field="robotId" label="Robot ID" />
           <SortingButton field="category" label="Category" />
           <SortingButton field="location" label="Location" />
@@ -53,7 +52,6 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
       <tbody>
         {events.map((event) => (
           <tr key={event.eventId}>
-            <td>{event.eventId}</td>
             <td>{event.robotId}</td>
             <td>{event.category}</td>
             <td>{event.location}</td>

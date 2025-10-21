@@ -18,10 +18,12 @@ import { useAuth } from "../ContextForAuth";
 import{
   collection,
   query,
+  doc,
   where,
   orderBy,
   limit,
-  getDocs
+  getDocs,
+  getDoc
 } from "firebase/firestore"
 
 function ActivityLogPage() {
@@ -35,6 +37,30 @@ function ActivityLogPage() {
   const [lastRefresh, setLastRefresh] = React.useState(new Date()); 
 
   console.log("Current user object:", currentUser);
+
+  // Helper function to get robot IDs for a user
+  const getUserRobotIDs = async (email) => {
+    if (!email) return [];
+    const profileRef = doc(db, "profiles", email);
+    const profileSnap = await getDoc(profileRef);
+    if (!profileSnap.exists()) return [];
+    const profileData = profileSnap.data();
+    const ids = profileData?.robots || profileData.robotIds || [];
+    if (!Array.isArray(ids))
+      throw new Error("Invalid robot IDs format in user profile, check how robot is sending events.");
+    return ids.filter(Boolean);
+  };
+
+  //splits array into chunks
+  const chunkArray = (array, n = 10) => {
+    const out = [];
+    for (let i = 0; i < array.length; i += n) {
+      out.push(array.slice(i, i + n));
+    }
+    return out;
+  };
+
+
   // Add fetchEvents function outside useEffect so it can be reused
   const fetchEvents = async () => {
     if (!currentUser) {
@@ -43,49 +69,67 @@ function ActivityLogPage() {
     }
     try {
       setLoading(true);
-      const q = query(
-        collection(db, "events"),
-        where("users", "array-contains", currentUser.uid),
-        orderBy("time", "desc"),
-        limit(200)
-      );
-      const snap = await getDocs(q);
 
-      const rows = snap.docs.map((d) => {
-          const data = d.data();
-          const imageUrl = data.image_url ?? null;
-          const t = 
-            data.time?.toDate?.() instanceof Date
-              ? data.time.toDate()
-              :typeof data.time === "string"
-              ? new Date(data.time)
-              : null;
-          const formatted = 
-            t && !isNaN(t)
-              ? t.toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                }).replace(",", "")
-              : "";
-          return  {
-            eventId: d.id,
-            robotId: data.robotId ?? "Unknown",
-            category: data.category ?? "Unknown",
-            location: data.location ?? "Unknown",
-            time: formatted,
-            //timeMS to make sure sorting by time works correctly in event table
-            timeMS: t instanceof Date ? t.getTime() : null,
-            imageUrl,
-          };
-        });
+      const robotIds = await getUserRobotIDs(currentUser.email);
 
-        setEvents(rows);
+      if (robotIds.length === 0) {
+        setEvents([]);
+        setErr("You don't have any robots associated with your account.");
+        setLoading(false);
+        console.log("No robots found for user.");
+        return;
+      }
+
+      const idChunks = chunkArray(robotIds, 10); // Firestore 'in' queries support up to 10 values
+      const all = [];
+
+      for (const IDs of idChunks) {
+        const q = query(
+          collection(db, "events"),
+          where("robotId", "in", IDs),
+          orderBy("time", "desc"),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+  
+        const rows = snap.docs.map((d) => {
+            const data = d.data();
+            const imageUrl = data.image_url ?? null;
+            const t = 
+              data.time?.toDate?.() instanceof Date
+                ? data.time.toDate()
+                :typeof data.time === "string"
+                ? new Date(data.time)
+                : null;
+                const isValid = t instanceof Date && !Number.isNaN(t.getTime());
+                const formatted =   isValid
+                ? t.toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }).replace(",", "")
+                : "";
+            return  {
+              //eventId: d.id,
+              robotId: data.robotId ?? "Unknown",
+              category: data.category ?? "Unknown",
+              location: data.location ?? "Unknown",
+              time: formatted,
+              //timeMS to make sure sorting by time works correctly in event table
+              timeMS: isValid ? t.getTime() : null,
+              imageUrl,
+            };
+          });
+  
+          all.push(...rows);
+        }
+  
+        setEvents(all);
         setLastRefresh(new Date());
-              } catch (e) {
+      } catch (e) {
         console.error("Error fetching events:", e);
         setErr(e?.message || "Failed to load activity log.");
       } finally {
@@ -172,7 +216,7 @@ function ActivityLogPage() {
                 {err}
               </Typography>
             ) : events.length === 0 ? (
-              <Typography>No activity found.</Typography>
+              <Typography>No activity found. Make sure your RobotID is set</Typography>
             ) : (
               <EventTable
                 events={sortedEvents}
