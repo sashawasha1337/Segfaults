@@ -9,6 +9,9 @@ import {
   Stack,
   Typography,
   Tooltip,
+  TextField,
+  Autocomplete, 
+  Chip
 } from "@mui/material";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import BackButton from "../components/BackButton";
@@ -35,6 +38,10 @@ function ActivityLogPage() {
   const [sortField, setSortField] = React.useState("timeMS");
   const [sortDirection, setSortDirection] = React.useState("desc");
   const [lastRefresh, setLastRefresh] = React.useState(new Date()); 
+
+  const [filterRobotIds, setFilterRobotIds] = React.useState([]);
+  const [filterCategories, setFilterCategories] = React.useState([]);
+  const [filterLocations, setFilterLocations] = React.useState([]);
 
   console.log("Current user object:", currentUser);
 
@@ -72,6 +79,7 @@ function ActivityLogPage() {
     }
     try {
       setLoading(true);
+      setErr(""); //clear errors
       if (resetPage) setPageIndex(0); // Reset to first page on new fetch
 
       const robotIds = await getUserRobotIDs(currentUser.email);
@@ -144,7 +152,6 @@ function ActivityLogPage() {
 
   React.useEffect(() => {
     fetchEvents();
-
     // Set up auto-refresh every 30 seconds
     const intervalId = setInterval(() => {
       fetchEvents();
@@ -153,11 +160,43 @@ function ActivityLogPage() {
     return () => clearInterval(intervalId);
   }, [currentUser?.email, pageIndex]);
 
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setPageIndex(0);
+      }, [filterRobotIds, filterCategories, filterLocations]);
+
+  const robotIdOptions = React.useMemo(
+    () => Array.from(new Set(events.map(e => e.robotId).filter(Boolean))).sort(),
+    [events]
+  );
+  const categoryOptions = React.useMemo(
+    () => Array.from(new Set(events.map(e => e.category).filter(Boolean))).sort(),
+    [events]
+  );
+  const locationOptions = React.useMemo(
+    () => Array.from(new Set(events.map(e => e.location).filter(Boolean))).sort(),
+    [events]
+  );
+
+  const clearAllFilters = () => {
+    setFilterRobotIds([]);
+    setFilterCategories([]);
+    setFilterLocations([]);
+  };
+
   const handleRequestSort = (field) => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     setSortField(field);
   };
   
+  const filteredEvents = React.useMemo(() => {
+    return events.filter(e => {
+      const byRobot = filterRobotIds.length === 0 || filterRobotIds.includes(e.robotId);
+      const byCategory = filterCategories.length === 0 || filterCategories.includes(e.category);
+      const byLocation = filterLocations.length === 0 || filterLocations.includes(e.location);
+      return byRobot && byCategory && byLocation;
+    });
+  }, [events, filterRobotIds, filterCategories, filterLocations]);
 
   //here is the actual function where data is sorted based on set order
   const sortedEvents = React.useMemo(() => {
@@ -171,23 +210,22 @@ function ActivityLogPage() {
       return "";
     }
     //pass this return into sorted events
-    return [...events].sort((a, b) => {
+    return [...filteredEvents].sort((a, b) => {
       //these interior returns tell the sort functin how to order the events
       const aValue = get(a);
       const bValue = get(b);
-      if (aValue < bValue) return -1 * dir;
-      if (aValue > bValue) return 1 * dir;
-      return 0;
+      if (sortField === "timeMS") return ((aValue ?? 0)  - (bValue ?? 0)) * dir;
+      return String(aValue).localeCompare(String(bValue)) * dir;
     });
-  }, [events, sortField, sortDirection]);
+  }, [filteredEvents, sortField, sortDirection]);
 
   const start = pageIndex * pageSize;
   const end = start + pageSize;
   const pagedEvents = React.useMemo(
     () => sortedEvents.slice(start, end),
-  [sortedEvents, start, end]
-);
-// simple flags for the pager buttons
+      [sortedEvents, start, end]
+    );
+  // simple flags for the pager buttons
   const hasPrev = pageIndex > 0;
   const hasNext = end < sortedEvents.length;
 
@@ -207,14 +245,99 @@ function ActivityLogPage() {
               </Typography>
             </Tooltip>
             <IconButton 
-              onClick={fetchEvents}
+              onClick={() => fetchEvents(true)}
               disabled={loading}
               color="primary"
             >
               <RefreshIcon />
             </IconButton>
           </Box>
+          {/* --- FILTER BAR --- */}
+          <Paper
+            elevation={1}
+            sx={{
+              width: "100%",
+              px: 2,
+              py: 2,
+              borderRadius: 2,
+              mb: 2,
+            }}
+          >
+            <Stack
+              direction={{ xs: "column", md: "row" }}
+              spacing={2}
+              alignItems={{ xs: "stretch", md: "center" }}
+            >
+            {/* Filter by Robot ID */}
+              <Autocomplete
+                multiple
+                size="small"
+                options={robotIdOptions}
+                value={filterRobotIds}
+                onChange={(_, v) => setFilterRobotIds(v)}
+                renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Robot ID" placeholder="Any" />
+                )}
+                sx={{ minWidth: 240, flex: 1 }}
+              />
 
+              {/* Filter by Category */}
+              <Autocomplete
+                multiple
+                size="small"
+                options={categoryOptions}
+                value={filterCategories}
+                onChange={(_, v) => setFilterCategories(v)}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Category" placeholder="Any" />
+                )}
+                sx={{ minWidth: 200, flex: 1 }}
+              />
+
+              {/* Filter by Location */}
+              <Autocomplete
+                multiple
+                size="small"
+                options={locationOptions}
+                value={filterLocations}
+                onChange={(_, v) => setFilterLocations(v)}
+                renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                  ))
+                  }
+                renderInput={(params) => (
+                  <TextField {...params} label="Location" placeholder="Any" />
+                )}
+                sx={{ minWidth: 220, flex: 1 }}
+              />
+
+                {/* Button to clear all filters */}
+                <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
+                <Button
+                  variant="outlined"
+                  onClick={clearAllFilters}
+                  disabled={
+                    filterRobotIds.length === 0 &&
+                    filterCategories.length === 0 &&
+                    filterLocations.length === 0
+                  }
+                >
+                 Clear
+                </Button>
+              </Box>
+            </Stack>
+          </Paper>
           <Paper
             elevation={2}
             sx={{
