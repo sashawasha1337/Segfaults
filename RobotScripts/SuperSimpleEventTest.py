@@ -2,13 +2,16 @@
 Minimal ROS2 -> Firestore writer for top-level 'events' collection.
 Only writes: robot_id, location, time, category, users.
 
-Run example:
-  export ROBOT_ID=RBT-01
-  export ROBOT_UID=3wxSSldz5mhCJrOJiAGvzsnMGpn2                 (this is Joey's user)
-  export EVENT_LOCATION="Test Park"
-  export EVENT_CATEGORY="Litter"
+Run example:'
+    cd C:\pixi_ws
+    pixi shell
+    call C:\pixi_ws\ros2-windows\local_setup.bat
+  set ROBOT_ID=RBT-01
+  set ROBOT_UID= 1P9zyLnCuoRLiqIRWZub                 (this is Joey's robot UID)
+  set EVENT_LOCATION= Test Park
+  set EVENT_CATEGORY= Litter
   # ONE_SHOT=1 (default) sends a single event then exits; set to 0 to keep sending on every message
-  export ONE_SHOT=1
+  set ONE_SHOT=1
   python3 SuperSimpleEventTest.py
 """
 
@@ -23,7 +26,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 SERVICE_ACCOUNT_FILE = "robot-service-account.json"
-ROBOT_ID  = os.environ.get("ROBOT_ID")  or os.uname().nodename
+ROBOT_NAME  = os.environ.get("ROBOT_ID")  or os.uname().nodename
 ROBOT_UID = os.environ.get("ROBOT_UID") or ROBOT_ID
 EVENT_LOCATION = os.environ.get("EVENT_LOCATION", "")
 EVENT_CATEGORY = os.environ.get("EVENT_CATEGORY", "")
@@ -60,10 +63,10 @@ class EventCompilerNode(Node):
 
         # Build only the fields your schema needs
         event_doc = {
-            "robot_id": ROBOT_ID,
+            "robotName": ROBOT_ID,
             "location": EVENT_LOCATION,
             "category": EVENT_CATEGORY,
-            "users": [ROBOT_UID],
+            "robotID": [ROBOT_UID],
             "time": firestore.SERVER_TIMESTAMP,  # Firestore server time
         }
 

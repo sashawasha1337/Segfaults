@@ -38,6 +38,9 @@ function ActivityLogPage() {
 
   console.log("Current user object:", currentUser);
 
+  const pageSize = 15; // number of events per page
+  const [pageIndex, setPageIndex] = React.useState(0); // which page we are on
+
   // Helper function to get robot IDs for a user
   const getUserRobotIDs = async (email) => {
     if (!email) return [];
@@ -62,13 +65,14 @@ function ActivityLogPage() {
 
 
   // Add fetchEvents function outside useEffect so it can be reused
-  const fetchEvents = async () => {
+  const fetchEvents = async (resetPage = false) => {
     if (!currentUser) {
       setLoading(false);
       return;
     }
     try {
       setLoading(true);
+      if (resetPage) setPageIndex(0); // Reset to first page on new fetch
 
       const robotIds = await getUserRobotIDs(currentUser.email);
 
@@ -88,7 +92,7 @@ function ActivityLogPage() {
           collection(db, "events"),
           where("robotId", "in", IDs),
           orderBy("time", "desc"),
-          limit(200)
+          limit(pageSize * (pageIndex + 1)) // fetch only enough for current page
         );
         const snap = await getDocs(q);
   
@@ -113,6 +117,7 @@ function ActivityLogPage() {
                   }).replace(",", "")
                 : "";
             return  {
+              //gonna comment out eventID for now since it looks ugly tbh, we should probably redesign how events are identified later
               //eventId: d.id,
               robotId: data.robotId ?? "Unknown",
               category: data.category ?? "Unknown",
@@ -146,7 +151,7 @@ function ActivityLogPage() {
     }, 30000); // 30000 ms = 30 seconds
 
     return () => clearInterval(intervalId);
-  }, [currentUser]);
+  }, [currentUser?.email, pageIndex]);
 
   const handleRequestSort = (field) => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -175,6 +180,16 @@ function ActivityLogPage() {
       return 0;
     });
   }, [events, sortField, sortDirection]);
+
+  const start = pageIndex * pageSize;
+  const end = start + pageSize;
+  const pagedEvents = React.useMemo(
+    () => sortedEvents.slice(start, end),
+  [sortedEvents, start, end]
+);
+// simple flags for the pager buttons
+  const hasPrev = pageIndex > 0;
+  const hasNext = end < sortedEvents.length;
 
   return ( //TODO: make this look nicer with MUI components probably
     <>  
@@ -216,20 +231,50 @@ function ActivityLogPage() {
                 {err}
               </Typography>
             ) : events.length === 0 ? (
-              <Typography>No activity found. Make sure your RobotID is set</Typography>
+              <Box sx={{ textAlign: "center", py: 4 }}>
+                <Typography variant="body1" color="text.secondary">
+                  No events yet. Try refreshing or verifying your robot is publishing.
+                </Typography>
+              <Button sx={{ mt: 2 }} variant="outlined" onClick={() => fetchEvents(true)} disabled={loading}>
+                Refresh
+              </Button>
+            </Box>
             ) : (
-              <EventTable
-                events={sortedEvents}
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onRequestSort={handleRequestSort}
-                sx={{
-                  "& th, & td": { py: 1.5, px: 2 }, // extra cell padding
-                }}
-              />
+              <>
+                <EventTable
+                  events={pagedEvents}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onRequestSort={handleRequestSort}
+                  sx={{
+                    "& th, & td": { py: 1.5, px: 2 }, // extra cell padding
+                  }}
+                />
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    disabled={!hasPrev || loading}
+                    onClick={() => setPageIndex((i) => Math.max(0, i - 1))}
+                  >
+                    Previous
+                    </Button>
+
+                <Typography variant="body2" color="text.secondary">
+                  Page {pageIndex + 1} {sortedEvents.length > 0 ? `of ${Math.ceil(sortedEvents.length / pageSize)}` : ""}
+                </Typography>
+
+                <Button
+                 variant="outlined"
+                  disabled={!hasNext || loading}
+                  onClick={() => setPageIndex((i) => i + 1)}
+                >
+                  Next
+                </Button>
+              </Box>
+            </>
             )}
-          </Paper>
-        </Stack>
+            </Paper>
+          </Stack>
       </Container>
     </>
   );
