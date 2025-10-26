@@ -25,7 +25,7 @@ function AddRobotPage() {
 
   const [emailError, setEmailError] = useState("");
   const [emailList, setEmailList] = useState([]);
-
+  const [err, setErr] = React.useState("");
   const norm = (s) => (s || "").trim().toLowerCase();
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
