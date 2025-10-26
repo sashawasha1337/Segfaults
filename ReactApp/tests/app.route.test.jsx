@@ -1,5 +1,6 @@
 //routing tests for App component
 //ReactApp/tests/app_route_test.jsx
+//not testing individual pages, just that routing to them works, more of an example of how to test routing with Vitest
 
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
