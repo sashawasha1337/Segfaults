@@ -141,6 +141,7 @@ function HomePage() {
             imgAlt={`Robot ${robot.id}`}
             title={robot.name || `Robot ${index + 1}`}
             description={`IP: ${robot.ipAddress}`}
+            admin={robot.admin}
             buttonText="FPV/Control"
             link={`/RobotDashboardPage/${robot.id}`}
             onDelete={() => handleDeleteRobot(robot.id)}
