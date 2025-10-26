@@ -13,7 +13,7 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
       state: {
         //eventId: event.eventId,
         imageUrl: event.imageUrl ?? null,
-        robotId: event.robotId ?? "Unknown",
+        robotID: event.robotID ?? "Unknown",
         category: event.category ?? "Unknown",
         location: event.location ?? "Unknown",
         timeMS: event.timeMS ?? null,
@@ -42,7 +42,7 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
     <table>
       <thead>
         <tr>
-          <SortingButton field="robotId" label="Robot ID" />
+          <SortingButton field="robotID" label="Robot ID" />
           <SortingButton field="category" label="Category" />
           <SortingButton field="location" label="Location" />
           <SortingButton field="timeMS" label="Time" />
@@ -52,7 +52,7 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
       <tbody>
         {events.map((event) => (
           <tr key={event.eventId}>
-            <td>{event.robotId}</td>
+            <td>{event.robotID}</td>
             <td>{event.category}</td>
             <td>{event.location}</td>
             <td>{event.time}</td>

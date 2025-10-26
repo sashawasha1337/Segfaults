@@ -32,7 +32,7 @@ function AddRobotPage() {
 
   const [successOpen, setSuccessOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [newRobotId, setNewRobotId] = useState("");
+  const [newRobotID, setNewRobotID] = useState("");
   const [copied, setCopied] = useState(false);
 
   // Tests the entered email
@@ -59,8 +59,8 @@ function AddRobotPage() {
   // Handles copying robot ID to clipboard
   const handleCopyId = async () => {
   try {
-    if (!newRobotId) return;
-    await navigator.clipboard.writeText(newRobotId);
+    if (!newRobotID) return;
+    await navigator.clipboard.writeText(newRobotID);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   } catch (e) {
@@ -98,7 +98,7 @@ function AddRobotPage() {
         { merge: true }
       );
     }
-    setNewRobotId(docRef.id);
+    setNewRobotID(docRef.id);
     setSuccessMsg("Robot added successfully!");
     setSuccessOpen(true);
     // clear form fields
@@ -239,7 +239,7 @@ function AddRobotPage() {
              size="small"
               startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
               onClick={handleCopyId}
-             disabled={!newRobotId}
+             disabled={!newRobotID}
             >
              {copied ? "Copied" : "Copy ID"}
             </Button>
@@ -273,9 +273,9 @@ function AddRobotPage() {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}
-              title={newRobotId}
+              title={newRobotID}
             >
-             {newRobotId || "—"}
+             {newRobotID || "—"}
             </Box>
           </Box>
         </Box>
