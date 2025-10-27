@@ -40,8 +40,9 @@ function TrashViewPage() {
         let cat = state?.category ?? "Unknown";
         let loc = state?.location ?? "Unknown";
         let timeTxt = "";
+        let confidence = state?.confidence ?? null;
 
-        if (!img && state?.eventId) {
+        if (state?.eventId) {
           const ref = doc(db, "events", state.eventId);
           const snap = await getDoc(ref);
           if (snap.exists()) {
@@ -50,6 +51,7 @@ function TrashViewPage() {
             rob = data.robotId ?? rob;
             cat = data.category ?? cat;
             loc = data.location ?? loc;
+            confidence = data.confidence ?? confidence;
             const t =
               data.time?.toDate?.() instanceof Date
                 ? data.time.toDate()
@@ -68,7 +70,7 @@ function TrashViewPage() {
         if (alive) {
           setImageUrl(img);
           setMetadata({
-            Confidence: "",
+            Confidence: confidence,
             Category: cat,
             Location: loc,
             Coordinates: "",

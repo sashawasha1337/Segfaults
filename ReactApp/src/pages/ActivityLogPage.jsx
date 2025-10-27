@@ -126,7 +126,7 @@ function ActivityLogPage() {
                 : "";
             return  {
               //gonna comment out eventID for now since it looks ugly tbh, we should probably redesign how events are identified later
-              //eventId: d.id,
+              eventId: d.id,
               robotId: data.robotId ?? "Unknown",
               category: data.category ?? "Unknown",
               location: data.location ?? "Unknown",

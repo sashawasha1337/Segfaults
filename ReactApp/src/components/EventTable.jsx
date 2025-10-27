@@ -11,7 +11,8 @@ const EventTable = ({events, sortField, sortDirection, onRequestSort, }) => {
   const handleViewDetails = (event) => {
     navigate('/TrashViewPage', {
       state: {
-        //eventId: event.eventId,
+        eventId: event.id ?? event.eventId,
+        confidence: event.confidence ?? null,
         imageUrl: event.imageUrl ?? null,
         robotId: event.robotId ?? "Unknown",
         category: event.category ?? "Unknown",
