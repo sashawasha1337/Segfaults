@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import NavSatFix
 import os
 import time
 import serial
@@ -12,81 +15,81 @@ BAUD_RATE = 9600                      # bits per second
 DELTA_DEG = 0.000005                  # ~ 0.5 meters
 LOCATION_CHECK_INTERVAL = 2.5         # seconds
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
-    firebase_admin.initialize_app(cred)
+class GPSNode(Node):
+    def __init__(self):
+        super().__init__('gps_node')
+        self.publisher = self.create_publisher(NavSatFix, '/gps/fix', 10)
+        self.timer = self.create_timer(LOCATION_CHECK_INTERVAL, self.run)
 
-db = firestore.client()
-gps_collection = db.collection("gps_data")
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+            firebase_admin.initialize_app(cred)
 
-def has_moved(last_lat, last_lng, lat, lng):
-    if last_lat is None or last_lng is None:
-        return True
-    return (abs(lat - last_lat) > DELTA_DEG or (abs(lng - last_lng) > DELTA_DEG))
+        self.db = firestore.client()
+        self.ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        self.last_lat = None
+        self.last_lng = None
 
-def save_detection(image_url, category, confidence, lat, lng, location, robot_id):
-    db = firestore.client()
-    image_data_collection = db.collection("trash_data")
+    def has_moved(self, lat, lng):
+        if self.last_lat is None or self.last_lng is None:
+            return True
+        return (abs(lat - self.last_lat) > DELTA_DEG or (abs(lng - self.last_lng) > DELTA_DEG))
 
-    image_data_collection.add({
-        "url": image_url,
-        "category": category,
-        "confidence": confidence,
-        "latitude": lat,
-        "longitude": lng,
-        "location": location,
-        "robotID": robot_id,
-        "timestamp": firestore.SERVER_TIMESTAMP,
-    })
+    def save_detection(self, image_url, category, confidence, lat, lng, location, robot_id):
+        image_data_collection = self.db.collection("trash_data")
 
-def run():
-    print(f"\nListening for GPS data on serial port {SERIAL_PORT} ...")
-    last_lat = None
-    last_lng = None
-    next_check_interval = 0.0
+        image_data_collection.add({
+            "url": image_url,
+            "category": category,
+            "confidence": confidence,
+            "latitude": lat,
+            "longitude": lng,
+            "location": location,
+            "robotID": robot_id,
+            "timestamp": firestore.SERVER_TIMESTAMP,
+        })
 
-    with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
-        while True:
-            try:
-                line_bytes = ser.readline()
-                if not line_bytes:
-                    continue
-                now = time.time()
-                if now < next_check_interval:
-                    continue
-                line = line_bytes.decode("ascii", errors="ignore").strip()
-                if not line.startswith("$"):
-                    continue
-                try:
-                    packet = pynmea2.parse(line)
-                except pynmea2.ParseError:
-                    continue
+    def run(self):
+        try:
+            line = self.ser.readline().decode("ascii", erros="ignore").strip()
+            if not line.startswith("$"):
+                return
+            packet = pynmea2.parse(line)
+            if isinstance(packet, pynmea2.types.talker.RMC) and getattr(packet, "status", None) == "A":
+                latitude = round(float(packet.latitude), 5)
+                longitude = round(float(packet.longitude), 5)
 
-                if isinstance(packet, pynmea2.types.talker.RMC) and getattr(packet, "status", None) == "A":
-                    latitude = round(float(packet.latitude), 5)
-                    longitude = round(float(packet.longitude), 5)
+                msg = NavSatFix()
+                msg.latitude = latitude
+                msg.longitude = longitude
+                msg.header.stamp = self.get_clock().now().to_msg()
+                msg.header.frame_id = 'gps'
+                self.publisher.publish(msg)
+                self.get_logger().info(f"Published GPS: lat={latitude}, lng={longitude}")
 
-                    if has_moved(last_lat, last_lng, latitude, longitude):
-                        last_lat = latitude
-                        last_lng = longitude
-                        print(f"\nGPS fix received at: lat={latitude}, lng={longitude}")
+                if self.has_moved(latitude, longitude):
+                    self.last_lat = latitude
+                    self.last_lng = longitude
+                    self.db.collection("gps_data").document("global").set({
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "timestamp": firestore.SERVER_TIMESTAMP,
+                    })
+                    self.get_logger().info("Uploaded GPS to Firestore")
+        except Exception as e:
+            self.get_logger().error(f"Failed to parse line: {e}")
 
-                        data_point = {
-                            "latitude": latitude,
-                            "longitude": longitude,
-                            "timestamp": firestore.SERVER_TIMESTAMP,
-                        }
-                        gps_collection.add(data_point)
-                        print(f"Uploaded GPS data to Firebase: {data_point}")
-                    else:
-                        print(f"UGV has not moved")
-                    next_check_interval = now + LOCATION_CHECK_INTERVAL
-            except KeyboardInterrupt:
-                print("\nStopping...")
-                break
-            except Exception as e:
-                print(f"Failed to parse line: {e}")
-                time.sleep(0.25)
+def main(args=None):
+    rclpy.init(args=args)
+    node = GPSNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        node.get_logger().info("Shutting down GPS node.")
+    finally:
+        node.ser.close()
+        node.destroy_node()
+        rclpy.shutdown()
 
-if __name__ == "__main__":
-    run()
+if __name__ == '__main__':
+    main()

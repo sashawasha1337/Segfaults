@@ -114,10 +114,10 @@ class YoloTrackNode(Node):
             for box, tid, cls, conf in zip(boxes.xyxy, boxes.id, boxes.cls, boxes.conf):
                 tid = int(tid.item())
                 class_name = self.model.names[int(cls.item())]
-                confidence = float(conf.item())
 
                 # Only publish new detections
                 if tid not in self.known_ids:
+                    confidence = float(conf.item())
                     self.known_ids.add(tid)
                     
                     ts_ms = int(ros_time_to_seconds(msg.header.stamp) * 1000)
@@ -129,10 +129,11 @@ class YoloTrackNode(Node):
                     event = {
                         "category": class_name,
                         "location": "",  # GPS data can be added later
-                        "robotID": ROBOT_ID,
+                        "robotId": ROBOT_ID,
                         "time": datetime.utcfromtimestamp(ts_ms / 1000).isoformat() + "Z",
                         "users": [ROBOT_UID],
-                        "image_url": image_url
+                        "image_url": image_url,
+                        "confidence": confidence
                     }
                     
 

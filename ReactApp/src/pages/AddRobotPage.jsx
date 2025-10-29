@@ -7,22 +7,33 @@ import BackButton from "../components/BackButton";
 import {collection, addDoc, getDocs, doc, updateDoc, arrayUnion, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import {useAuth} from "../ContextForAuth.jsx";
+import { Snackbar, Alert } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
 import { Merge } from "@mui/icons-material";
 
 
 function AddRobotPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();      
+
   const [robotName, setRobotName] = useState("");
   const [robotIp, setRobotIp] = useState("");
+
   const [email, setEmail] = useState("");
   const [admin, setAdmin] = useState("");
+
   const [emailError, setEmailError] = useState("");
   const [emailList, setEmailList] = useState([]);
+  const [err, setErr] = React.useState("");
   const norm = (s) => (s || "").trim().toLowerCase();
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [newRobotID, setNewRobotID] = useState("");
+  const [copied, setCopied] = useState(false);
 
   // Tests the entered email
   function handleAddEmail(){
@@ -45,9 +56,23 @@ function AddRobotPage() {
     setEmailList(emailList.filter(e => e.toLowerCase() !== value.toLowerCase()));
   }
 
-
+  // Handles copying robot ID to clipboard
+  const handleCopyId = async () => {
+  try {
+    if (!newRobotID) return;
+    await navigator.clipboard.writeText(newRobotID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  } catch (e) {
+    console.error("Clipboard copy failed:", e);
+  }
+};
   // Handles adding robot to users profiles and robots collection
   const handleAddRobot = async () => {
+  if (!robotName.trim() || !robotIp.trim()) {
+    setErr("Please fill out both the Name and IP Address fields before adding a robot.");
+    return;
+  }    
   try {
     if (!currentUser) throw new Error("Not signed in");
 
@@ -73,8 +98,16 @@ function AddRobotPage() {
         { merge: true }
       );
     }
+    setNewRobotID(docRef.id);
+    setSuccessMsg("Robot added successfully!");
+    setSuccessOpen(true);
+    // clear form fields
+    setRobotName("");
+    setRobotIp("");
+    setEmail("");
+    setEmailList([]);
+    setEmailError("");
 
-    navigate("/HomePage");
   } catch (error) {
     console.error("Error adding robot: ", error);
   }
@@ -107,6 +140,8 @@ function AddRobotPage() {
           variant="filled"
           value={robotName}
           onChange={(e) => setRobotName(e.target.value)}
+          error={!robotName.trim() && err !== ""}
+          helperText={!robotName.trim() && err !== "" ? "Name is required" : ""}
         />
 
         <TextField
@@ -116,6 +151,8 @@ function AddRobotPage() {
           variant="filled"
           value={robotIp}
           onChange={(e) => setRobotIp(e.target.value)}
+          error={!robotIp.trim() && err !== ""}
+          helperText={!robotIp.trim() && err !== "" ? "IP Address is required" : ""}
         />
 
         <div>
@@ -173,6 +210,7 @@ function AddRobotPage() {
 
         <Button variant="contained"
         onClick = {handleAddRobot}
+        disabled={!robotName.trim() || !robotIp.trim()}
         sx={{
           mt: 6, 
           width: "195px", 
@@ -184,8 +222,67 @@ function AddRobotPage() {
           Add Robot
         </Button>
       </Box>
-    </>
-  );
-}
+      <Snackbar
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+      <Alert
+        severity="success"
+        variant="filled"
+        onClose={() => setSuccessOpen(false)}
+        sx={{ width: "100%", alignItems: "flex-start" }}
+        action={
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+             color="inherit"
+             size="small"
+              startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+              onClick={handleCopyId}
+             disabled={!newRobotID}
+            >
+             {copied ? "Copied" : "Copy ID"}
+            </Button>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setSuccessOpen(false);
+                navigate("/HomePage");
+             }}
+            >
+             Go to Home
+            </Button>
+          </Box>
+    }   
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <span>{successMsg || "Robot added successfully"}</span>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+           <span style={{ opacity: 0.9 }}>Robot ID:</span>
+           <Box
+             sx={{
+                fontFamily: "monospace",
+               px: 1.25,
+                py: 0.25,
+                borderRadius: 1,
+                bgcolor: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                maxWidth: 320,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={newRobotID}
+            >
+             {newRobotID || "—"}
+            </Box>
+          </Box>
+        </Box>
+      </Alert>
+    </Snackbar>
+        </>
+      );
+    }
 
 export default AddRobotPage;

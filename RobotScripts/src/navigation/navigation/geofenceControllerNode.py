@@ -8,7 +8,6 @@ from geometry_msgs.msg import Twist
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-ROBOT_ID = "ugv1"
 SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_KEY_PATH", "/home/ugv/.keys/firebase-adminsdk.json")
 
 GEO_CHECK_PERIOD = 2.0            # seconds
@@ -42,7 +41,6 @@ class GeofenceController(Node):
     def fetch_latest_gps(self):
         q = (
             self.db.collection("gps_data")
-            .where("robotId", "==", ROBOT_ID)
             .order_by("timestamp", direction=firestore.Query.DESCENDING)
             .limit(1)
         )
@@ -52,7 +50,7 @@ class GeofenceController(Node):
         return docs[0].to_dict()
 
     def fetch_geofence(self):
-        ref = self.db.collection("geofence").document(ROBOT_ID)
+        ref = self.db.collection("geofence").document("global")
         snap = ref.get()
         if not snap.exists:
             return None
@@ -108,17 +106,12 @@ class GeofenceController(Node):
 
             lat = float(gps["latitude"])
             lng = float(gps["longitude"])
-            distance = haversine_m(lat, lng, center["lat"], center["lng"])
+            distance = haversine_m(lat, lng, center["latitude"], center["longitude"])
             self.get_logger().info(f"Distance from center: {distance:.1f} meters (radius {radius:.1f} meters)")
 
             if distance > radius:
                 self.get_logger().info("Outside geofence, ugv will spin in place (U-turn).")
                 self.publish_cmd(0.0, TURN_ANGULAR_SPEED, OUTSIDE_SPIN_DURATION)
-            else:
-                if LINEAR_SPEED_WHEN_INSIDE == 0.0:
-                    self.stop()
-                else:
-                    self.publish_cmd(LINEAR_SPEED_WHEN_INSIDE, 0.0, 0.25)
 
         except Exception as e:
             self.get_logger().error(f"Geofence loop function error: {e}")

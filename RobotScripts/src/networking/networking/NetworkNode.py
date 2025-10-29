@@ -5,7 +5,7 @@ SocketIO is used for signaling, while WebRTC handles peer-to-peer communication.
 Streams camera feed, reports metrics that it subscribes to, and transmits data over WebRTC data channels.
 
 Published Topics:
-- cmd_vel (geometry_msgs/Twist): Publishes robot movement commands.
+- cmd_vel_teleop (geometry_msgs/Twist): Publishes robot movement commands.
 
 Subscribed Topics:
 - /camera/image_raw (sensor_msgs/Image): Subscribes to camera feed.
@@ -45,8 +45,8 @@ class NetworkNode(Node):
 
         self.bridge = CvBridge() # For converting ROS Image messages to OpenCV images
 
-        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10) # Commands published for robot movement commands
-        self.get_logger().info("cmd_vel publisher created.")
+        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel_teleop', 10) # Commands published for robot movement commands
+        self.get_logger().info("cmd_vel_teleop publisher created.")
         self.status_pusher = StatusPusher(self, lambda: self.peer_session)
         self.status_timer = self.create_timer(STATUS_INTERVAL, self.handle_status_push)
         # Initial Status

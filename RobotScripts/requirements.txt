@@ -15,4 +15,5 @@ lgpio~=0.2.2.0
 torch~=2.1
 torchvision~=0.15
 pyserial~=3.5
+pytest~=8.3
 numpy~=1.24

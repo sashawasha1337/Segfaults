@@ -37,4 +37,12 @@
     border-radius: 5px;
 }
 
+.robot-card-btn.delete-btn {
+  margin-top: 10px; 
+  background-color: #d32f2f; 
+}
+
+.robot-card-btn.delete-btn:hover {
+  background-color: #b71c1c; 
+}
 
