@@ -7,6 +7,7 @@ import { Typography } from "@mui/material";
 import PasswordTextField from "../components/PasswordTextField";
 import { GoogleLogin } from "../components/GoogleLogin.jsx";
 import Logo from "../assets/Logo.png";
+import { QuestionMark } from "@mui/icons-material";
 
 {/*
   The Login page allows users to enter their username and password to gain access to the web application.
@@ -100,6 +101,13 @@ function LoginPage() {
         noValidate
         autoComplete="off"
       >
+        <Button
+          color="inherit"
+          size="small"
+          startIcon={<QuestionMark/>}
+          onClick={() => navigate("/docs")}
+          sx={{backgroundColor: "#f4ecd8",}}
+        > Documentation</Button>
         <Typography 
           variant="h2"
           sx={{fontFamily:"Garamond, serif", fontWeight: "bold", mb: 1 , color: "#3b2f2f"}}
