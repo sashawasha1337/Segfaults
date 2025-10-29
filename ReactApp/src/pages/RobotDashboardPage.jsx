@@ -10,6 +10,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-le
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRobotConnection } from "../hooks/useRobotConnection";
+import { QuestionMark } from "@mui/icons-material";
 
 function a11yProps(index) { return { id: `tab-${index}`, "aria-controls": `tabpanel-${index}` }; }
 function TabPanel({ children, value, index }) {
@@ -56,6 +57,10 @@ export default function RobotDashboard() {
   const [batteryVoltage, setBatteryVoltage] = useState(null);
   const [wifiStrength, setWifiStrength] = useState(null);
 
+
+  function openInNewTab( url ){
+    window.open(url, "_blank");
+  }
   // Function to fetch the robot's IP address from Firestore using its ID
   useEffect(() => {
   const fetchRobotIP = async () => {
@@ -94,6 +99,10 @@ export default function RobotDashboard() {
         <SettingsButton path={`/RobotSettingPage/${robotID}`} />
         <BackButton path="/HomePage" />
         <Typography variant="h5" sx={{ ml: 1 }}>RobotID: {robotID}</Typography>
+        <Button color="inherit" size="small" startIcon={<QuestionMark/>}
+          onClick={() => openInNewTab('/docs/robot-id')}
+        >
+        </Button>
       </Box>
 
       <AppBar position="static" color="default" elevation={1}>

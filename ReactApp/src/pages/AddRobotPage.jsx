@@ -11,6 +11,7 @@ import { Snackbar, Alert } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import { Merge } from "@mui/icons-material";
+import { QuestionMark } from "@mui/icons-material";
 
 
 function AddRobotPage() {
@@ -35,6 +36,10 @@ function AddRobotPage() {
   const [newRobotID, setNewRobotID] = useState("");
   const [copied, setCopied] = useState(false);
 
+  function openInNewTab( url ){
+    window.open(url, "_blank");
+  }
+  
   // Tests the entered email
   function handleAddEmail(){
     if (!emailRegex.test(email)) {
@@ -277,6 +282,13 @@ function AddRobotPage() {
             >
              {newRobotID || "—"}
             </Box>
+            <Button
+             color="inherit"
+             size="small"
+              startIcon={<QuestionMark/>}
+              onClick={() => openInNewTab('/docs/robot-id')}
+            >
+            </Button>
           </Box>
         </Box>
       </Alert>

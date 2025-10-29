@@ -13,6 +13,11 @@ import TrashViewPage from './pages/TrashViewPage.jsx';
 import UserSettingsPage from './pages/UserSettingsPage.jsx';
 import RobotDashboardPage from './pages/RobotDashboardPage.jsx';
 import ProtectedPage from './components/ProtectedPage.jsx';
+import DocumentationLayout from './pages/Documentation/DocumentationLayout';
+import GettingStarted from './pages/Documentation/GettingStarted';
+import Configuration from './pages/Documentation/Configuration';
+import Troubleshooting from './pages/Documentation/Troubleshooting';
+import RobotID from './pages/Documentation/RobotID';
 import './App.css'
 
 
@@ -20,6 +25,12 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/docs" element={<DocumentationLayout />}>
+          <Route path="getting-started" element={<GettingStarted />} />
+          <Route path="configuration" element={<Configuration />} />
+          <Route path="troubleshooting" element={<Troubleshooting />} />
+          <Route path="robot-id" element={<RobotID />} />
+      </Route>
       <Route path="/LoginPage" element={<LoginPage />} />
       <Route element={<ProtectedPage />} >
         <Route path="/ActivityLogPage" element={<ActivityLogPage />} />
