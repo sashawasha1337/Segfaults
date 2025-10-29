@@ -145,7 +145,16 @@ function HomePage() {
         </p>
       ) : (
       robots.map((robot, index) => (
-        <><RobotCard
+        <Box
+          key={robot.id}
+          sx={{
+            displayy: "inline-block",
+            verticalAlign: "top",
+            textAlign: "center",
+            m: 2,
+          }}
+        >
+          <RobotCard
           key={robot.id}
           imgSrc="https://images.squarespace-cdn.com/content/v1/5a3c1a29f9a61e2987882112/bee5c58a-5b2c-4302-bb18-433dd7bd5f2c/ROSmaster.jpeg"
           imgAlt={`Robot ${robot.id}`}
@@ -153,14 +162,16 @@ function HomePage() {
           description={`IP: ${robot.ipAddress}`}
           buttonText="FPV/Control"
           //link={`/ControlPage/${robot.id}`} /><Button
-          link={`/RobotDashboardPage/${robot.id}`} /><Button
+          link={`/RobotDashboardPage/${robot.id}`} />
+          <Button
             variant="outlined"
             size="small"
             sx={{ mt: 1, textTransform: "none" }}
             onClick={() => handleDeleteRobot(robot.id)}
           >
             Delete Robot
-          </Button></>
+          </Button>
+        </Box>
       ))
     )}
   </div>
