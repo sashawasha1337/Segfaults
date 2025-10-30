@@ -51,7 +51,7 @@ class GPSNode(Node):
 
     def run(self):
         try:
-            line = self.ser.readline().decode("ascii", erros="ignore").strip()
+            line = self.ser.readline().decode("ascii", errors="ignore").strip()
             if not line.startswith("$"):
                 return
             packet = pynmea2.parse(line)
