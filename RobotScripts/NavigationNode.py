@@ -17,13 +17,14 @@ class NavigationNode(Node):
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') # ROS2 Action
 
-    def gps_conversion(lat, lon):
+    def gps_conversion(self, lat, lon):
         x, y = TRANSFORMER.transform(lon, lat)
         return x - X0, y - Y0
 
     def send_goal(self, x, y, theta):
         # Initialize goal_msg
         goal_msg = NavigateToPose.Goal()
+        goal_msg.pose = PoseStamped()
         goal_msg.pose.header.frame_id = 'map'
         goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
         goal_msg.pose.pose.position.x = x

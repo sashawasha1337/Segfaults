@@ -6,7 +6,7 @@ import BackButton from "../components/BackButton";
 import SettingsButton from "../components/SettingsButton";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection, query, limit, onSnapshot, orderBy, where, setDoc } from "firebase/firestore";
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRobotConnection } from "../hooks/useRobotConnection";
@@ -27,6 +27,29 @@ const ugvIcon = L.icon({
   iconAnchor: [7, 7],
   popupAnchor: [0, -7]
 });
+
+function ClickToSendGoal({ robotID }) {
+  const [goalMarker, setGoalMarker] = useState(null);
+  useMapEvents({
+    click: async (e) => {
+      const { lat, lng } = e.latlng;
+      setGoalMarker([lat, lng]);
+      try {
+        await setDoc(doc(db, "nav_goal", "global"), {
+        latitude: lat,
+        longitude: lng,
+        heading_deg: 0,         // optional: could compute heading from robot orientation
+        robotID,
+        timestamp: new Date()
+        });
+        console.log("Sent waypoint:", lat, lng);
+      } catch (err) {
+        console.error("Failed to send goal:", err);
+      }
+    },
+  });
+  return goalMarker ? <Marker position={goalMarker}><Popup>Goal</Popup></Marker> : null;
+}
 
 function AutoRecenterMap({ lat, lng }) {
   const map = useMap();
@@ -279,6 +302,7 @@ function MapTab({ robotID }) {
         attribution="&copy; OpenStreetMap contributors"
       />
       <AutoRecenterMap lat={position.lat} lng={position.lng} />
+      <ClickToSendGoal robotID={robotID} />
       <Marker position={[position.lat, position.lng]} icon={ugvIcon}>
         <Popup>
           <div style={{ textAlign: "center" }}><strong>UGV</strong></div>

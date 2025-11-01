@@ -1,0 +1,48 @@
+efk_node:
+  ros__parameters:
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: map        # outdoor: use GPS as world
+
+    # Inputs: adjust topic names if different
+    # IMU (yaw + gyro)
+    imu0: /imu/data
+    imu0_queue_size: 10
+    imu0_remove_gravitational_acceleration: true
+    imu0_differential: false
+    imu0_relative: false
+    # [x, y, z,  roll, pitch, yaw,  vx, vy, vz,  vroll, vpitch, vyaw,  ax, ay, az]
+    imu0_config: [ false, false, false,
+                   false, false,  true,
+                   false, false, false,
+                   false, false,  true,
+                    true,  true,  true ]
+
+    # Wheel odometry (optional but recommended for smoothness)
+    odom0: /wheel/odometry
+    odom0_queue_size: 10
+    odom0_differential: false
+    odom0_relative: false
+    # fuse x, y, yaw, vx, vyaw
+    odom0_config: [ true,  true,  false,
+                    false, false,  true,
+                     true, false, false,
+                    false, false,  true,
+                    false, false, false ]
+
+    # GPS odometry injected via navsat_transform (publishes /odometry/gps)
+    odom1: /odometry/gps
+    odom1_queue_size: 10
+    odom1_differential: false
+    odom1_relative: false
+    # fuse x, y position only (z if you want and don't zero altitude)
+    odom1_config: [ true,  true,  false,
+                    false, false, false,
+                    false, false, false,
+                    false, false, false,
+                    false, false, false ]

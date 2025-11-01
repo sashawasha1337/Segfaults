@@ -66,6 +66,43 @@ def generate_launch_description():
             executable='gps_node',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
+            #env={'FIREBASE_KEY_PATH': '/root/.keys/firebase-adminsdk.json'}
+        ),
+        Node(
+            package='navigation',
+            executable='firestore_waypoint_listener_node',
+            output='screen',
+            parameters=[{'goal_frame': 'map'}]
+            #env={'FIREBASE_KEY_PATH': '/root/.keys/firebase-adminsdk.json'}
+        ),
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            output='screen',
+            parameters=['/config/ekf.yaml']
+        ),
+        Node(
+            package='robot_localization',
+            executable='navsat_transform_node',
+            output='screen',
+            parameters=['/config/navsat.yaml'],
+            remappings=[
+                ('/imu/data', '/imu/data'),                   # IMU topic
+                ('/gps/fix',  '/gps/fix'),                    # from your gpsNode.py
+                ('/odometry/filtered', '/odometry/filtered')  # from EKF
+            ]
+        ),
+        Node(
+            package='nav2_util',
+            executable='lifecycle_bringup',
+            output='screen',
+            arguments=['nav2_container', '/config/nav2_outdoor.yaml']
+        ),
+        Node(
+            package='rviz2', # RViz is optional outdoors
+            executable='rviz2',
+            output='screen',
+            arguments=[]
         ),
         Node(
             package='navigation',

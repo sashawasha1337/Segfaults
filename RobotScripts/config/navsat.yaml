@@ -1,0 +1,22 @@
+navsat_transform_node:
+  ros__parameters:
+    frequency: 30.0
+    zero_altitude: true
+    publish_filtered_gps: false
+    wait_for_datum: false
+    magnetic_declination_radians: 0.0
+    yaw_offset: 0.0
+
+    # Frames
+    base_link_frame: base_link
+    odom_frame: odom
+    map_frame: map
+    use_odometry_yaw: true
+
+    # This node subscribes:
+    #  - /gps/fix (sensor_msgs/NavSatFix)
+    #  - /imu/data (sensor_msgs/Imu)
+    #  - /odometry/filtered (nav_msgs/Odometry)   <- from EKF
+    #
+    # And publishes:
+    #  - /odometry/gps (nav_msgs/Odometry)        <- we feed this back into EKF as odom1

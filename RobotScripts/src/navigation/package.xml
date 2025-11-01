@@ -7,8 +7,21 @@
   <maintainer email="patrick.doolittle@gmail.com">patrick</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>nav_msgs</depend>
-  <depend>geometry_msgs</depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>nav2_util</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_recoveries</exec_depend>
+  <exec_depend>nav2_costmap_2d</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_waypoint_follower</exec_depend>
+  <exec_depend>rviz2</exec_depend>
   <exec_depend>pyserial</exec_depend>
   <exec_depend>pynmea2</exec_depend>
   <exec_depend>firebase_admin</exec_depend>
