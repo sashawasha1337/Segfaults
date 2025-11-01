@@ -22,7 +22,7 @@ setup(
         'console_scripts': [
             'navigation_node = navigation.NavigationNode:main',
             'gps_node = navigation.gpsNode:main',
-            'firestore_waypoint_listener_node = navigation.firestore_waypoint_listener:main',
+            'firestore_waypoint_listener_node = navigation.firestoreWaypointListener:main',
             'obstacle_avoidance = navigation.obstacle_avoidance:main',
             'geofence_node = navigation.geofenceControllerNode:main',
         ],
