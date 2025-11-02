@@ -1,5 +1,7 @@
 # Node to handle the control of bi-directional PWM DC motors using lgpio
 
+
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -22,8 +24,8 @@ class RosmasterMotorNode(Node):
         )
         self.get_logger().info("Created cmd_vel subscription.")
 
-        try: 
-            self.car = Rosmaster('/dev/ttyUSB0') # Adjust port as necessary
+        try: # might need to be in dialout group for serial access on some systems
+            self.car = Rosmaster(port="/dev/ttyUSB0") # Adjust port as necessary
             self.get_logger().info("Connected to Rosmaster motor controller")
         except Exception as e:
             self.get_logger().error(f"Failed to connect to Rosmaster: {e}")
