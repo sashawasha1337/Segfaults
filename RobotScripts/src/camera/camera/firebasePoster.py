@@ -1,4 +1,6 @@
-#export FIREB
+#export FIREBASE_KEY_PATH = whatever path to service account json
+#export FIRESTORE_COLLECTION = events
+#python firebasePoster.py
 
 
 
