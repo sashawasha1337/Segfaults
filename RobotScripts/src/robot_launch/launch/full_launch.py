@@ -28,6 +28,11 @@ def generate_launch_description():
     "'libcamerify' if '", system, "' == 'pi' else ''"
     ])
     
+    motor_executable = PythonExpression([
+        "'rosmaster_motor_node' if '", system, "' == 'nano' else 'motor_node'"
+    ])
+
+
 
     return LaunchDescription([
         verbosity_arg,
@@ -85,7 +90,7 @@ def generate_launch_description():
         ),
         Node(
             package='motor_control',
-            executable='motor_node',
+            executable=motor_executable,
             output='screen',
             respawn=True,
             respawn_delay=2,
