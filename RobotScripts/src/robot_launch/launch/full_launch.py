@@ -71,6 +71,7 @@ def generate_launch_description():
             executable='gps_node',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
+            #env={'FIREBASE_KEY_PATH': '/root/.keys/firebase-adminsdk.json'}
         ),
         Node(
             package='navigation',
