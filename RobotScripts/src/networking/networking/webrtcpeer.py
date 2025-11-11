@@ -115,7 +115,7 @@ class SinglePeerSession:
             await self.peer_connection.setRemoteDescription(
                 RTCSessionDescription(sdp=answer["sdp"], type=answer["type"])
             )
-            self.get_logger().info(f"WebRTC connection established successfully for {self.sid}")
+            self.logger.info(f"WebRTC connection established successfully for {self.sid}")
         except json.JSONDecodeError as e:
             self.logger.error(f"Invalid JSON in answer data: {e}")
         except Exception as e:

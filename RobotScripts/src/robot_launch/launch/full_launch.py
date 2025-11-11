@@ -28,6 +28,11 @@ def generate_launch_description():
     "'libcamerify' if '", system, "' == 'pi' else ''"
     ])
     
+    motor_executable = PythonExpression([
+        "'rosmaster_motor_node' if '", system, "' == 'nano' else 'motor_node'"
+    ])
+
+
 
     return LaunchDescription([
         verbosity_arg,
@@ -66,6 +71,7 @@ def generate_launch_description():
             executable='gps_node',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
+            #env={'FIREBASE_KEY_PATH': '/root/.keys/firebase-adminsdk.json'}
         ),
         Node(
             package='navigation',
@@ -85,7 +91,7 @@ def generate_launch_description():
         ),
         Node(
             package='motor_control',
-            executable='motor_node',
+            executable=motor_executable,
             output='screen',
             respawn=True,
             respawn_delay=2,

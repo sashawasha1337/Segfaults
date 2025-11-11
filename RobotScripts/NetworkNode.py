@@ -39,7 +39,7 @@ STATUS_INTERVAL = 15.0  # check status every N seconds
 class NetworkNode(Node):
     def __init__(self):
         super().__init__('network_node')
-        self.get_logger().info("Network node initialization started.")
+        self.get_logger().info("Network Node initialization started.")
         
         self.peer_session = None
 
