@@ -3,6 +3,7 @@ import { Box,  Button, Card, CardMedia, Grid, Typography } from "@mui/material";
 import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-material";
 import BackButton from "../components/BackButton";
 import SettingsButton from '../components/SettingsButton';
+import LogoutButton from "../components/LogoutButton";
 import { db } from "../firebaseConfig"; // Import Firestore
 import { doc, getDoc } from "firebase/firestore"; // Import Firestore methods
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
@@ -72,6 +73,16 @@ const ControlPage = () => {
         alignItems: "center"
       }}
     >
+            <Box
+              sx={{
+                position: "absolute",
+                top: 30,
+                left: 30,
+                zIndex: 1000,
+              }}
+            >
+              <LogoutButton />
+            </Box>
       <SettingsButton path={`/RobotSettingPage/${robotID}`} />
       <BackButton path="/HomePage" />
 

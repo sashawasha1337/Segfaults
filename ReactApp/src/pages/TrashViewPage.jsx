@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Typography, Container, Box } from "@mui/material";
 import DisplayCard from "../components/DisplayCard";
 import BackButton from "../components/BackButton";
+import LogoutButton from "../components/LogoutButton";
 import { db } from "../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -91,6 +92,7 @@ function TrashViewPage() {
   }, [db, state]);
 
   return (
+    
     <Box
       sx={{
         display: "flex",
@@ -102,7 +104,16 @@ function TrashViewPage() {
       }}
     >
       <BackButton path="/ActivityLogPage"/>
-
+      <Box
+        sx={{
+          position: "absolute",
+          top: 30,
+          left: 30,
+          zIndex: 1000,
+        }}
+      >
+        <LogoutButton />
+      </Box>
       <Container maxWidth="sm">
         <Typography variant="h4" align="center" sx={{ mb: 2 }}>
           Robot Detection Display

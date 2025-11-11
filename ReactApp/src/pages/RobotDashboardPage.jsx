@@ -9,6 +9,7 @@ import { doc, getDoc, collection, query, limit, onSnapshot, orderBy, where, setD
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import LogoutButton from "../components/LogoutButton";
 import { useRobotConnection } from "../hooks/useRobotConnection";
 import { QuestionMark } from "@mui/icons-material";
 
@@ -144,9 +145,19 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
   };
 
   return (
+    
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <Typography variant="h4" sx={{ mb: 1 }}>Robot Control</Typography>
-
+      <Box
+        sx={{
+          position: "absolute",
+          top: 70,
+          left: 30,
+          zIndex: 1000,
+        }}
+      >
+        <LogoutButton />
+      </Box>
       <Card
       sx={{ 
         width: 600,

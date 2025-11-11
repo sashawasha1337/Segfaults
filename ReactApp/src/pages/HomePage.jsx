@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
-
+import LogoutButton from '../components/LogoutButton.jsx';
 import { Box, Button } from "@mui/material";
 import {RobotCard} from "../components/RobotCard";
 import AddButton from '../components/AddButton';
@@ -128,6 +128,16 @@ function HomePage() {
 
   return (
     <>
+          <Box
+            sx={{
+              position: "absolute",
+              top: 70,
+              left: 30,
+              zIndex: 1000,
+            }}
+          >
+            <LogoutButton />
+          </Box>
       <Box className="homepage"
         sx={{
           width: "100%", 

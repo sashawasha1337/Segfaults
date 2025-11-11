@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Box, Button, Grid2, Switch, TextField } from "@mui/material";
 import BackButton from "../components/BackButton";
-
+import LogoutButton from "../components/LogoutButton";
 import {collection, addDoc, getDocs, doc, updateDoc, arrayUnion, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import {useAuth} from "../ContextForAuth.jsx";
@@ -120,8 +120,18 @@ function AddRobotPage() {
 
   return (
     <>
-      <BackButton path="/HomePage" />
+      <Box
+        sx={{
+          position: "absolute",
+          top: 30,
+          left: 30,
+          zIndex: 1000,
+        }}
+      >
+        <LogoutButton />
+      </Box>
 
+      <BackButton path="/HomePage" />
       <h1 style ={{color: "black"}}>
         Add a Robot
       </h1>

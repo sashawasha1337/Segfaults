@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton";
 import IconButton from "@mui/material/IconButton";
 import { 
   Box,
@@ -230,7 +231,17 @@ function ActivityLogPage() {
   const hasNext = end < sortedEvents.length;
 
   return ( //TODO: make this look nicer with MUI components probably
-    <>  
+    <>
+      <Box
+        sx={{
+        position: "absolute",
+        top: 30,
+        left: 30,
+        zIndex: 1000,
+      }}
+    >
+      <LogoutButton />
+    </Box>  
       <Container maxWidth="lg" sx={{ pt: 10, pb: 6 }}>
         <BackButton path="/HomePage" />
         <Stack spacing={3} alignItems="center">
