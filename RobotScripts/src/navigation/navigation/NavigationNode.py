@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
+from sensor_msgs.msg import NavSatFix
 from rclpy.action import ActionClient
 from pyproj import Proj, Transformer
 import math
@@ -16,6 +17,7 @@ class NavigationNode(Node):
     def __init__(self):
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') # ROS2 Action
+        self.create_subscription(NavSatFix, '/gps_goal', self.gps_goal_callback, 10)
 
     def gps_conversion(lat, lon):
         x, y = TRANSFORMER.transform(lon, lat)
@@ -54,6 +56,14 @@ class NavigationNode(Node):
     def get_result_callback(self, response):
         result = response.result().result
         self.get_logger().info(f'Navigation result: {result}')
+
+    def gps_goal_callback(self, msg):
+        lat = msg.latitude
+        lon = msg.longitude
+        self.get_logger().info(f"Received GPS goal: Latitude = {lat}, Longitude = {lon}")
+        x, y = gps_conversion(msg.latitude, msg.longitude)
+        self.get_logger().info(f"Sending cartesian goal with coordinates: x = {x}, y = {y}")
+        send_goal(x, y, 0)
 
 def main(args=None):
     rclpy.init(args=args)
