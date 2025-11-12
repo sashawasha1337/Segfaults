@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",    
+    "deploy": "vite build && firebase deploy"
+
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
