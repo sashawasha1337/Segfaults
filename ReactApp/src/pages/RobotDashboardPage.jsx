@@ -6,9 +6,8 @@ import BackButton from "../components/BackButton";
 import SettingsButton from "../components/SettingsButton";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection, query, limit, onSnapshot, orderBy, where, setDoc } from "firebase/firestore";
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { GoogleMap, Marker as GMarker, Circle as GCircle, useLoadScript } from "@react-google-maps/api";
+import { serverTimestamp } from "firebase/firestore";
 import LogoutButton from "../components/LogoutButton";
 import { useRobotConnection } from "../hooks/useRobotConnection";
 import { QuestionMark } from "@mui/icons-material";
@@ -23,20 +22,6 @@ function TabPanel({ children, value, index }) {
 }
 
 // From Mapview
-const ugvIcon = L.icon({
-  iconUrl: "https://cdn.pixabay.com/photo/2013/07/12/13/43/arrow-147174_1280.png",
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
-  popupAnchor: [0, -7]
-});
-
-function AutoRecenterMap({ lat, lng }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView([lat, lng]); 
-  }, [lat, lng, map]);
-  return null;
-}
 
 function clampRadius(meters) {
   if (Number.isNaN(meters)) {
@@ -227,6 +212,11 @@ function MapTab({ robotID }) {
   const [radiusInput, setRadiusInput] = useState("25");
   const [lockedCenter, setLockedCenter] = useState(null);
   const mapRadius = clampRadius(Number(radiusInput));
+  const [waypoint, setWaypoint] = useState(null);
+
+  const {isLoaded} = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  });
 
   useEffect(() => {
     const q = query(
@@ -273,6 +263,28 @@ function MapTab({ robotID }) {
     }
   }, [mapRadius, isRadiusOn, lockedCenter]);
 
+  const mapClicker = async (e) => {
+    const clickedLat = e.latLng.lat();
+    const clickedLng = e.latLng.lng();
+    const wp = {lat: clickedLat, lng: clickedLng};
+    setWaypoint(wp);
+
+    try{
+      // storing waypoint in firebase right now, later we can send it to robot directly maybe???
+      const ref = doc(db, "waypoints", robotID);
+      await setDoc(ref, {
+        latitude: clickedLat,
+        longitude: clickedLng,
+        timestamp: serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Error setting waypoint:", e);
+    }
+  };
+
+  if (!isLoaded)
+    return <div>Loading Map...!</div>;
+
   return (
   <Box className="maptab" sx={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-start", alignItems: "center", ml: -2}}>
     <GlobalStyles styles={`
@@ -289,35 +301,39 @@ function MapTab({ robotID }) {
       .maptab .lockNote { font-size: 12px; color: #333; margin-top: 6px; }
     `} />
 
-    <MapContainer
-      center={[position.lat, position.lng]}
+    <GoogleMap
+      mapContainerStyle={{ width: 400, height: 300, borderRadius: 10, overflow: "hidden" }}
+      center={position}
       zoom={15}
-      style={{ width: 400, height: 300, borderRadius: 10, overflow: "hidden" }}
+      onClick={mapClicker}
     >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      <AutoRecenterMap lat={position.lat} lng={position.lng} />
-      <Marker position={[position.lat, position.lng]} icon={ugvIcon}>
-        <Popup>
-          <div style={{ textAlign: "center" }}><strong>UGV</strong></div>
-        </Popup>
-      </Marker>
-      {isRadiusOn && lockedCenter && (
-        <Circle
-          center={[lockedCenter.lat, lockedCenter.lng]}
-          radius={mapRadius}
-          pathOptions={{ color: "blue", weight: 1.5, fillOpacity: 0.05 }}
-        />
+      <GMarker position={position} />
+      {waypoint && (
+        <GMarker position={waypoint}
+        label="W" />
       )}
-    </MapContainer>
+      {isRadiusOn && lockedCenter && (
+        <GCircle
+          center={lockedCenter}
+          radius={mapRadius}
+          />
+      )}
+    </GoogleMap>
+
+   
 
     <Box sx={{ minWidth: 280 }}>
       <Typography variant="h6" sx={{ mb: 1 }}>Location & Geofence</Typography>
-      <div><strong>Coordinates:</strong>&nbsp;
+      <div><strong>Current Location:</strong>&nbsp;
         {position.lat?.toFixed(5)}, {position.lng?.toFixed(5)}
       </div>
+
+    {waypoint && (
+      <div><strong>Waypoint Set To:</strong>&nbsp;
+      {waypoint.lat.toFixed(5)}, {waypoint.lng.toFixed(5)}
+      </div>
+    )}
+
 
       <div className="radiusControls">
         <span className="labelText">Search&nbsp;Radius:</span>
