@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
-import { AppBar, Tabs, Tab, Box, Card, Button, Grid, Typography, GlobalStyles } from "@mui/material";
+import { AppBar, Tabs, Tab, Box, Card, Button, Grid, Typography, GlobalStyles, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward } from "@mui/icons-material";
 import BackButton from "../components/BackButton";
 import SettingsButton from "../components/SettingsButton";
@@ -213,6 +213,8 @@ function MapTab({ robotID }) {
   const [lockedCenter, setLockedCenter] = useState(null);
   const mapRadius = clampRadius(Number(radiusInput));
   const [waypoint, setWaypoint] = useState(null);
+  const [pendingWaypoint, setPendingWaypoint] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const {isLoaded} = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -263,11 +265,9 @@ function MapTab({ robotID }) {
     }
   }, [mapRadius, isRadiusOn, lockedCenter]);
 
-  const mapClicker = async (e) => {
-    const clickedLat = e.latLng.lat();
-    const clickedLng = e.latLng.lng();
-    const wp = {lat: clickedLat, lng: clickedLng};
-    setWaypoint(wp);
+  const confirmWaypoint = async (clickedLat, clickedLng) => {
+    if (!pendingWaypoint) return;
+    setWaypoint(pendingWaypoint);
 
     try{
       // storing waypoint in firebase right now, later we can send it to robot directly maybe???
@@ -280,7 +280,26 @@ function MapTab({ robotID }) {
     } catch (e) {
       console.error("Error setting waypoint:", e);
     }
+    setDialogOpen(false);
+    setPendingWaypoint(null);
   };
+
+  const handleCancelWaypoint = () => {
+    setDialogOpen(false);
+    setPendingWaypoint(null);
+  };
+
+  const handleConfirmWaypoint = async () => {
+    await confirmWaypoint(pendingWaypoint.lat, pendingWaypoint.lng);
+  };
+
+  const mapClicker = async (e) => {
+    const clickedLat = e.latLng.lat();
+    const clickedLng = e.latLng.lng();
+    setPendingWaypoint({ lat: clickedLat, lng: clickedLng });
+    setDialogOpen(true);
+  };
+
 
   if (!isLoaded)
     return <div>Loading Map...!</div>;
@@ -302,10 +321,11 @@ function MapTab({ robotID }) {
     `} />
 
     <GoogleMap
-      mapContainerStyle={{ width: 400, height: 300, borderRadius: 10, overflow: "hidden" }}
+      mapContainerStyle={{ width: 600, height: 400, borderRadius: 10, overflow: "hidden" }}
       center={position}
       zoom={15}
       onClick={mapClicker}
+      options ={{clickableIcons: false, streetViewControl: false, draggableCursor: "pointer", }}
     >
       <GMarker position={position} />
       {waypoint && (
@@ -362,6 +382,25 @@ function MapTab({ robotID }) {
       </div>
 
       <BackButton path="/HomePage" />
+      <Dialog open={dialogOpen} onClose={handleCancelWaypoint}>
+        <DialogTitle>Set Waypoint?</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography>
+            Send robot to: <br />
+            <strong>
+              {pendingWaypoint?.lat.toFixed(5)}, {pendingWaypoint?.lng.toFixed(5)}
+            </strong>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmWaypoint} variant="contained" color="primary">
+            Confirm
+          </Button>
+          <Button onClick={handleCancelWaypoint} color="inherit">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   </Box>
   );
