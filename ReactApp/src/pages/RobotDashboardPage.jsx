@@ -6,7 +6,7 @@ import BackButton from "../components/BackButton";
 import SettingsButton from "../components/SettingsButton";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection, query, limit, onSnapshot, orderBy, where, setDoc } from "firebase/firestore";
-import { GoogleMap, Marker as GMarker, Circle as GCircle, useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, Marker as GMarker, Circle as GCircle, useLoadScript, Polyline } from "@react-google-maps/api";
 import { serverTimestamp } from "firebase/firestore";
 import LogoutButton from "../components/LogoutButton";
 import { useRobotConnection } from "../hooks/useRobotConnection";
@@ -203,6 +203,34 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
     </Box>
   );
 }
+//the function that uses google directions API which will retrun an array of [lat,lng] waypoints for the robot to follow
+function getRoutePoints(origin,destination){
+  if(!window.google || !window.google.maps){
+    return Promise.reject("Google Maps API not loaded");
+  }
+  const directionsService = new window.google.maps.DirectionsService();
+  return new Promise((resolve, reject) => {
+    directionsService.route(
+      {
+        origin,
+        destination,
+        travelMode: window.google.maps.TravelMode.WALKING,
+      },
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK) {
+          const route = result.routes[0];
+          const overviewPath = route.overview_path;
+          const points = overviewPath.map((latLng) => ({
+            lat: latLng.lat(),
+            lng: latLng.lng(),
+          }));
+          resolve(points);
+        } else {
+          reject("Directions request failed due to " + status);
+        }
+    });
+  });
+}
 
 // Map Tab
 function MapTab({ robotID }) {
@@ -215,6 +243,7 @@ function MapTab({ robotID }) {
   const [waypoint, setWaypoint] = useState(null);
   const [pendingWaypoint, setPendingWaypoint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [routePath, setRoutePath] = useState(null);
 
   const {isLoaded} = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -271,14 +300,20 @@ function MapTab({ robotID }) {
 
     try{
       // storing waypoint in firebase right now, later we can send it to robot directly maybe???
+      const origin = { lat: position.lat, lng: position.lng };
+      const destination = { lat: clickedLat, lng: clickedLng };
+      const pathPoints = await getRoutePoints(origin, destination);
+      setRoutePath(pathPoints);
+
       const ref = doc(db, "waypoints", robotID);
       await setDoc(ref, {
         latitude: clickedLat,
         longitude: clickedLng,
+        path: pathPoints,
         timestamp: serverTimestamp()
       });
     } catch (e) {
-      console.error("Error setting waypoint:", e);
+      console.error("Error setting waypoint or directions:", e);
     }
     setDialogOpen(false);
     setPendingWaypoint(null);
@@ -337,6 +372,16 @@ function MapTab({ robotID }) {
           center={lockedCenter}
           radius={mapRadius}
           />
+      )}
+      {routePath && routePath.length > 1 && (
+        <Polyline
+          path={routePath}
+          options={{
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
+          }}
+        />
       )}
     </GoogleMap>
 
