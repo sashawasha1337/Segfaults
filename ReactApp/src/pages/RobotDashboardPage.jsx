@@ -15,8 +15,13 @@ import { QuestionMark } from "@mui/icons-material";
 function a11yProps(index) { return { id: `tab-${index}`, "aria-controls": `tabpanel-${index}` }; }
 function TabPanel({ children, value, index }) {
   return (
-    <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
-      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+  <div
+      role="tabpanel"
+      style={{ display: value === index ? "block" : "none" }}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+    >
+      <Box sx={{ p: 2 }}>{children}</Box>
     </div>
   );
 }
@@ -119,7 +124,7 @@ export default function RobotDashboard() {
 }
 
 // Control Tab
-function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, wifiStrength, robotIP, sendCommand, error }) {
+{/*function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, wifiStrength, robotIP, sendCommand, error }) {
   const adjustRobotDirection = async (command) => {
     const sent = await sendCommand(command);
     if (!sent) {
@@ -202,6 +207,103 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
       </Box>
     </Box>
   );
+}*/}
+
+function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, wifiStrength, robotIP, sendCommand, error }) {
+  const intervalRef = useRef(null);
+
+  const sendContinuous = (command) => {
+    // Stop any existing loop
+    stopSending();
+
+    // Immediately send first command
+    sendCommand(command);
+
+    // Start loop every 100ms (10 Hz, required by ROS)
+    intervalRef.current = setInterval(() => {
+      sendCommand(command);
+    }, 100);
+  };
+
+  const stopSending = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    sendCommand("stop");
+  };
+
+  const buttonEvents = (cmd) => ({
+    onMouseDown: () => sendContinuous(cmd),
+    onMouseUp: stopSending,
+    onMouseLeave: stopSending,
+    onTouchStart: () => sendContinuous(cmd),
+    onTouchEnd: stopSending
+  });
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Typography variant="h4" sx={{ mb: 1 }}>Robot Control</Typography>
+
+      <Card
+        sx={{
+          width: 600,
+          height: 400,
+          mb: 2,
+          border: "1px solid #0001",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}>
+        {robotIP ? (
+          <video
+            ref={videoRef}
+            muted
+            autoPlay
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover"
+            }}
+          />
+        ) : (
+          <Box sx={{ p: 2, textAlign: "center" }}><Typography variant="h6">No Live Feed Detected…</Typography></Box>
+        )}
+      </Card>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <Typography>Connection Status: <strong>{isConnected ? "Connected" : "Disconnected"}</strong></Typography>
+        <Typography>Battery Voltage: <strong>{batteryVoltage ?? "N/A"}</strong></Typography>
+        <Typography>Wifi Strength: <strong>{wifiStrength != null ? `${wifiStrength} dB` : "N/A"}</strong></Typography>
+      </Box>
+
+      {/* Movement Controls */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+        
+        {/* Forward */}
+        <Button {...buttonEvents("forward")} variant="contained">
+          <ArrowUpward sx={{ fontSize: 50 }} />
+        </Button>
+
+        <Box sx={{ display: "flex", gap: 12 }}>
+          {/* Left */}
+          <Button {...buttonEvents("left")} variant="contained">
+            <ArrowBack sx={{ fontSize: 50 }} />
+          </Button>
+
+          {/* Right */}
+          <Button {...buttonEvents("right")} variant="contained">
+            <ArrowForward sx={{ fontSize: 50 }} />
+          </Button>
+        </Box>
+
+        {/* Back */}
+        <Button {...buttonEvents("back")} variant="contained">
+          <ArrowDownward sx={{ fontSize: 50 }} />
+        </Button>
+      </Box>
+    </Box>
+  );
 }
 //the function that uses google directions API which will retrun an array of [lat,lng] waypoints for the robot to follow
 function getRoutePoints(origin,destination){
@@ -231,6 +333,9 @@ function getRoutePoints(origin,destination){
     });
   });
 }
+
+
+
 
 // Map Tab
 function MapTab({ robotID }) {

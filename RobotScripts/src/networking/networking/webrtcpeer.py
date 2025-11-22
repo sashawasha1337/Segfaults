@@ -1,11 +1,19 @@
-'''
+"""
 Helper class that manages WebRTC connection lifecycle, including offer/answer exchange,
 data channel communication, and video track streaming.
-'''
+"""
 
 import asyncio
 import json
-from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
+
+from aiortc import (
+    RTCPeerConnection,
+    RTCSessionDescription,
+    VideoStreamTrack,
+    RTCConfiguration,
+    RTCIceServer,
+)
+
 from av import VideoFrame
 
 class SinglePeerSession:
@@ -17,10 +25,10 @@ class SinglePeerSession:
         self.data_channel = None
         self.logger = node.get_logger()
 
-
     async def start(self):
         self.logger.info(f"Initiating WebRTC connection for {self.sid}")
 
+        # Clean up any existing PC
         if self.peer_connection:
             self.logger.info("Closing existing peer connection")
             try:
@@ -31,25 +39,14 @@ class SinglePeerSession:
                 self.peer_connection = None
                 self.data_channel = None
 
-        pc = RTCPeerConnection()
+        # Configure STUN to improve connectivity
+        config = RTCConfiguration(
+            iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
+        )
+        pc = RTCPeerConnection(configuration=config)
         self.peer_connection = pc
 
-        @pc.on("icecandidate")
-        def on_ice_candidate(event):
-            self.logger.info(f"ICE candidate for {self.sid}: {event.candidate}")
-
-        @pc.on("iceconnectionstatechange")
-        def on_ice_connection_state_change():
-            self.logger.info(f"ICE connection state changed for {self.sid}: {pc.iceConnectionState}")
-
-        @pc.on("connectionstatechange")
-        def on_connection_state_change():
-            self.logger.info(f"Connection state changed for {self.sid}: {pc.connectionState}")
-
-        @pc.on("icegatheringstatechange")
-        def on_ice_gathering_state_change():
-            self.logger.info(f"ICE gathering state changed for {self.sid}: {pc.iceGatheringState}")
-
+        # --- Data channel created on server side
         self.data_channel = pc.createDataChannel("robot")
         self.logger.info(f"Data channel created for {self.sid}")
 
@@ -81,75 +78,93 @@ class SinglePeerSession:
                         ack = json.dumps({"type": "command_ack", "command": cmd})
                         if self.data_channel.readyState == "open":
                             self.data_channel.send(ack)
-                        else: 
-                            self.logger.warning(f"Cannot send ack - data channel state: {self.data_channel.readyState}")
+                        else:
+                            self.logger.warning(
+                                f"Cannot send ack - data channel state: {self.data_channel.readyState}"
+                            )
                     except Exception as e:
-                        self.logger.error(f"Error sending command acknowledgment: {e}")
+                        self.logger.error(
+                            f"Error sending command acknowledgment: {e}"
+                        )
                 else:
                     self.logger.info(f"Unknown inbound message: {obj}")
             except Exception as e:
                 self.logger.error(f"Error handling inbound message: {e}")
-        
-        
-        pc.addTrack(ROSVideoTrack(self.node))
 
-        offer = await self.peer_connection.createOffer()
-        await self.peer_connection.setLocalDescription(offer)
 
-        self.logger.info(f"Offer type: {offer.type}, SDP length: {len(offer.sdp)}")
+        video_track = ROSVideoTrack(self.node)
+        pc.addTrack(video_track)
 
-        payload = json.dumps({
-            "sdp": self.peer_connection.localDescription.sdp,
-            "type": self.peer_connection.localDescription.type,
-        })
-        self.socketio.emit('offer', payload, room=self.sid)
+        # --- Create & set local description (offer)
+        offer = await pc.createOffer()
+        await pc.setLocalDescription(offer)
+
+        # Wait for ICE gathering to complete (non-trickle flow)
+        try:
+            while pc.iceGatheringState != "complete":
+                await asyncio.sleep(0.05)
+        except Exception as e:
+            self.logger.error(f"Error while waiting ICE gathering: {repr(e)}")
+
+        payload = json.dumps(
+            {
+                "sdp": pc.localDescription.sdp,
+                "type": pc.localDescription.type,
+            }
+        )
+        self.socketio.emit("offer", payload, room=self.sid)
         self.logger.info(f"Sent WebRTC offer to {self.sid}")
 
-    async def process_answer(self, answer_data): 
+    async def process_answer(self, answer_data):
         if not self.peer_connection:
             self.logger.warning(f"No active peer for sid {self.sid}")
             return
-        
+
         try:
             answer = json.loads(answer_data)
             await self.peer_connection.setRemoteDescription(
                 RTCSessionDescription(sdp=answer["sdp"], type=answer["type"])
             )
-            self.logger.info(f"WebRTC connection established successfully for {self.sid}")
+            self.logger.info(
+                f"WebRTC connection established successfully for {self.sid}"
+            )
+
         except json.JSONDecodeError as e:
             self.logger.error(f"Invalid JSON in answer data: {e}")
         except Exception as e:
             self.logger.error(f"Error setting remote description: {e}")
-            await self.peer_connection.close()
-            self.peer_connection = None
-            self.data_channel = None
+            try:
+                await self.peer_connection.close()
+            finally:
+                self.peer_connection = None
+                self.data_channel = None
 
-    async def close(self): 
+    async def close(self):
         if self.peer_connection:
             await self.peer_connection.close()
             self.peer_connection = None
             self.data_channel = None
             self.logger.info("Peer connection closed")
 
+
 # Helper class to manage video streaming from ROS to WebRTC
+
 class ROSVideoTrack(VideoStreamTrack):
     def __init__(self, node):
         super().__init__()
         self.node = node
+        self.logger = node.get_logger()
 
     async def recv(self):
-        try:
-            await asyncio.sleep(1 / 15)
-            pts, time_base = await self.next_timestamp()
-            frame = self.node.latest_frame
-            if frame is None:
-                import numpy as np
-                frame = np.zeros((480, 640, 3), np.uint8)
-                self.node.get_logger().warning("No camera frame available, sending black frame", throttle_duration_sec=5)
-            video_frame = VideoFrame.from_ndarray(frame, format="bgr24")
-            video_frame.pts = pts
-            video_frame.time_base = time_base
-            return video_frame
-        except Exception as e:
-            self.node.get_logger().error(f"Error in video frame retrieval: {repr(e)}")
-            raise
+        await asyncio.sleep(1/25)
+        # wait until a real frame exists
+        while self.node.latest_frame is None:
+            await asyncio.sleep(0.05)
+
+        pts, time_base = await self.next_timestamp()
+        frame = self.node.latest_frame.copy()
+        vf = VideoFrame.from_ndarray(frame, format="bgr24")
+        vf.pts, vf.time_base = pts, time_base
+
+        return vf
+

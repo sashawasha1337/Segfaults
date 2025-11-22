@@ -45,7 +45,7 @@ class NetworkNode(Node):
 
         self.bridge = CvBridge() # For converting ROS Image messages to OpenCV images
 
-        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel_teleop', 10) # Commands published for robot movement commands
+        self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10) # Commands published for robot movement commands
         self.get_logger().info("cmd_vel_teleop publisher created.")
         self.status_pusher = StatusPusher(self, lambda: self.peer_session)
         self.status_timer = self.create_timer(STATUS_INTERVAL, self.handle_status_push)

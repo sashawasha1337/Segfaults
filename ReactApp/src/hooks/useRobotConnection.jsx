@@ -20,8 +20,8 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
     setConnectionStatus('connecting');
     
     // Connect to signaling server
-    console.log(`Connecting to: http://${robotIP}`);
-    const socket = io(`http://${robotIP}`, {
+    const url = robotIP.includes(':') ? `http://${robotIP}` : `http://${robotIP}:5000`;
+    const socket = io(url, {
       reconnectionAttempts: 3,
       timeout: 5000,
       transports: ['websocket', 'polling'],
@@ -39,14 +39,15 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
       setConnectionStatus('processing offer');
       
       try {
+        const offer = JSON.parse(offerData);
         // Create peer connection as answerer (not initiator)
-        const peer = new Peer({ 
-          initiator: false,  // Client is now the answerer
-          trickle: false
+        const peer = new Peer({
+          initiator: false,
+          trickle: false, 
+          config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
         });
-        peerRef.current = peer;
 
-        // Handle all data from the robot through simple-peer's data event
+        peerRef.current = peer;
         peer.on('data', (data) => {
           console.log("Message from robot:", data.toString());
           try {
@@ -61,34 +62,32 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
             console.error("Failed to parse message:", err, data.toString());
           }
         });
-        
-        // Handle WebRTC signaling - send answer back to robot
+
         peer.on('signal', data => {
           console.log('Sending answer to robot');
           socket.emit('answer', JSON.stringify(data));
         });
-        
+
         peer.on('stream', stream => {
           setConnectionStatus('streaming');
           if (videoRef && videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play().catch(err => {
-              console.error('Error playing video stream:', err);
-            });
+            const video = videoRef.current;
+            video.muted = true;
+            video.srcObject = stream;
+            video.play().catch(err => {
+                console.error('Error playing video:', err);
+              });
           }
           setIsConnected(true);
         });
-        
+
         peer.on('connect', () => {
           console.log("WebRTC peer connection established");
           setConnectionStatus('connected');
           setIsConnected(true);
           setError(null);
-
-        
         });
 
-        
         peer.on('close', () => {
           console.warn("WebRTC peer connection closed");
           setConnectionStatus('disconnected');
@@ -101,10 +100,9 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
           setConnectionStatus('connection failed');
           setIsConnected(false);
         });
-        
-        // Signal the offer to start the connection
-        peer.signal(JSON.parse(offerData));
-        
+
+        peer.signal(offer);
+
       } catch (err) {
         console.error('Error creating Peer:', err);
         setError('Failed to create WebRTC peer connection');
@@ -135,8 +133,6 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
     };
   }, [robotIP, videoRef]);
 
-
-
   // Function to send commands
 const sendCommand = async (command) => {
   if (!peerRef.current || !isConnected) {
@@ -158,7 +154,6 @@ const sendCommand = async (command) => {
     return false;
   }
 };
-
 
   return {
     isConnected,
