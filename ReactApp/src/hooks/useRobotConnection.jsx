@@ -20,7 +20,7 @@ export function useRobotConnection(robotIP, videoRef, onBatteryUpdate, onWifiUpd
     setConnectionStatus('connecting');
     
     // Connect to signaling server
-    const url = robotIP.includes(':') ? `http://${robotIP}` : `http://${robotIP}:5000`;
+    const url = robotIP.includes(':') ? `https://${robotIP}` : `https://${robotIP}:5000`;
     const socket = io(url, {
       reconnectionAttempts: 3,
       timeout: 5000,
