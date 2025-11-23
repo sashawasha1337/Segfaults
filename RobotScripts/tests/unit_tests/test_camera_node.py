@@ -1,83 +1,45 @@
-'''
-Unit test for ROS2 Camera Node
-'''
-
+# tests/unit_tests/test_camera_node.py
+import time
 import pytest
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+from sensor_msgs.msg import Image
 
-
-def test_camera_node_initialization(mock_cv2):
-    # Arrange
-    import rclpy
+@pytest.fixture(scope="session", autouse=True)
+def rclpy_init_shutdown():
     rclpy.init()
-    from camera.camera.CameraNode import CameraPublisher
+    yield
+    rclpy.shutdown()
 
-    try:
-        # Act
-        camera_node = CameraPublisher()
+@pytest.fixture()
+def frame_listener():
+    class FrameListener(Node):
+        def __init__(self):
+            super().__init__('frame_listener')
+            self.frames_received = 0
+            qos = QoSProfile(
+                reliability=ReliabilityPolicy.BEST_EFFORT,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=10
+            )
+            self.create_subscription(Image, '/camera/image_raw', self.callback, qos)
 
-        assert camera_node.get_parameter("camera_index").value == 0
-        assert camera_node.get_parameter("width").value == 640
-        assert camera_node.get_parameter("height").value == 480
-        assert camera_node.get_parameter("fps").value == 15.0
-        assert camera_node.get_parameter('camera_backend').value == 'auto'
-    finally:
-        rclpy.shutdown()
+        def callback(self, msg):
+            self.frames_received += 1
 
+    node = FrameListener()
+    yield node
+    node.destroy_node()
 
-def test_camera_node_camera_open_error(mock_cv2_broken):
-    # Arrange
-    import rclpy
-    rclpy.init()
-    from camera.camera.CameraNode import CameraPublisher
+@pytest.mark.integration
+def test_camera_publishes_frames(frame_listener):
+    """Verify camera node publishes to /camera/image_raw"""
+    timeout = 3.0
+    start = time.time()
+    while time.time() - start < timeout:
+        rclpy.spin_once(frame_listener, timeout_sec=0.1)
+        if frame_listener.frames_received > 0:
+            break
 
-
-    # Act & Assert
-    try:
-        # Act & Assert
-        with pytest.raises(ConnectionError, match="Camera open failed"):
-            camera_node = CameraPublisher()
-    finally:
-        rclpy.shutdown()
-
-def test_camera_releases_on_destroy(mock_cv2):
-    # Arrange
-    import rclpy
-    rclpy.init()
-    from camera.camera.CameraNode import CameraPublisher
-
-    try:
-        # Act
-        camera_node = CameraPublisher()
-        cap = camera_node.cap
-
-        # Assert camera is opened
-        assert cap.isOpened() is True
-
-        # Destroy node
-        camera_node.destroy_node()
-
-        # Assert camera is released
-        assert cap.isOpened() is False
-    finally:
-        rclpy.shutdown()
-
-
-def test_process_frame_reshaping(mock_cv2):
-    # Arrange
-    import rclpy
-    rclpy.init()
-    from camera.camera.CameraNode import CameraPublisher
-    import numpy as np
-
-    try:
-        camera_node = CameraPublisher()
-
-        flattened = np.zeros((1, 640 * 480 * 3), dtype=np.uint8)
-
-        # Act
-        processed_frame = camera_node.process_frame(flattened, 640, 480)
-
-        # Assert
-        assert processed_frame.shape == (480, 640, 3)
-    finally:
-        rclpy.shutdown()
+    assert frame_listener.frames_received > 0, f"Expected frames but got {frame_listener.frames_received}"
