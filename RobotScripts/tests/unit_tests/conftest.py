@@ -86,6 +86,7 @@ def mock_rclpy():
 # Mock cv2
 @pytest.fixture()
 def mock_cv2():
+
     class FakeVideoCapture:
         def __init__(self, index, backend=None):
             self.index = index
@@ -122,8 +123,8 @@ def mock_cv2():
     yield
 
     # Cleanup sys.modules
-    if 'camera.CameraNode' in sys.modules:
-        del sys.modules['camera.CameraNode']
+    if 'camera.camera.CameraNode' in sys.modules:
+        del sys.modules['camera.camera.CameraNode']
     if 'cv2' in sys.modules:
         del sys.modules['cv2']
 
@@ -162,8 +163,8 @@ def mock_cv2_broken():
     yield
 
     # Cleanup sys.modules
-    if 'camera.CameraNode' in sys.modules:
-        del sys.modules['camera.CameraNode']
+    if 'camera.camera.CameraNode' in sys.modules:   
+        del sys.modules['camera.camera.CameraNode']
     if 'cv2' in sys.modules:
         del sys.modules['cv2']
 
