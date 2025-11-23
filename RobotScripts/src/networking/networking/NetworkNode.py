@@ -12,6 +12,7 @@ Subscribed Topics:
 - battery_state (sensor_msgs/BatteryState): Subscribes to battery status.
 '''
 
+import os
 import asyncio
 import threading
 from flask import Flask, request
@@ -27,6 +28,10 @@ from sensor_msgs.msg import BatteryState
 
 from networking.status import StatusPusher
 from networking.webrtcpeer import SinglePeerSession
+
+CERT_DIR = os.path.expanduser('~/Segfaults/RobotScripts')
+CERT_FILE = os.path.join(CERT_DIR, 'cert.pem')
+KEY_FILE = os.path.join(CERT_DIR, 'key.pem')
 
 app = Flask(__name__) # 
 CORS(app) # Cross Origin Resource Sharing, allows browser access from a different origin
@@ -46,7 +51,7 @@ class NetworkNode(Node):
         self.bridge = CvBridge() # For converting ROS Image messages to OpenCV images
 
         self.cmd_vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10) # Commands published for robot movement commands
-        self.get_logger().info("cmd_vel_teleop publisher created.")
+        self.get_logger().info("cmd_vel publisher created.")
         self.status_pusher = StatusPusher(self, lambda: self.peer_session)
         self.status_timer = self.create_timer(STATUS_INTERVAL, self.handle_status_push)
         # Initial Status
@@ -163,7 +168,7 @@ def main():
     socketio_thread = threading.Thread(
         target=lambda: socketio.run(
             app,
-            ssl_context=None,
+            ssl_context=(CERT_FILE, KEY_FILE),
             host='0.0.0.0',
             port=5000,
             debug=False,
