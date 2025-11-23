@@ -6,7 +6,7 @@ import BackButton from "../components/BackButton";
 import SettingsButton from "../components/SettingsButton";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection, query, limit, onSnapshot, orderBy, where, setDoc } from "firebase/firestore";
-import { GoogleMap, Marker as GMarker, Circle as GCircle, useLoadScript, Polyline } from "@react-google-maps/api";
+import { GoogleMap, Marker as GMarker, Circle as GCircle, useLoadScript, DirectionsRenderer } from "@react-google-maps/api";
 import { serverTimestamp } from "firebase/firestore";
 import LogoutButton from "../components/LogoutButton";
 import { useRobotConnection } from "../hooks/useRobotConnection";
@@ -223,9 +223,11 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
 //the function that uses google directions API which will retrun an array of [lat,lng] waypoints for the robot to follow
 function getRoutePoints(origin,destination){
   if(!window.google || !window.google.maps){
-    return Promise.reject("Google Maps API not loaded");
+    return Promise.reject(new Error("Google Maps API not loaded"));
   }
+
   const directionsService = new window.google.maps.DirectionsService();
+
   return new Promise((resolve, reject) => {
     directionsService.route(
       {
@@ -234,18 +236,19 @@ function getRoutePoints(origin,destination){
         travelMode: window.google.maps.TravelMode.WALKING,
       },
       (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) {
+        if (status === "OK" && result.routes && result.routes.length > 0) {
           const route = result.routes[0];
-          const overviewPath = route.overview_path;
+          const overviewPath = route.overview_path || [];
           const points = overviewPath.map((latLng) => ({
             lat: latLng.lat(),
             lng: latLng.lng(),
           }));
-          resolve(points);
+          resolve({ points, directions: result });
         } else {
-          reject("Directions request failed due to " + status);
+          reject(new Error("Directions request failed due to " + status));
         }
-    });
+      }
+    );
   });
 }
 
@@ -264,6 +267,7 @@ function MapTab({ robotID }) {
   const [pendingWaypoint, setPendingWaypoint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [routePath, setRoutePath] = useState(null);
+  const [directionsResult, setDirectionsResult] = useState(null);
 
   const {isLoaded} = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -316,14 +320,16 @@ function MapTab({ robotID }) {
 
   const confirmWaypoint = async (clickedLat, clickedLng) => {
     if (!pendingWaypoint) return;
-    setWaypoint(pendingWaypoint);
+    const finalWaypoint = { lat: clickedLat, lng: clickedLng };
+    setWaypoint(finalWaypoint);
 
     try{
       // storing waypoint in firebase right now, later we can send it to robot directly maybe???
       const origin = { lat: position.lat, lng: position.lng };
-      const destination = { lat: clickedLat, lng: clickedLng };
-      const pathPoints = await getRoutePoints(origin, destination);
-      setRoutePath(pathPoints);
+      const destination = finalWaypoint;      
+      const {points, directions} = await getRoutePoints(origin, destination);
+      setRoutePath(points);
+      setDirectionsResult(directions);
 
       const ref = doc(db, "waypoints", robotID);
       await setDoc(ref, {
@@ -345,12 +351,15 @@ function MapTab({ robotID }) {
   };
 
   const handleConfirmWaypoint = async () => {
+    if (!pendingWaypoint) return;
     await confirmWaypoint(pendingWaypoint.lat, pendingWaypoint.lng);
   };
 
   const mapClicker = async (e) => {
     const clickedLat = e.latLng.lat();
     const clickedLng = e.latLng.lng();
+
+    setDirectionsResult(null);
     setPendingWaypoint({ lat: clickedLat, lng: clickedLng });
     setDialogOpen(true);
   };
@@ -393,16 +402,19 @@ function MapTab({ robotID }) {
           radius={mapRadius}
           />
       )}
-      {routePath && routePath.length > 1 && (
-        <Polyline
-          path={routePath}
+      {directionsResult && (
+        <DirectionsRenderer
+          directions={directionsResult}
           options={{
-            strokeColor: "#FF0000",
-            strokeOpacity: 0.8,
-            strokeWeight: 4,
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#FF0000",
+              strokeOpacity: 0.8,
+              strokeWeight: 4,
+            }
           }}
         />
-      )}
+      )}  
     </GoogleMap>
 
    
