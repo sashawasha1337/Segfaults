@@ -23,7 +23,7 @@ class NavigationNode(Node):
         self.waypoints = []
         self.current_index = 0
         self.goal_msg = None
-        
+
         self.get_logger().info("Navigation node started.")
 
     # Callback when a new path is published
@@ -31,6 +31,11 @@ class NavigationNode(Node):
         if not msg.poses:
             self.get_logger().warn("Received empty path. Ignoring.")
             return
+        
+        # Cancel any existing timers
+        if hasattr(self, 'retry_timer'):
+            self.retry_timer.cancel()
+            del self.retry_timer
         
         self.waypoints = msg.poses
         self.current_index = 0
@@ -58,7 +63,7 @@ class NavigationNode(Node):
     # Send goal with retry logic
     def send_goal_with_retries(self, msg):
         if self.retry_attempt >= self.max_retry_attempts:
-            self.get_logger().error("Max retries reached for waypoint {self.current_index + 1}. Skipping to next waypoint.")
+            self.get_logger().error(f"Max retries reached for waypoint {self.current_index + 1}. Skipping to next waypoint.")
             self.current_index += 1
             self.navigate_next_waypoint()
             return
@@ -67,7 +72,7 @@ class NavigationNode(Node):
         self.get_logger().info(f"Sending goal attempt #{self.retry_attempt}")
         
         # Wait until action server is available
-        self._action_client.wait_for_server()
+        self._action_client.wait_for_server(timeout_sec=5.0)
         
         goal_response = self._action_client.send_goal_async(msg)
         goal_response.add_done_callback(self.goal_response_callback)
@@ -75,19 +80,40 @@ class NavigationNode(Node):
     # Check how nav2 responds to goal request
     def goal_response_callback(self, future):
         goal_handle = future.result()
-        retry_timer = [None]
         
         if not goal_handle.accepted:
             self.get_logger().warn(f"Goal rejected, retrying in {self.retry_delay} seconds")
-            self.create_timer(self.retry_delay, lambda: self.send_goal_with_retries(self.goal_msg))            
+
+            # Cancel any existing timers
+            if hasattr(self, 'retry_timer'):
+                self.retry_timer.cancel()
+                del self.retry_timer
+
+            # one-shot timer
+            def retry_callback():
+                self.send_goal_with_retries(self.goal_msg)
+                self.retry_timer.cancel()
+                del self.retry_timer
+
+            self.retry_timer = self.create_timer(self.retry_delay, retry_callback)
         else:
             self.get_logger().info('Goal accepted')
             self.retry_attempt = 0
+
+            # Cancel retry timer if it exists
+            if hasattr(self, 'retry_timer'):
+                self.retry_timer.cancel()
+                del self.retry_timer
+
             goal_handle.get_result_async().add_done_callback(self.get_result_callback)
 
     # Log outcome after navigation goal is reached
     def get_result_callback(self, future):
-        result = future.result().result
+        try:
+            result = future.result().result
+        except Exception as e:
+            self.get_logger().info(f"Failed to get navigation result: {e}")
+            result = None
         self.get_logger().info(f'Navigation result for waypoint {self.current_index + 1}: {result}')
         self.current_index += 1
         self.navigate_next_waypoint()
