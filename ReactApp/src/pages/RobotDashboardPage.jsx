@@ -335,7 +335,7 @@ function MapTab({ robotID }) {
       await setDoc(ref, {
         latitude: clickedLat,
         longitude: clickedLng,
-        path: pathPoints,
+        path: points,
         timestamp: serverTimestamp()
       });
     } catch (e) {
@@ -482,3 +482,4 @@ function MapTab({ robotID }) {
   </Box>
   );
 }
+export { MapTab, getRoutePoints };
