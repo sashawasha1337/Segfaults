@@ -1,11 +1,24 @@
 //routing tests for App component
 //ReactApp/tests/app_route_test.jsx
 //not testing individual pages, just that routing to them works, more of an example of how to test routing with Vitest
+import { vi } from "vitest";
+const fakeAuth ={}
+vi.mock("firebase/auth", () => {
+  const fakeAuth ={}
+  return {
+    getAuth: vi.fn(() => fakeAuth),
+    onAuthStateChanged: vi.fn((auth, callback) => {
+      callback({ uid: "user123" });
+      return () => {};
+    }),
+    GoogleAuthProvider: vi.fn(),
+  };
+});
 
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import App from "../src/App";
-import { vi } from "vitest";
+
 
 
 vi.mock("../src/pages/ActivityLogPage.jsx", () => ({ default: () => <div>ActivityLogPage</div> }));
