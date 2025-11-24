@@ -3,14 +3,17 @@
 //not testing individual pages, just that routing to them works, more of an example of how to test routing with Vitest
 import { vi } from "vitest";
 const fakeAuth ={}
-vi.mock("firebase/auth", () => ({
+vi.mock("firebase/auth", () => {
+  const fakeAuth ={}
+  return {
     getAuth: vi.fn(() => fakeAuth),
-
     onAuthStateChanged: vi.fn((auth, callback) => {
       callback({ uid: "user123" });
       return () => {};
-  }),
-}));
+    }),
+    GoogleAuthProvider: vi.fn(),
+  };
+});
 
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
