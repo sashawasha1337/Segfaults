@@ -1,6 +1,3 @@
-#Optional bash script to build the Docker image for the ROS 2 manipulation package
-#if bash build.sh does not work, manually run the command using sudo docker build -f docker/Dockerfile -t manipulation:latest .
-
 #!/bin/bash
 
 # Get the absolute path of the directory containing this script (docker directory)
@@ -20,10 +17,10 @@ build_docker_image()
     # Print the log message using our debug function
     print_debug
 
-   # Build the Docker image
-    # -f $SCRIPT_PATH/Dockerfile: Specify the path to the Dockerfile in the docker direct$
+    # Build the Docker image
+    # -f $SCRIPT_PATH/Dockerfile: Specify the path to the Dockerfile in the docker directory
     # -t manipulation:latest: Tag the image as manipulation:latest
-    # $PARENT_PATH: Use the parent directory as the build context, allowing access to all$
+    # $PARENT_PATH: Use the parent directory as the build context, allowing access to all package files
     # --no-cache: Build the image without using the cache, ensuring fresh dependencies
     sudo docker image build -f $SCRIPT_PATH/Dockerfile -t manipulation:latest $PARENT_PATH --no-cache
 }
@@ -50,6 +47,7 @@ create_shared_folder()
 # This provides consistent formatting for our log messages
 print_debug()
 {
+    # Print an empty line for readability
     echo ""
 
     # Print the log message
