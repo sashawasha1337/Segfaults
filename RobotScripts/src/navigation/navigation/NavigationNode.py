@@ -9,7 +9,7 @@ import math
 class NavigationNode(Node):
     def __init__(self):
         super().__init__('navigation_node')
-        self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose') # ROS2 Action
+        self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose') # ROS2 Action
 
         # Subscribe to the Path message from FirestoreGPSListener
         self.create_subscription(Path, '/gps_goal', self.path_callback, 10)
