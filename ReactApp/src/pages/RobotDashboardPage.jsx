@@ -196,24 +196,24 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
         
         {/* Forward */}
-        <Button {...buttonEvents("forward")} variant="contained">
+        <Button aria-label="Forward" {...buttonEvents("forward")} variant="contained">
           <ArrowUpward sx={{ fontSize: 50 }} />
         </Button>
 
         <Box sx={{ display: "flex", gap: 12 }}>
           {/* Left */}
-          <Button {...buttonEvents("left")} variant="contained">
+          <Button aria-label="Left" {...buttonEvents("left")} variant="contained">
             <ArrowBack sx={{ fontSize: 50 }} />
           </Button>
 
           {/* Right */}
-          <Button {...buttonEvents("right")} variant="contained">
+          <Button aria-label="Right" {...buttonEvents("right")} variant="contained">
             <ArrowForward sx={{ fontSize: 50 }} />
           </Button>
         </Box>
 
         {/* Back */}
-        <Button {...buttonEvents("back")} variant="contained">
+        <Button aria-label="Back"{...buttonEvents("back")} variant="contained">
           <ArrowDownward sx={{ fontSize: 50 }} />
         </Button>
       </Box>
@@ -482,4 +482,4 @@ function MapTab({ robotID }) {
   </Box>
   );
 }
-export { MapTab, getRoutePoints };
+export { MapTab, getRoutePoints, ControlTab };
