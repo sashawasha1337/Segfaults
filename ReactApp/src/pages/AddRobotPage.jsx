@@ -200,27 +200,6 @@ function AddRobotPage() {
         </div>
 
 
-        
-        <Box //box and grid for switches
-          sx={{ mt: 2 }}> 
-          <Grid2 container spacing={2} alignItems="center">
-            <Grid2 item>
-              <Switch sx={{transform: "scale(1.5)"}} />
-            </Grid2>
-            <Grid2 item>
-              <span style={{ fontWeight: "bold", color: "black" }}>Return to dock when signal lost</span>
-            </Grid2>
-          </Grid2>
-
-          <Grid2 container spacing={2} alignItems="center" sx={{ mt: 1 }}>
-            <Grid2 item>
-              <Switch sx={{transform: "scale(1.5)"}} />
-            </Grid2>
-            <Grid2 item>
-              <span style={{ fontWeight: "bold", color: "black" }}>Robot equipped with lidar</span>
-            </Grid2>
-          </Grid2>
-        </Box>
 
 
         <Button variant="contained"
