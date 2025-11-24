@@ -22,8 +22,7 @@ setup(
     'console_scripts': [
         'camera_node = camera.CameraNode:main',
         'yolo_node = camera.YoloNode:main',
-        'rplidar_avoidance = camera.rplidar_avoidance:main',
-        'event_compiler_node = camera.EventCompilerNode:main',
+        'firebase_listener = camera.FirebaseListener:main',
     ],
 },
 

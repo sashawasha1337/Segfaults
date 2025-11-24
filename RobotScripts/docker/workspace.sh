@@ -1,23 +1,20 @@
-#sets up the ROS2 workspace inside the docker container
 #!/bin/bash
 set -e
 
 # Set ROS 2 distribution as a variable
-ROS_DISTRO="jazzy"
+ROS_DISTRO="foxy"
 
 # Source ROS 2 setup
-source /opt/ros/$ROS_DISTRO/setup.bash
+if [ -f "/opt/ros/$ROS_DISTRO/setup.bash" ]; then
+  source "/opt/ros/$ROS_DISTRO/setup.bash"
+elif [ -f "/opt/ros/$ROS_DISTRO/install/setup.bash" ]; then
+  source "/opt/ros/$ROS_DISTRO/install/setup.bash"
+else
+  echo "ERROR: ROS $ROS_DISTRO not found under /opt/ros/$ROS_DISTRO" >&2
+  exit 1
+fi
 
 # Install system dependencies for PCL
-apt-get update && apt-get install -y \
-    gnupg \
-    curl \
-    libpcap-dev
-
-# Navigate back to the workspace root
-cd /root/ros2_ws
-
-# Install ROS2 dependencies for all packages
 apt-get update && apt-get install -y \
     gnupg \
     curl \

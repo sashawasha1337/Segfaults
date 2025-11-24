@@ -18,6 +18,7 @@ import GettingStarted from './pages/Documentation/GettingStarted';
 import Configuration from './pages/Documentation/Configuration';
 import Troubleshooting from './pages/Documentation/Troubleshooting';
 import RobotID from './pages/Documentation/RobotID';
+import ManageUsersPage from './pages/ManageUsersPage';
 import './App.css'
 
 
@@ -45,6 +46,7 @@ function App() {
         <Route path="/TrashViewPage" element={<TrashViewPage />} />
         <Route path="/UserSettingsPage" element={<UserSettingsPage />} />
         <Route path="/RobotDashboardPage/:robotID" element={<RobotDashboardPage />} /> 
+        <Route path="/ManageUsersPage/:robotID" element={<ManageUsersPage />} />
       </Route>
     </Routes>
   );

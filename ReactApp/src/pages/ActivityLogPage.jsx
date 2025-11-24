@@ -151,15 +151,17 @@ function ActivityLogPage() {
       }
     };
 
-  React.useEffect(() => {
-    fetchEvents();
-    // Set up auto-refresh every 30 seconds
+React.useEffect(() => {
+  fetchEvents(true);
+  // Set up interval to refresh every 30 seconds, disabled for tests
+  if (process.env.NODE_ENV !== "test") {
     const intervalId = setInterval(() => {
       fetchEvents();
-    }, 30000); // 30000 ms = 30 seconds
+    }, 30000); //30 secs, change if needed
 
     return () => clearInterval(intervalId);
-  }, [currentUser?.email, pageIndex]);
+  }
+}, [currentUser?.email]);
 
   // Reset to first page when filters change
   React.useEffect(() => {
@@ -227,10 +229,11 @@ function ActivityLogPage() {
       [sortedEvents, start, end]
     );
   // simple flags for the pager buttons
+  const totalPages = Math.ceil(sortedEvents.length / pageSize);
   const hasPrev = pageIndex > 0;
-  const hasNext = end < sortedEvents.length;
+  const hasNext = pageIndex < totalPages - 1;
 
-  return ( //TODO: make this look nicer with MUI components probably
+  return ( 
     <>
       <Box
         sx={{
@@ -263,7 +266,6 @@ function ActivityLogPage() {
               <RefreshIcon />
             </IconButton>
           </Box>
-          {/* --- FILTER BAR --- */}
           <Paper
             elevation={1}
             sx={{
@@ -279,7 +281,6 @@ function ActivityLogPage() {
               spacing={2}
               alignItems={{ xs: "stretch", md: "center" }}
             >
-            {/* Filter by Robot ID */}
               <Autocomplete
                 multiple
                 size="small"
@@ -297,7 +298,6 @@ function ActivityLogPage() {
                 sx={{ minWidth: 240, flex: 1 }}
               />
 
-              {/* Filter by Category */}
               <Autocomplete
                 multiple
                 size="small"
@@ -315,7 +315,6 @@ function ActivityLogPage() {
                 sx={{ minWidth: 200, flex: 1 }}
               />
 
-              {/* Filter by Location */}
               <Autocomplete
                 multiple
                 size="small"
@@ -333,7 +332,6 @@ function ActivityLogPage() {
                 sx={{ minWidth: 220, flex: 1 }}
               />
 
-                {/* Button to clear all filters */}
                 <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
                 <Button
                   variant="outlined"
