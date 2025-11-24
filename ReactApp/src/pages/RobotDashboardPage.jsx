@@ -213,7 +213,7 @@ function ControlTab({ videoRef, isConnected, connectionStatus, batteryVoltage, w
         </Box>
 
         {/* Back */}
-        <Button aria-label="Back"{...buttonEvents("back")} variant="contained">
+        <Button aria-label="Back" {...buttonEvents("back")} variant="contained">
           <ArrowDownward sx={{ fontSize: 50 }} />
         </Button>
       </Box>
