@@ -50,44 +50,6 @@ function RobotSettingPage() {
 
   const norm = (s) => (s || "").toString().trim().toLowerCase();
 
-  // Helpers for display
-  const formatIP = (ip) => {
-    if (!ip) return "—";
-    // basic IPv4 validation
-    const v4 = /^(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}$/;
-    return v4.test(ip) ? ip : ip.toString();
-  };
-
-  const formatDate = (createdAt) => {
-    if (!createdAt) return null;
-    try {
-      let d = createdAt;
-      if (typeof createdAt.toDate === 'function') d = createdAt.toDate();
-      else d = new Date(createdAt);
-      if (isNaN(d.getTime())) return null;
-      return d.toLocaleString();
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const connectionLabel = (status) => {
-    if (!status) return 'Unknown';
-    const s = status.toString().toLowerCase();
-    if (s.includes('connected')) return 'Connected';
-    if (s.includes('connecting')) return 'Connecting';
-    if (s.includes('disconnected') || s.includes('lost')) return 'Disconnected';
-    return status;
-  };
-
-  const connectionColor = (status) => {
-    const lab = connectionLabel(status).toLowerCase();
-    if (lab === 'connected') return 'green';
-    if (lab === 'connecting') return 'orange';
-    if (lab === 'disconnected') return 'red';
-    return '#000000';
-  };
-
   const onDelete = async () => {
   try {
     if (!currentUser?.email) {
@@ -250,20 +212,7 @@ function RobotSettingPage() {
           ROS Version: {robot?.rosVersion || "Eloquent Elusor"}
         </Typography>
 
-        {/* IP Address */}
-        <Typography sx={{ color: "#000000", fontFamily: "Inter", fontSize: 16 }}>
-          IP Address: {formatIP(robot?.ipAddress)}
-        </Typography>
-
-        {/* Date Added */}
-        <Typography sx={{ color: "#000000", fontFamily: "Inter", fontSize: 16 }}>
-          Date Added To Network: {formatDate(robot?.createdAt) || "—"}
-        </Typography>
-
-        {/* Connection status with friendly label */}
-        <Typography sx={{ fontFamily: "Inter", fontSize: 16 }}>
-          Connection: <span style={{ color: connectionColor(connectionStatus), fontWeight: 600 }}>{connectionLabel(connectionStatus)}</span>
-        </Typography>
+        {/* IP/Date/Connection removed per request */}
         
       </Box>
     </Box>
