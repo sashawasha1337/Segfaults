@@ -68,7 +68,7 @@ Our Project features a web app which includes user management and presents data 
 - **Web App Testing**
   - Vitest
 - **Robot Testing**
-  -Pytest
+  - Pytest
 
 
 
