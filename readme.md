@@ -47,7 +47,7 @@ Our Project features a web app which includes user management and presents data 
 ### Web Application
 - **Frontend**:
   - React + Vite
-  - Leaflet (for maps)
+  - Google Maps and Routes API
   - Firebase Authentication
 - **Backend**:
   - Firebase Firestore (for data storage)
@@ -65,8 +65,10 @@ Our Project features a web app which includes user management and presents data 
 ## 🚀 Deployment
 
 ## 🖥️ Testing 
-
-## 👽 Developer instructions
+- **Web App Testing**
+  - Vitest
+- **Robot Testing**
+  - Pytest
 
 
 

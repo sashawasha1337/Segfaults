@@ -33,16 +33,16 @@ function App() {
           <Route path="robot-id" element={<RobotID />} />
       </Route>
       <Route path="/LoginPage" element={<LoginPage />} />
+      <Route path="/SignUpPage" element={<SignUpPage />} />
+      <Route path="/ForgotUsernamePage" element={<ForgotUsernamePage />} />
       <Route element={<ProtectedPage />} >
         <Route path="/ActivityLogPage" element={<ActivityLogPage />} />
         <Route path="/AddRobotPage" element={<AddRobotPage />} />
         <Route path="/ControlPage/:robotID" element={<ControlPage />} />
-        <Route path="/ForgotUsernamePage" element={<ForgotUsernamePage />} />
         <Route path="/HomePage" element={<HomePage />} />
         <Route path="/ResetPasswordPage" element={<ResetPasswordPage />} />
         <Route path="/RobotSettingPage/:robotID" element={<RobotSettingPage />} />
         <Route path="/MapViewPage" element={<MapViewPage />} />
-        <Route path="/SignUpPage" element={<SignUpPage />} />
         <Route path="/TrashViewPage" element={<TrashViewPage />} />
         <Route path="/UserSettingsPage" element={<UserSettingsPage />} />
         <Route path="/RobotDashboardPage/:robotID" element={<RobotDashboardPage />} /> 
