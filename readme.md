@@ -232,7 +232,7 @@ Pytest integration_tests/ -v
 
 ---
 
-#### Data ERD 
+#### Entity Relationship Diagram 
 ![image](SegfaultsERD.png)
 
 ---
