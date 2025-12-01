@@ -2,10 +2,8 @@ import React from 'react';
 import { List, ListItemButton, ListItemText, Box, Divider } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+// Show only the Robot ID docs entry per request
 const navItems = [
-  { label: 'Getting Started', path: '/docs/getting-started' },
-  { label: 'Configuration', path: '/docs/configuration' },
-  { label: 'Troubleshooting', path: '/docs/troubleshooting' },
   { label: 'Robot ID', path: '/docs/robot-id' },
 ];
 
