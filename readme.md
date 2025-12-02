@@ -245,7 +245,7 @@ We have developed automated software tests for both the web application and the 
 - 
 <h1 align="center">
 
-  <img src="web_test" alt="robot picture" >
+  <img src="web_test.png" alt="robot picture" >
 
 </h1>
 
