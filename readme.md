@@ -232,7 +232,7 @@ Pytest integration_tests/ -v
 
 ---
 
-#### Entity Relationship Diagram 
+#### Firestore Entity Relationship Diagram 
 ![image](SegfaultsERD.png)
 
 ---
