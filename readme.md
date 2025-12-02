@@ -79,6 +79,13 @@ Our Project features a web app which includes user management, presents data gat
 - **Backend**:
   - Firebase Firestore with cloud storage buckets enabled (for data storage)
 
+<h1 align="center">
+
+  <img src="firebase.PNG" alt="robot picture" >
+
+</h1>
+
+
 ### Robot Scripts
 - **Languages**:
   - Python
