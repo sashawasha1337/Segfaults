@@ -45,6 +45,7 @@ Our Project features a web app which includes user management, presents data gat
   <img src="Capture.PNG" alt="robot picture" >
 
 </h1>
+
 - **Navigation**:
   - Motor scripts are used to move the robot.
   - Autonomous obstacle avoidance is implemented through data received from a Lidar.
