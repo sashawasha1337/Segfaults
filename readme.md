@@ -25,6 +25,13 @@ Our Project features a web app which includes user management, presents data gat
 ## ✨ Key Features
 
 ### Web App
+
+<h1 align="center">
+
+  <img src="homepage.PNG" alt="robot picture" >
+
+</h1>
+
 - **Real-Time Monitoring**: Track the robot's status, location, and trash detection events.
 - **Remote Control**: Navigate the robot via an intuitive React-based interface.
 - **Trash Visualization**: Display detected trash locations using Leaflet map integration.
