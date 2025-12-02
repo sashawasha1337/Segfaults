@@ -52,7 +52,7 @@ Our Project features a web app which includes user management, presents data gat
 
 <h1 align="center">
 
-  <img src="map.png" alt="robot picture" >
+  <img src="map.PNG" alt="robot picture" >
 
 </h1>
 
