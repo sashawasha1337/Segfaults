@@ -36,7 +36,7 @@ Our Project features a web app which includes user management, presents data gat
 - **Object Detection**: Utilizes the YOLO algorithm to scan a live feed video for litter in the robot's environment.
 <h1 align="center">
 
-  <img src="robot_pic.jpg" alt="robot picture" >
+  <img src="Capture.png" alt="robot picture" >
 
 </h1>
 - **Navigation**:
