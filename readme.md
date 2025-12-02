@@ -242,7 +242,7 @@ Once the robot is running and connected (often via Tailscale), the web app will 
 ## 🖥️ Testing 
 We have developed automated software tests for both the web application and the robot. These are crucial for testing changes made to production code, ensuring they do not lead to critical errors when deployed. 
 - **Web App Testing**
-- 
+
 <h1 align="center">
 
   <img src="web_test.png" alt="robot picture" >
