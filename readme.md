@@ -49,6 +49,14 @@ Our Project features a web app which includes user management, presents data gat
 - **Navigation**:
   - Motor scripts are used to move the robot.
   - Autonomous obstacle avoidance is implemented through data received from a Lidar.
+
+<h1 align="center">
+
+  <img src="map.png" alt="robot picture" >
+
+</h1>
+
+---
 - **Movement Tracking**: Utilizes a GPS module to keep track of the robot's location.
 - **Cloud Connectivity**: Live video feed data is streamed to a website for real-time updates.
 
