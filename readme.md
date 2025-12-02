@@ -101,8 +101,9 @@ VITE_FIREBASE_STORAGE_BUCKET=<your-project-id>.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
 VITE_FIREBASE_APP_ID=<your-app-id>
 ```
-You must configure your Firebase account to support cloud storage to have the **VITE_FIREBASE_STORAGE_BUCKET** endpoint 
-follow this link for information on how to do this: https://firebase.google.com/docs/storage/web/start
+You must configure your Firebase account to support cloud storage to have the **VITE_FIREBASE_STORAGE_BUCKET** endpoint  
+follow this link for information on how to do this: https://firebase.google.com/docs/storage/web/start  
+
 3. Login and initialize Firebase
 ```bash
 firebase login
