@@ -260,6 +260,13 @@ npm run test
 ```
 
 - **Robot Testing**
+
+<h1 align="center">
+
+  <img src="robottest.png" alt="robottest" >
+
+</h1>
+
   - We use Pytest for unit ant integration testing of ROS2 nodes.
 Navigate to the testing ROS2 workspace
 ```bash
