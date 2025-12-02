@@ -34,6 +34,11 @@ Our Project features a web app which includes user management, presents data gat
 ### Robot Scripts
 - **Camera Integration**: Integrates the onboard camera with the robot's single-board computer to enable the capturing and processing of videos.
 - **Object Detection**: Utilizes the YOLO algorithm to scan a live feed video for litter in the robot's environment.
+<h1 align="center">
+
+  <img src="robot_pic.jpg" alt="robot picture" >
+
+</h1>
 - **Navigation**:
   - Motor scripts are used to move the robot.
   - Autonomous obstacle avoidance is implemented through data received from a Lidar.
