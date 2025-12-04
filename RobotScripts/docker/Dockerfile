@@ -78,7 +78,7 @@ RUN mkdir -p src && cd src && \
 
 #copy src goes here if doing that 
 
-COPY docker/workspace.sh ./workspace.sh
+#COPY docker/workspace.sh ./workspace.sh
 COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x /ros2_ws/*.sh
 
