@@ -83,11 +83,11 @@ COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x /ros2_ws/*.sh
 
 
-#venv stuff
-RUN mkdir -p /ros2_ws/src/scripts
+#venv stuff no longer necessary as camera functioned outside docker
+#RUN mkdir -p /ros2_ws/src/scripts
 #maybe we need to fix this addressing later?
-COPY src/camera/camera/venv_script.py /ros2_ws/src/scripts/venv_script.py
-RUN chmod +x /ros2_ws/src/scripts/venv_script.py
+#COPY src/camera/camera/venv_script.py /ros2_ws/src/scripts/venv_script.py
+#RUN chmod +x /ros2_ws/src/scripts/venv_script.py
 
 #debug
 RUN echo "PY36:" && python3 --version && \
