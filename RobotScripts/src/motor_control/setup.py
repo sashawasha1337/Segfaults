@@ -20,9 +20,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-		'motor_node = motor_control.MotorNode:main',
-        'rosmaster_motor_node = motor_control.RosmasterMotorNode:main',
-        'battery_node = motor_control.BatteryCheck:main',
         ],
     },
 )

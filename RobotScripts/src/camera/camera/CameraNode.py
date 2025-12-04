@@ -9,14 +9,14 @@ from cv_bridge import CvBridge
 class CameraPublisher(Node):
     def __init__(self):
         super().__init__("camera_publisher")
-
+        
         self.get_logger().info("Starting camera node initialization.")
 
 
         self.declare_parameter("camera_index", 0)
         self.declare_parameter("width",        640)
         self.declare_parameter("height",       480)
-        self.declare_parameter("fps",          15.0)
+        self.declare_parameter("fps",          30.0)
         self.declare_parameter('camera_backend', 'auto')  # 'auto' | 'gstreamer' | 'v4l2'
 
 
@@ -32,7 +32,7 @@ class CameraPublisher(Node):
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  width)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
             self.cap.set(cv2.CAP_PROP_FPS,          self.fps)
-
+        
         except Exception as e:
             self.get_logger().error(f"Exception opening camera index {idx}: {str(e)}")
             raise ConnectionError("Camera open failed")

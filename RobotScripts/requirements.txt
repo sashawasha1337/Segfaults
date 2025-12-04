@@ -1,19 +1,17 @@
-aiortc~=1.8
-av~=12.3
-eventlet~=0.36
-firebase-admin~=6.5
-Flask~=3.0
-Flask-Cors~=4.0
-Flask-SocketIO~=5.3
-opencv-python~=4.10
-pynmea2~=1.19
-python-socketio~=5.11
-smbus2~=0.4
-ultralytics~=8.2
-pyproj~=3.6
-lgpio~=0.2.2.0
-torch~=2.1
-torchvision~=0.15
-pyserial~=3.5
-pytest~=8.3
-numpy~=1.24
+# Jetson Nano pinned ML stack
+--extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v46/pytorch
+
+torch==1.10.2
+torchvision==0.11.3
+
+onnx
+onnxsim
+numpy<2
+opencv-python==4.5.5.64
+
+# YOLO (Ultralytics) pinned to compatible version
+# ultralytics==8.0.95
+
+# ROS Python tools (optional)
+rclpy
+cv_bridge

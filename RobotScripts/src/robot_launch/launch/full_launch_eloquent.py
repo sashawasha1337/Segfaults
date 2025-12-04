@@ -36,25 +36,6 @@ def generate_launch_description():
         system_arg,
 
         Node(
-            package='camera',
-            node_executable='camera_node',
-            prefix=camera_prefix,
-            output='screen',
-            arguments=['--ros-args', '--log-level', verbosity]
-        ),
-        Node(
-            package='camera',
-            node_executable='yolo_node',
-            output='screen',
-            arguments=['--ros-args', '--log-level', verbosity]
-        ),
-        Node(
-            package='camera',
-            node_executable='rplidar_avoidance',
-            output='screen',
-            arguments=['--ros-args', '--log-level', verbosity]
-        ),
-        Node(
             package='navigation',
             node_executable='navigation_node',
             output='screen',
@@ -72,27 +53,22 @@ def generate_launch_description():
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
         ),
+
         Node(
-            package='motor_control',
-            node_executable=motor_executable,
+            package='camera',
+            node_executable='firebase_listener',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
         ),
         Node(
-            package='motor_control',
-            node_executable='battery_node',
+            package='networking',
+            node_executable='firestore_gps_listener',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
         ),
         Node(
             package='networking',
             node_executable='networking_node_script',
-            output='screen',
-            arguments=['--ros-args', '--log-level', verbosity]
-        ),
-        Node(
-            package='networking',
-            node_executable='event_compiler',
             output='screen',
             arguments=['--ros-args', '--log-level', verbosity]
         ),

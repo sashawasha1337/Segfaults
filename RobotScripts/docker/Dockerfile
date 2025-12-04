@@ -38,33 +38,21 @@ RUN pip3 install --no-cache-dir \
     thop==0.1.1.post2209072238 \
     filterpy==1.4.5 \
     cython==0.29.36 \
-    lap==0.4.0
-
-
-#python 3.9 for potential venv
-WORKDIR /tmp
-RUN wget https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz && \
-    tar -xf Python-3.9.18.tgz && \
-    cd Python-3.9.18 && \
-    ./configure --enable-optimizations && \
-    make -j4 && make altinstall && \
-    rm -rf /tmp/Python-3.9.18*
-
-
-RUN /usr/local/bin/python3.9 -m venv /opt/py39-env
-RUN /opt/py39-env/bin/pip install --upgrade pip setuptools wheel
-
-# Firebase for venv
-RUN /opt/py39-env/bin/pip install "firebase-admin<7.0.0" 
-
-
-ENV PY39_VENV=/opt/py39-env/bin/python3.9
-ENV SIDE_CAR_SCRIPT=/ros2_ws/src/venv_script.py
+    cython-bbox
+    #pip dependencies for trying to use hungarian algorithm(as opposed to cosine imbedding?)
+    #lapx
+    #lap==0.4.0
 
 
 RUN git clone --depth 1 https://github.com/WongKinYiu/yolov7.git /ros2_ws/yolov7 && \
     sed -i '/opencv-python/d' /ros2_ws/yolov7/requirements.txt && \
         sed -i '/ipython/d' /ros2_ws/yolov7/requirements.txt
+
+RUN git clone https://github.com/ZQPei/deep_sort_pytorch.git /deep_sort_pytorch && \
+    mkdir -p /deep_sort_pytorch/deep_sort/deep/checkpoint
+
+COPY ckpt.t7 /deep_sort_pytorch/deep_sort/deep/checkpoint/
+
 
 RUN sed -i 's/def check_requirements([^)]*):/def check_requirements(*args, **kwargs):\n    return/g' \
     /ros2_ws/yolov7/utils/general.py || true
@@ -72,31 +60,21 @@ RUN sed -i 's/def check_requirements([^)]*):/def check_requirements(*args, **kwa
 ENV YOLOV5_SKIP_REQUIREMENTS=1
 
 
-WORKDIR /ros2_ws
+RUN echo "=== Launching ROS2 full launch ===" ros2 launch robot_launch full_launch_eloquent.py & sleep 2 echo "=== Running Rosmaster Motor Node ===" cd ~/ros2_ws python3 RosmasterMotorNode.pyWORKDIR /ros2_ws
 RUN mkdir -p src && cd src && \
     git clone -b foxy https://github.com/ros-perception/vision_opencv.git
 
-#copy src goes here if doing that 
+#copy src goes here if doing that
 
 #COPY docker/workspace.sh ./workspace.sh
 COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x /ros2_ws/*.sh
 
 
-#venv stuff no longer necessary as camera functioned outside docker
-#RUN mkdir -p /ros2_ws/src/scripts
-#maybe we need to fix this addressing later?
-#COPY src/camera/camera/venv_script.py /ros2_ws/src/scripts/venv_script.py
-#RUN chmod +x /ros2_ws/src/scripts/venv_script.py
-
 #debug
-RUN echo "PY36:" && python3 --version && \
-    echo "PY39:" && /opt/py39-env/bin/python3.9 --version
-
 ENV OpenCV_DIR=/usr/lib/aarch64-linux-gnu/cmake/opencv4
 
 
 
 ENTRYPOINT ["/ros2_ws/entrypoint.sh"]
-CMD ["bash"]
-
+CMD ["ros2", "launch", "robot_launch", "yolo_docker_launch.py"]

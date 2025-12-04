@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import os
-
+import sys
 
 #fix for model version mismatches?
 #sys.modules.setdefault('numpy._core', np.core)
@@ -40,7 +40,6 @@ def ros_time_to_seconds(ros_time):
     return ros_time.sec + ros_time.nanosec * 1e-9
 
 #intersection over union math
-#dont ask me this is some stuff also pulled offline
 def iou_xyxy(a, b):
     ax1, ay1, ax2, ay2 = a
     bx1, by1, bx2, by2 = b
@@ -63,7 +62,6 @@ class YoloV7Detector:
         self.conf_thres = float(conf_thres)
 
         # Device
-        #self.device = torch.device(device if (torch.cuda.is_available() and device.startswith("cuda")) else "cpu")
         if isinstance(device, torch.device):
             self.device = device
         else:
@@ -85,7 +83,7 @@ class YoloV7Detector:
         if yolov7_root not in sys.path:
             sys.path.insert(0, yolov7_root)
 
-        # Monkey-patch attempt_download to avoid calling git tag
+        # patch attempt_download to avoid calling git tag
         from utils import google_utils as ggu
         ggu.attempt_download = lambda f, *a, **k: f
 
@@ -118,7 +116,7 @@ class YoloV7Detector:
         self.names = getattr(model, "names", {}) or getattr(getattr(model, "module", None), "names", {}) or {}
         self.model = model
         self.log.info("YOLO: loaded and ready.")
-
+    #YOLO inference
     @torch.no_grad()
     def infer(self, bgr_img: np.ndarray) -> np.ndarray:
         from utils.datasets import letterbox
@@ -162,7 +160,7 @@ class YoloTrackNode(Node):
         # Parameters
         self.declare_parameter('image_topic', '/camera/image_raw')
         self.declare_parameter('weights', '/Model/newbest.pt')
-        self.declare_parameter('conf', 0.3)
+        self.declare_parameter('conf', 0.55)
         self.declare_parameter('device', 'cuda:0')
         self.declare_parameter('img_size', 640)
 
@@ -175,7 +173,7 @@ class YoloTrackNode(Node):
         self.get_logger().info("YoloTrackNode starting up…")
         self.get_logger().info(f"Using weights={self.weights} device={self.device} img_size={self.img_size}")
 
-        # YOLO model + bridge
+        # get YOLO model + bridge
         self.bridge = CvBridge()
         self.get_logger().info("Loading YOLOv7 model...")
         try:
@@ -200,8 +198,9 @@ class YoloTrackNode(Node):
 
         self.deepsort = DeepSort(
             "/deep_sort_pytorch/deep_sort/deep/checkpoint/ckpt.t7",
-            max_age=70,
-            n_init=3,
+            max_age=20,
+            max_dist=1.5,
+            n_init=5,
             nn_budget=100,
             use_cuda=self.device.type == "cuda"
         )
@@ -213,102 +212,137 @@ class YoloTrackNode(Node):
       
 
     def _match_track_to_det(self, track_box, det_np):
-        #returns cls_id and conf of a detection
         if det_np is None or len(det_np) == 0:
             return None, None
+
+        # Compute IoU between tracked box and detections
         ious = [iou_xyxy(track_box, det[:4]) for det in det_np]
-        j = int(np.argmax(ious))
-        if ious[j] <= 0.0:
+        best_idx = int(np.argmax(ious))
+        best_iou = ious[best_idx]
+
+        # require some overlap
+        if best_iou < 0.2:
             return None, None
-        best = det_np[j]
-        conf = float(best[4])
-        cls_id = int(best[5])
-        return cls_id, conf
+
+        best_det = det_np[best_idx]
+        det_conf = float(best_det[4])
+        cls_id = int(best_det[5])
+
+        # YOLO confidence threshold
+        if det_conf < self.conf:
+            return None, None
+
+        return cls_id, det_conf
+
 
     def image_cb(self, msg: Image):
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         det_np = self.detector.infer(frame)
 
-        bbox_xyxy = det_np[:, 0:4]
-        confidences = det_np[:, 4]
+        # Filter low-confidence detections(does not mean no detections will show under threshold)
+        det_np = det_np[det_np[:, 4] >= self.conf]
 
-        xywhs = np.zeros_like(bbox_xyxy)
-        xywhs[:, 0] = (bbox_xyxy[:, 0] + bbox_xyxy[:, 2]) / 2.0
-        xywhs[:, 1] = (bbox_xyxy[:, 1] + bbox_xyxy[:, 3]) / 2.0
-        xywhs[:, 2] = bbox_xyxy[:, 2] - bbox_xyxy[:, 0]
-        xywhs[:, 3] = bbox_xyxy[:, 3] - bbox_xyxy[:, 1]
+        if det_np.shape[0] > 0:
+            bbox_xyxy = det_np[:, 0:4]
+            confidences = det_np[:, 4]
+            xywhs = np.zeros_like(bbox_xyxy)
+            xywhs[:, 0] = (bbox_xyxy[:, 0] + bbox_xyxy[:, 2]) / 2.0
+            xywhs[:, 1] = (bbox_xyxy[:, 1] + bbox_xyxy[:, 3]) / 2.0
+            xywhs[:, 2] = bbox_xyxy[:, 2] - bbox_xyxy[:, 0]
+            xywhs[:, 3] = bbox_xyxy[:, 3] - bbox_xyxy[:, 1]
+            classes = det_np[:, 5]
+        else:
+            #if no detections pass in empty np arrays
+            xywhs = np.empty((0, 4))
+            confidences = np.empty((0,))
+            classes = np.empty((0,))
 
-        #def update(self, bbox_xywh, confidences, classes, ori_img, masks=None): is update definition
-        outputs = self.deepsort.update(xywhs, confidences, det_np[:, 5], frame, None)
-        if isinstance(outputs, tuple):
-            outputs = outputs[0]  #safety so code doesnt break if no inputs
+        #Always call update once only 
+        result = self.deepsort.update(xywhs, confidences, classes, frame, None)
+        #fixing unexpected formatting
+        if isinstance(result, (tuple, list)) and len(result) == 2:
+            outputs, _ = result
+        else:
+            outputs = result
 
+
+       
         if outputs is None or len(outputs) == 0:
-            return
+            outputs = np.empty((0,6),dtype=float)
+        else:
+            outputs = np.asarray(outputs,dtype=float)
+            if outputs.ndim ==1:
+                outputs=outputs.reshape(1,-1)
 
-        if isinstance(outputs[0], (list, tuple, np.ndarray)) and isinstance(outputs[0][0], (list, tuple, np.ndarray)):
-            outputs = [item[0] for item in outputs if len(item) > 0]
 
-        outputs = np.array(outputs, dtype=float)
-        if outputs.size == 0 or outputs.ndim != 2 or outputs.shape[1] < 5:
-            return
-
-        annotated = frame.copy()
+        annotated=frame.copy()
         ts_ms = int(ros_time_to_seconds(msg.header.stamp) * 1000)
-        print("OUTPUT SHAPE:", outputs.shape)
-        print("FIRST ROW:", outputs[0])
 
-        for x1, y1, x2, y2, class_id, track_id, in outputs:
-            cv2.rectangle(annotated, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-            cv2.putText(annotated, f"ID {track_id}", (int(x1), int(max(0, y1 - 5))),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-            if track_id not in self.uploaded_ids:
-                self.uploaded_ids.add(track_id)
-                cls_id, conf = self._match_track_to_det([x1, y1, x2, y2], det_np)
+          
+            
 
-                # Resolve class label (YOLOv7 uses list of class names)
-                names = self.detector.names
-                if cls_id is not None:
-                    if isinstance(names, list) and cls_id < len(names):
-                        label = names[cls_id]
-                    elif isinstance(names, dict):
-                        label = names.get(cls_id, str(cls_id))
-                    else:
-                        label = str(cls_id)
+        for row in outputs:
+                # Make sure each row is a flat vector/legible
+                
+                
+
+                if row.size == 5:
+                    x1, y1, x2, y2, track_id = row
+                elif row.size >= 6:
+                    x1, y1, x2, y2, _, track_id = row
                 else:
-                    label = None
+                    self.get_logger().warn("Skipping malformed Deep SORT row")
+                    self.get_logger().warn(f"RAW Deep SORT row: {row}")
+                    continue
 
-                jpeg_b64 = None
+                # Draw tracking boxes
+                cv2.rectangle(annotated, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+                cv2.putText(annotated, f"ID {int(track_id)}",
+                            (int(x1), int(max(0, y1 - 5))),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+                # Match YOLO confidence + class to this track
+                cls_id, det_conf = self._match_track_to_det([x1, y1, x2, y2], det_np)
+
+                if cls_id is None or det_conf is None or det_conf < self.conf:
+                    continue
+
+                # Only publish first time
+                if track_id in self.uploaded_ids:
+                    continue
+
+                self.uploaded_ids.add(track_id)
+
+                # Resolve label
+                names = self.detector.names
+                if isinstance(names, list) and cls_id < len(names):
+                    label = names[cls_id]
+                elif isinstance(names, dict):
+                    label = names.get(cls_id, str(cls_id))
+                else:
+                    label = str(cls_id)
+
+                # Encode image
                 try:
-                    #maybe need this?
                     jpeg_b64 = bgr_to_jpeg_bytes(annotated, quality=90)
                 except Exception as e:
                     self.get_logger().warn(f"JPEG encode failed: {e}")
                     jpeg_b64 = None
 
+                # Publish event
                 event = {
                     "timestamp_ms": ts_ms,
                     "track_id": int(track_id),
                     "bbox": [int(x1), int(y1), int(x2), int(y2)],
-                    "class_id": (int(cls_id) if cls_id is not None else None),
+                    "class_id": int(cls_id),
                     "label": label,
-                    "conf": (float(conf) if conf is not None else None),
+                    "conf": float(det_conf),
                     "image": jpeg_b64
                 }
 
-              
                 self.pub_events.publish(String(data=json.dumps(event)))
-                self.get_logger().info(str(event))
-
-        img_msg = self.bridge.cv2_to_imgmsg(annotated, encoding="bgr8")
-        img_msg.header = msg.header
-        self.pub_img.publish(img_msg)
-
-        #keep set bounded
-        if len(self.uploaded_ids) > 5000:
-            self.uploaded_ids.clear()
-
+                self.get_logger().info(str({key : value for key ,value in event.items() if key != "image"}))
 
 def main(args=None):
     rclpy.init(args=args)
@@ -323,4 +357,3 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-

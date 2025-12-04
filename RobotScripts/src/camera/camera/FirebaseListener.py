@@ -87,7 +87,7 @@ class FirebaseListener(Node):
             jpeg_bytes = base64.b64decode(jpeg_b64.encode("ascii"))
             _, image_url = self.upload_jpeg_bytes(ROBOT_UID, ts_ms, jpeg_bytes)
 
-
+        
         if ts_ms:
             iso = dt.datetime.utcfromtimestamp(ts_ms / 1000).isoformat() + "Z"
         else:
@@ -130,3 +130,4 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
+

@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'networking_node_script = networking.NetworkNode:main',
+            'firestore_gps_listener = networking.FirestoreGPSListener:main',
         ],
     },
 )
