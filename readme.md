@@ -288,7 +288,16 @@ Pytest integration_tests/ -v
 
 ---
 
-## 📧 Contact
+## 📧 Team Members names and contact 
+| Name | GitHub | Email |
+|-------------------------------|------------------|----------------------------|
+| Joseph Molina | (WRXJoey) | joey.molina1999@gmail.com |
+| Daniel Manifacio | (0x53544152) | DanielManifacio@gmail.com |
+| Daniel Nishi | (dlnishi) | daniel.nishi9@gmail.com |
+| Henry Peng | (henryis300) | Henrypeng9292@gmail.com |
+| Patrick Doolittle | (PatrickDoolittle) | patrickdoolittle@gmail.com |
+| Sasha Yasin Saaed-Marmorstein | (sashawasha1337) | sashamarmorstein@gmail.com |
+| Manpreet Rai | (ManpreetRai-0) | manpreetrai9000@gmail.com |
 
 For inquiries or feedback, reach out to the project team at **[sashayasinericsaaed@csus.edu]**.
 
