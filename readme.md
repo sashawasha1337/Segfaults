@@ -288,6 +288,11 @@ Pytest integration_tests/ -v
 
 ---
 
+#### Deployment Diagram 
+![image](deploymentDiagram.png)
+
+---
+
 ## 📧 Team Members names and contact 
 | Name | GitHub | Email |
 |-------------------------------|------------------|----------------------------|
