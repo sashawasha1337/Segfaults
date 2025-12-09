@@ -29,7 +29,7 @@ class FirestoreGPSListener(Node):
         cred = credentials.Certificate(SERVICE_ACCOUNT_FILE)
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
-            self.db = firestore.client()
+        self.db = firestore.client()
 
         # Publishers / subscribers
         self.publisher = self.create_publisher(Path, "/gps_goal", 10)
@@ -111,8 +111,8 @@ class FirestoreGPSListener(Node):
 
                 # Convert lat/lon to UTM x/y
                 x, y = self.TRANSFORMER.transform(point["lng"], point["lat"])
-                pose.pose.position.x = self.X0 - x
-                pose.pose.position.y = self.Y0 - y
+                pose.pose.position.x = x - self.X0
+                pose.pose.position.y = y - self.Y0
                 pose.pose.position.z = 0.0
 
                 # Orientation

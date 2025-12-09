@@ -13,7 +13,7 @@ SERVICE_ACCOUNT_PATH = os.getenv("FIREBASE_KEY_PATH", "/home/jetson/.keys/fireba
 SERIAL_PORT = '/dev/ttyUSB2'          # Raspberry Pi or Jetson Nano use = '/dev/ttyUSB0'
 BAUD_RATE = 9600                      # bits per second
 DELTA_DEG = 0.000005                  # ~ 0.5 meters
-LOCATION_CHECK_INTERVAL = 2.5         # seconds
+LOCATION_CHECK_INTERVAL = 1         # seconds
 
 class GPSNode(Node):
     def __init__(self):
